@@ -28,7 +28,7 @@ public class SysCourseSigninController extends BaseController
     /**
      * 查询课程签到列表（admin）
      */
-    @GetMapping("/list")
+    @GetMapping("/list/{signinId}")
     public TableDataInfo list(SysCourseSignin query)
     {
         startPage();
@@ -69,7 +69,7 @@ public class SysCourseSigninController extends BaseController
      * 删除课程签到（admin）
      */
     @Log(title = "课程签到", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/{signinIds}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(signinService.deleteCourseSigninByIds(ids));

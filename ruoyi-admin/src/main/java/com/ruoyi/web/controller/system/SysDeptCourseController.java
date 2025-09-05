@@ -35,6 +35,7 @@ public class SysDeptCourseController extends BaseController
 
     /**
      * 查询课程列表
+     * - 废弃
      * - 普通用户：只能看到自己部门
      * - admin：可传 deptId 指定部门；未传则查询全部
      */
@@ -60,10 +61,11 @@ public class SysDeptCourseController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:myCourse:list')")
     @GetMapping("/myCourse")
-    public TableDataInfo listMyDeptCourse(SysDeptCourse deptCourse)
+    public TableDataInfo listMyDeptCourse()
     {
         startPage();
         Long deptId = getLoginUser().getUser().getDeptId();
+        SysDeptCourse deptCourse = new SysDeptCourse();
         deptCourse.setDeptId(deptId);
         List<SysDeptCourse> list = deptCourseService.selectDeptCourseList(deptCourse);
         return getDataTable(list);

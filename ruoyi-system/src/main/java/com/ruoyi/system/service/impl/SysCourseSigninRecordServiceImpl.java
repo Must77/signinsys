@@ -1,3 +1,7 @@
+/* 
+
+import org.springframework.stereotype.Service;
+
 @Service
 public class SysCourseSigninRecordServiceImpl implements ISysCourseSigninRecordService {
 
@@ -24,3 +28,5 @@ public class SysCourseSigninRecordServiceImpl implements ISysCourseSigninRecordS
         return recordMapper.batchInsert(records);
     }
 }
+
+*/

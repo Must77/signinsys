@@ -16,7 +16,7 @@ import com.ruoyi.system.domain.SysDeptApply;
 import com.ruoyi.system.service.ISysDeptApplyService;
 
 @RestController
-@RequestMapping("/system/dept/apply")
+@RequestMapping("/system/deptApply")
 public class SysDeptApplyController extends BaseController {
 
     @Resource

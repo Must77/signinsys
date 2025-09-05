@@ -238,6 +238,9 @@ public class SysDeptCourse extends BaseEntity {
     private Integer size;
     private Integer cap;
     private String coverURL;
+
+    /** 删除标记(0存在,2删除) **/
+    private String delFlag;
 }
 ```
 

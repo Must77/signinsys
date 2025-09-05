@@ -5,55 +5,94 @@
 <mapper namespace="com.ruoyi.system.mapper.SysDeptCourseMapper">
 
     <resultMap type="SysDeptCourse" id="SysDeptCourseResult">
-        <id property="courseId" column="course_id"/>
+        <id     property="courseId" column="course_id"/>
         <result property="deptId" column="dept_id"/>
         <result property="deptName" column="dept_name"/>
-        <result property="courseName" column="course_name"/>
-        <result property="courseDesc" column="course_desc"/>
+        <result property="name" column="name"/>
+        <result property="brief" column="brief"/>
+        <result property="size" column="size"/>
+        <result property="cap" column="cap"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="coverURL" column="cover_url"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <sql id="selectDeptCourseVo">
+        SELECT c.course_id,
+               c.dept_id,
+               d.dept_name,
+               c.name,
+               c.brief,
+               c.size,
+               c.cap,
+               c.cover_url,
+               c.create_by,
+               c.create_time
+        FROM sys_dept_course c
+        LEFT JOIN sys_dept d ON c.dept_id = d.dept_id
+    </sql>
+
     <select id="selectDeptCourseById" resultMap="SysDeptCourseResult">
         select * from sys_dept_course where course_id = #{courseId}
     </select>
 
 	<select id="selectDeptCourseList" parameterType="SysDeptCourse" resultMap="SysDeptCourseResult">
-	    SELECT c.course_id,
-	           c.dept_id,
-	           d.dept_name,
-	           c.course_name,
-	           c.course_desc,
-	           c.create_by,
-	           c.create_time
-	    FROM sys_dept_course c
-	    LEFT JOIN sys_dept d ON c.dept_id = d.dept_id
-	    <where>
-	        <if test="deptId != null">
-	            AND c.dept_id = #{deptId}
-	        </if>
-	        <if test="courseName != null and courseName != ''">
-	            AND c.course_name like concat('%', #{courseName}, '%')
-	        </if>
-	    </where>
+        <include refid="selectDeptCourseVo"/>
+        where c.del_flag = '0'
+        <if test="deptId != null and deptId != 0">
+            AND c.dept_id = #{deptId}
+        </if>
+        <if test="deptName != null and deptName != ''">
+            AND c.dept_name = #{deptName}
+        </if>
+        <if test="name != null and name != ''">
+            AND c.name like concat('%', #{name}, '%')
+        </if>
+        <!-- TODO 数据范围过滤-->
+        order by c.dept_id
 	</select>
 
-
-    <insert id="insertDeptCourse" parameterType="SysDeptCourse" useGeneratedKeys="true" keyProperty="courseId">
-        insert into sys_dept_course(dept_id, course_name, course_desc, create_by, create_time)
-        values (#{deptId}, #{courseName}, #{courseDesc}, #{createBy}, now())
+    <insert id="insertDeptCourse" parameterType="SysDeptCourse">
+        insert into sys_dept_course(
+            <if test="courseId != null and courseId != 0">course_id,</if>
+            <if test="deptId != null and deptId != 0">dept_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="brief != null and brief !=''">brief,</if>
+            <if test="size != null">size,</if>
+            <if test="cap != null">cap,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        )values(
+            <if test="courseId != null and courseId != 0">#{courseId}</if>
+            <if test="deptId != null and deptId != 0">#{deptId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="brief != null and brief != ''">#{brief},</if>
+            <if test="size != null">#{size},</if>
+            <if test="cap != null">#{cap},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+        )
     </insert>
 
     <update id="updateDeptCourse" parameterType="SysDeptCourse">
         update sys_dept_course
-        set dept_id=#{deptId},
-            course_name=#{courseName},
-            course_desc=#{courseDesc},
-            update_by=#{updateBy},
-            update_time=now()
-        where course_id=#{courseId}
+        <set>
+            <if test="deptId != null and deptId != 0">dept_id = #{deptId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="brief != null and brief != ''">brief = #{brief},</if>
+            
+            <if test="size != null">size = #{size},</if>
+            <if test="cap != null">cap = #{cap},</if>
+            <if test="coverURL != null and coverURL != ''">cover_url = #{coverURL},</if>
+            
+            <!-- 更新信息 -->
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where course_id = #{courseId}
     </update>
 
     <delete id="deleteDeptCourseById">
@@ -61,7 +100,7 @@
     </delete>
 
     <delete id="deleteDeptCourseByIds">
-        delete from sys_dept_course where course_id in
+        update sys_dept_course set del_flag = '2' where course_id in 
         <foreach collection="array" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
