@@ -334,25 +334,21 @@ public class SysDeptApply extends BaseEntity {
     /** 申请时间 **/
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date timestamp;     // 类似的字段在BaseEntiity中存在, 但是为了开发迅速, 这里再冗余一个字段
+    private Date applyTime;    // 类似的字段在BaseEntiity中存在, 但是为了开发迅速, 这里再冗余一个字段
 
     /** 申请时向admin展示的信息, 为了让真人确定申请人的信息 **/
     private String phone;
     private String email;
     private String job; // 我也不知道为什么要有这个字段
 
-    /** LLM推荐我添加的, 仅用于列表展示的扩展字段, 我猜是为了让后端返回部门名称而非部门Id, 提高可读性 */
-    private String userName;  // 申请人用户名
-    private String nickName;  // 申请人昵称
-    private String deptName;  // 申请部门名
-
-}
+    }
 ```
 1. 查看全部申请
     - 仅admin可以使用, 否则返回error
     ```
     URL:        GET ~/system/deptApply/list
-    参数:       无
+    参数:       SysDeptApply
+    参数方式:   路径参数自动绑定到类对象
     返回值:     TableDataInfo 分页对象
                 - total 总记录数
                 - List<SysDeptApply> 申请列表
