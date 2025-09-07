@@ -41,17 +41,26 @@ public class SysDeptApplyServiceImpl implements ISysDeptApplyService {
         return deptApplyMapper.insertDeptApply(apply);
     }
 
+    /**
+     * 更新申请者的申请信息，暂时没用到
+     */
     @Override
     public int updateDeptApply(SysDeptApply apply) {
         apply.setUpdateBy(SecurityUtils.getUsername());
         return deptApplyMapper.updateDeptApply(apply);
     }
 
+    /**
+     * 删除申请记录, 没设计也没用
+     */
     @Override
     public int deleteDeptApplyByIds(Long[] applyIds) {
         return deptApplyMapper.deleteDeptApplyByIds(applyIds);
     }
 
+    /**
+     * 管理员通过申请
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int approve(Long applyId) {
@@ -60,11 +69,21 @@ public class SysDeptApplyServiceImpl implements ISysDeptApplyService {
         // 更新用户所在部门
         sysUserMapper.updateUserDept(apply.getUserId(), apply.getDeptId());
         // 更新申请状态
-        return deptApplyMapper.updateStatus(applyId, "1", SecurityUtils.getUsername());
+        apply.setStatus("1");
+        apply.setUpdateBy(SecurityUtils.getUsername());
+        return deptApplyMapper.updateStatus(apply);
     }
 
+    /**
+     * 管理员拒绝申请
+     */
     @Override
     public int reject(Long applyId) {
-        return deptApplyMapper.updateStatus(applyId, "2", SecurityUtils.getUsername());
+        SysDeptApply apply = deptApplyMapper.selectDeptApplyById(applyId);
+        if (apply == null) return 0;
+        // 更新申请状态
+        apply.setStatus("2");
+        apply.setUpdateBy(SecurityUtils.getUsername());
+        return deptApplyMapper.updateStatus(apply);
     }
 }

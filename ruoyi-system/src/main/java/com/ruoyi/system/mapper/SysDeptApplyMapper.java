@@ -79,10 +79,10 @@ public interface SysDeptApplyMapper {
     /**
      * 更新部门申请状态
      * 
-     * @param applyId 要更新的部门申请ID
-     * @param status 更新后的状态值
-     * @param updateBy 执行更新的用户
+     * 感觉这个接口设计的有点石, updateDeptApply用于更新申请记录的信息, 而这个用于只用于更新申请状态
+     * 
+     * @param apply 包含申请ID和新的状态的部门申请对象
      * @return 更新操作影响的行数
      */
-    int updateStatus(@Param("applyId") Long applyId, @Param("status") String status, @Param("updateBy") String updateBy);
+    int updateStatus(SysDeptApply apply);
 }

@@ -22,7 +22,7 @@ public class SysDeptApplyController extends BaseController {
     @Resource
     private ISysDeptApplyService deptApplyService;
 
-    /** 列表（管理员查看全部 / 用户可按自己过滤） */
+    /** 列表（管理员查看全部） */
     @PreAuthorize("@ss.hasPermi('system:deptApply:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysDeptApply query) {

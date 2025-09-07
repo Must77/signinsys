@@ -343,7 +343,7 @@ public class SysDeptApply extends BaseEntity {
 
     }
 ```
-1. 查看全部申请
+1. 查询申请
     - 仅admin可以使用, 否则返回error
     ```
     URL:        GET ~/system/deptApply/list
@@ -358,18 +358,7 @@ public class SysDeptApply extends BaseEntity {
     ```
 
 2. 查询某班级的申请
-    - 仅admin可以使用, 否则返回error
-    ```
-    URL:        GET ~/system/deptApply/list/{deptId}
-    参数:       Long deptId
-    参数方式:   路径参数
-    返回值:     TableDataInfo 分页对象
-                - total 总记录数
-                - List<SysDeptApply> 申请列表
-                - code 消息状态码
-                - msg 消息内容
-    权限:       system:deptApply:list
-    ```
+    - 和 ~/system/deptApply/list 接口重复, 废弃
 
 3. 用户提交申请
     - 框架获取当前登录用户的信息
@@ -402,6 +391,7 @@ public class SysDeptApply extends BaseEntity {
     ```
 
 5. 批量删除审批
+    - 没想好为什么要做非逻辑删除, 所以这个接口暂时不可用
     - 仅admin可以使用, 否则返回error
     ```
     URL:        PUT ~/system/deptApply/{applyIds}
