@@ -20,70 +20,105 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <sql id="selectCourseSigninVo">
+        SELECT cs.id, cs.course_id, cs.dept_id, cs.title, cs.start_time, cs.end_time, cs.status, cs.create_by, cs.create_time, cs.update_by, cs.update_time,
+               d.dept_name,
+               c.name
+        FROM sys_course_signin cs
+        LEFT JOIN sys_dept d ON cs.dept_id = d.dept_id
+        LEFT JOIN sys_dept_course c ON cs.course_id = c.course_id
+    </sql>
+
     <!-- 根据ID查询 -->
     <select id="selectCourseSigninById" resultMap="SysCourseSigninResult">
-        SELECT * FROM sys_course_signin
-        WHERE id = #{signinId}
+        <include refid="selectCourseSigninVo"/>
+        WHERE cs.id = #{signinId}
     </select>
 
     <!-- 查询列表（条件可扩展） -->
     <select id="selectCourseSigninList" resultMap="SysCourseSigninResult">
-        SELECT * FROM sys_course_signin
-        <where>
-            <if test="courseId != null"> AND course_id = #{courseId} </if>
-            <if test="deptId != null"> AND dept_id = #{deptId} </if>
-            <if test="title != null and title != ''"> AND title LIKE concat('%', #{title}, '%') </if>
-            <if test="status != null and status != ''"> AND status = #{status} </if>
-            <if test="startTime != null"> AND start_time &gt;= #{startTime} </if>
-            <if test="endTime != null"> AND end_time &lt;= #{endTime} </if>
-        </where>
-        ORDER BY create_time DESC
+        <include refid="selectCourseSigninVo"/>
+        WHERE cs.del_flag = '0'
+        <if test="courseId != null and courseId != 0">
+            AND cs.course_id = #{courseId}
+        </if>
+        <if test="deptId != null and deptId != 0">
+            AND cs.dept_id = #{deptId}
+        </if>
+        <if test="title != null and title != ''">
+            AND cs.title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND cs.status = #{status}
+        </if>
+        <if test="startTime != null">
+            AND cs.start_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND cs.end_time &lt;= #{endTime}
+        </if>
+        ORDER BY cs.create_time DESC
     </select>
 
     <!-- 新增签到 -->
-    <insert id="insertCourseSignin" parameterType="com.ruoyi.system.domain.SysCourseSignin" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_course_signin
-        (course_id, dept_id, title, start_time, end_time, status, create_by, create_time)
-        VALUES
-        (#{courseId}, #{deptId}, #{title}, #{startTime}, #{endTime}, #{status}, #{createBy}, NOW())
+    <insert id="insertCourseSignin" parameterType="com.ruoyi.system.domain.SysCourseSignin">
+        INSERT INTO sys_course_signin(
+            <if test="courseId != null">course_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="title != null">title,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="status != null">status,</if>   
+            create_time
+        )VALUES(
+            <if test="courseId != null">#{courseId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="status != null">#{status},</if>   
+            sysdate()
+        )
     </insert>
 
     <!-- 修改签到 -->
     <update id="updateCourseSignin" parameterType="com.ruoyi.system.domain.SysCourseSignin">
         UPDATE sys_course_signin
         <set>
-            <if test="courseId != null"> course_id = #{courseId}, </if>
-            <if test="deptId != null"> dept_id = #{deptId}, </if>
-            <if test="title != null"> title = #{title}, </if>
-            <if test="startTime != null"> start_time = #{startTime}, </if>
-            <if test="endTime != null"> end_time = #{endTime}, </if>
-            <if test="status != null"> status = #{status}, </if>
-            <if test="updateBy != null"> update_by = #{updateBy}, </if>
-            update_time = NOW()
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
         </set>
         WHERE id = #{id}
     </update>
 
-    <!-- 删除单条记录 -->
-    <delete id="deleteCourseSigninById" parameterType="Long">
-        DELETE FROM sys_course_signin WHERE id = #{signinId}
-    </delete>
+    <!-- 删除单条记录 未使用-->
+    <!-- <delete id="deleteCourseSigninById" parameterType="Long">
+        update sys_course_signin
+        set del_flag = '2'
+        where id = #{id}
+    </delete> -->
 
     <!-- 批量删除 -->
     <delete id="deleteCourseSigninByIds" parameterType="Long">
-        DELETE FROM sys_course_signin WHERE id IN
-        <foreach collection="signinIds" item="id" open="(" separator="," close=")">
+        update sys_course_signin
+        set del_flag = '2'
+        where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
 
     <!-- 更新签到状态 -->
     <update id="updateStatus">
-        UPDATE sys_course_signin
-        SET status = #{status},
-            update_by = #{updateBy},
-            update_time = NOW()
-        WHERE id = #{signinId}
+        update sys_course_signin
+        set status = #{status}, update_time = sysdate()
+        where id = #{id}
     </update>
 
 </mapper>

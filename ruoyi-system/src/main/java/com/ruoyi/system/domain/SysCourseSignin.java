@@ -41,6 +41,9 @@ public class SysCourseSignin extends BaseEntity{
     @Excel(name = "签到任务状态（0未开始，1进行中，2已结束）")
     private String status;
 
+    /** 删除标记(0存在,2删除) **/
+    private String delFlag;
+
     // getter/setter
     public Long getId() {
       return id;
@@ -98,6 +101,12 @@ public class SysCourseSignin extends BaseEntity{
       this.status = status;
     }
 
+    public String getDelFlag() {
+      return delFlag;
+    }
 
+    public void setDelFlag(String delFlag) {
+      this.delFlag = delFlag;
+    }
     
 }

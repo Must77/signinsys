@@ -11,7 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class SysCourseSigninRecord extends BaseEntity {
     /** 预生成签到的ID **/
     @Excel(name = "预生成签到的ID")
-    private Long id;
+    private Long recordId;
 
     /** 对应的签到任务（签到元数据）的ID **/
     @Excel(name = "对应的签到任务（签到元数据）的ID")
@@ -20,12 +20,10 @@ public class SysCourseSigninRecord extends BaseEntity {
     /** 用户ID **/
     @Excel(name = "用户ID")
     private Long userId;
-    // TODO: 将用户ID转换为用户名
 
     /** 需要签到的课程ID **/
     @Excel(name = "需要签到的课程ID")
     private Long courseId;
-    // TODO: 将课程ID转换为课程名字
 
     /** 签到状态（0未签到，1已签到） **/
     @Excel(name = "签到状态（0未签到，1已签到）")
@@ -37,17 +35,14 @@ public class SysCourseSigninRecord extends BaseEntity {
     @Excel(name = "签到时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date signinTime;
 
-    /** 注释 **/
-    @Excel(name = "注释")
-    private String remark;
 
     // getter / setter
-    public Long getId() {
-        return id;
+    public Long getRecordId() {
+        return recordId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setRecordId(Long id) {
+        this.recordId = id;
     }
 
     public Long getSigninId() {

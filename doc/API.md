@@ -433,8 +433,11 @@ public class SysCourseSignin extends BaseEntity{
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
 
-    /** 签到任务状态（0未开始，1进行中，2已结束, 3已经失效） **/
+    /** 签到任务状态（0未开始，1进行中，2已结束） **/
     private String status;
+
+    /** 删除标记(0存在,2删除) **/
+    private String delFlag;
 }
 ```
 1. 根据班级Id查询所有的签到
@@ -503,18 +506,16 @@ public class SysCourseSignin extends BaseEntity{
 ```java
 public class SysCourseSigninRecord extends BaseEntity {
     /** 预生成签到的ID **/
-    private Long id;
+    private Long recordId;
 
     /** 对应的签到任务（签到元数据）的ID **/
     private Long signinId;
 
     /** 用户ID **/
     private Long userId;
-    // TODO: 将用户ID转换为用户名
 
     /** 需要签到的课程ID **/
     private Long courseId;
-    // TODO: 将课程ID转换为课程名字
 
     /** 签到状态（0未签到，1已签到） **/
     private String status;

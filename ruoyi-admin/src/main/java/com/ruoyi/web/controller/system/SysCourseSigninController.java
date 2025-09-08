@@ -47,11 +47,15 @@ public class SysCourseSigninController extends BaseController
 
     /**
      * 新增课程签到（admin发布签到）
+     * 
+     * TODO:    这里需要在新增签到的同时，给该课程下的所有学生生成一条签到记录（未签到状态）
+     * TODO:   需要判断当前时间是不是在这个新增签到的时间段内, 如果是, 则状态为进行中, 否则为未开始, 超过的话为已结束
      */
     @Log(title = "课程签到", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysCourseSignin signin)
     {
+        
         return toAjax(signinService.insertCourseSignin(signin));
     }
 
@@ -69,7 +73,7 @@ public class SysCourseSigninController extends BaseController
      * 删除课程签到（admin）
      */
     @Log(title = "课程签到", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{signinIds}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(signinService.deleteCourseSigninByIds(ids));
@@ -91,7 +95,7 @@ public class SysCourseSigninController extends BaseController
 
     /**
      * 查看某个签到的签到结果（admin）
-     * 已签到人员 / 未签到人员
+     *  已签到人员 / 未签到人员
      */
     @GetMapping("/result/{signinId}")
     public AjaxResult result(@PathVariable Long signinId)
