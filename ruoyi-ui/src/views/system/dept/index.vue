@@ -1,16 +1,16 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
-      <el-form-item label="部门名称" prop="deptName">
+      <el-form-item label="班级名称" prop="deptName">
         <el-input
           v-model="queryParams.deptName"
-          placeholder="请输入部门名称"
+          placeholder="请输入班级名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="部门状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="班级状态" clearable>
           <el-option
             v-for="dict in dict.type.sys_normal_disable"
             :key="dict.value"
@@ -56,7 +56,7 @@
       :default-expand-all="isExpandAll"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="deptName" label="部门名称" width="260"></el-table-column>
+      <el-table-column prop="deptName" label="班级名称" width="260"></el-table-column>
       <el-table-column prop="orderNum" label="排序" width="200"></el-table-column>
       <el-table-column prop="status" label="状态" width="100">
         <template slot-scope="scope">
@@ -100,16 +100,9 @@
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="24" v-if="form.parentId !== 0">
-            <el-form-item label="上级部门" prop="parentId">
-              <treeselect v-model="form.parentId" :options="deptOptions" :normalizer="normalizer" placeholder="选择上级部门" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
           <el-col :span="12">
-            <el-form-item label="部门名称" prop="deptName">
-              <el-input v-model="form.deptName" placeholder="请输入部门名称" />
+            <el-form-item label="班级名称" prop="deptName">
+              <el-input v-model="form.deptName" placeholder="请输入班级名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -137,7 +130,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="部门状态">
+            <el-form-item label="班级状态">
               <el-radio-group v-model="form.status">
                 <el-radio
                   v-for="dict in dict.type.sys_normal_disable"
@@ -145,6 +138,64 @@
                   :label="dict.value"
                 >{{dict.label}}</el-radio>
               </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- 新增字段 -->
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="简介" prop="brief">
+              <el-input v-model="form.brief" placeholder="请输入简介" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="封面URL" prop="coverURL">
+              <el-input v-model="form.coverURL" placeholder="请输入封面URL" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="开始时间" prop="startTime">
+              <el-date-picker
+                v-model="form.startTime"
+                type="datetime"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                placeholder="请选择开始时间">
+              </el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="结束时间" prop="endTime">
+              <el-date-picker
+                v-model="form.endTime"
+                type="datetime"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                placeholder="请选择结束时间">
+              </el-date-picker>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="班级容量" prop="cap">
+              <el-input-number v-model="form.cap" controls-position="right" :min="0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="当前人数" prop="size">
+              <el-input-number v-model="form.size" controls-position="right" :min="0" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="自动加入">
+              <el-switch
+                v-model="form.autoJoin"
+                :active-value="1"
+                :inactive-value="0">
+              </el-switch>
             </el-form-item>
           </el-col>
         </el-row>
@@ -193,11 +244,8 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        parentId: [
-          { required: true, message: "上级部门不能为空", trigger: "blur" }
-        ],
         deptName: [
-          { required: true, message: "部门名称不能为空", trigger: "blur" }
+          { required: true, message: "班级名称不能为空", trigger: "blur" }
         ],
         orderNum: [
           { required: true, message: "显示排序不能为空", trigger: "blur" }
@@ -257,7 +305,14 @@ export default {
         leader: undefined,
         phone: undefined,
         email: undefined,
-        status: "0"
+        status: "0",
+        brief: undefined,
+        coverURL: undefined,
+        startTime: undefined,
+        endTime: undefined,
+        size: undefined,
+        cap: undefined,
+        autoJoin: 0
       }
       this.resetForm("form")
     },
@@ -277,7 +332,7 @@ export default {
         this.form.parentId = row.deptId
       }
       this.open = true
-      this.title = "添加部门"
+      this.title = "添加班级"
       listDept().then(response => {
         this.deptOptions = this.handleTree(response.data, "deptId")
       })
@@ -296,7 +351,7 @@ export default {
       getDept(row.deptId).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改部门"
+        this.title = "修改班级"
         listDeptExcludeChild(row.deptId).then(response => {
           this.deptOptions = this.handleTree(response.data, "deptId")
           if (this.deptOptions.length == 0) {
