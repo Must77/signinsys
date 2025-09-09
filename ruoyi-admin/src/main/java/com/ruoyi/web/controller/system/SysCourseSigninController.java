@@ -37,7 +37,7 @@ public class SysCourseSigninController extends BaseController
     /**
      * 查询课程签到列表（admin）
      */
-    @GetMapping("/list/{signinId}")
+    @GetMapping("/list")
     public TableDataInfo list(SysCourseSignin query)
     {
         startPage();
@@ -76,7 +76,7 @@ public class SysCourseSigninController extends BaseController
 
         int rows = signinService.insertCourseSignin(signin);
 
-        Long signinId = signin.getId();
+        Long signinId = signin.getSigninId();
         if (rows > 0 && signinId != null) {
             // 预生成签到记录
             recordService.generateSigninRecords(signin); // 里面用 signin.getId()

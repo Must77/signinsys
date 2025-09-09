@@ -87,7 +87,7 @@ public class SysCourseSigninRecordServiceImpl implements ISysCourseSigninRecordS
         List<SysCourseSigninRecord> records = new ArrayList<>();
         for (SysUser stu : students) {
             SysCourseSigninRecord r = new SysCourseSigninRecord();
-            r.setSigninId(signin.getId());
+            r.setSigninId(signin.getSigninId());
             r.setUserId(stu.getUserId());
             r.setCourseId(signin.getCourseId());
             r.setStatus("0"); // 未签到

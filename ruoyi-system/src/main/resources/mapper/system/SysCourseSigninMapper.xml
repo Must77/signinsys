@@ -39,6 +39,9 @@
     <select id="selectCourseSigninList" resultMap="SysCourseSigninResult">
         <include refid="selectCourseSigninVo"/>
         WHERE cs.del_flag = '0'
+        <if test ="signinId != null and signinId != 0">
+            AND cs.signin_id = #{signinId}
+        </if>
         <if test="courseId != null and courseId != 0">
             AND cs.course_id = #{courseId}
         </if>
