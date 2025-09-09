@@ -47,14 +47,14 @@ public class SysCourseSigninRecordController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 查询某个签到的结果（admin）
-     */
-    @GetMapping("/list/{signinId}")
-    public AjaxResult list(@PathVariable Long signinId) {
-        SysCourseSigninRecord query = new SysCourseSigninRecord();
-        query.setSigninId(signinId);
-
+    /** 
+     * 条件查询某个签到记录
+     * @param query 条件
+     * @return 成功与否
+    */
+    @GetMapping("/list")
+    public AjaxResult list(SysCourseSigninRecord query)
+    {
         List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
         return AjaxResult.success(list);
     }

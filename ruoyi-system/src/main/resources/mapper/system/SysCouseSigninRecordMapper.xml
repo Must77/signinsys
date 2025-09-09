@@ -50,6 +50,9 @@
         <if test="status != null and status != ''">
             AND sr.status = #{status}
         </if>
+        <if test="recordId != null and recordId != ''">
+            AND sr.record_id = #{recordId}
+        </if>
         ORDER BY sr.create_time DESC
     </select>
 

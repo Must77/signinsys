@@ -541,14 +541,14 @@ public class SysCourseSigninRecord extends BaseEntity {
     参数:       无
     返回值:     表格数据对象
     权限:       system:signinRecord:myPending
-    ```
+    ``` 
 
 3. 查看某个签到的结果
     ```
-    URL:        GET ~/system/signinRecord/list/{signinId}
-    参数:       Long signinId
-    参数方式:   路径参数
-    返回值:     成功与否
+    URL:        GET ~/system/signinRecord/list/
+    参数:       SysCourseSigninRecord
+    参数方式:   路径参数自动绑定到类对象
+    返回值:     List<SysCourseSigninRecord> 签到记录列表
     权限:       system:signinRecord:list
     ```
 
