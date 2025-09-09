@@ -177,7 +177,7 @@ public class SysDept extends BaseEntity
     URL:        POST ~/system/dept
     参数:       SysDept
     参数方式:   请求体json
-    返回值:     int 本次插入影响的数据库表中的行数
+    返回值:     成功与否和消息
     权限:       system:dept:add
     ```
 
@@ -188,7 +188,7 @@ public class SysDept extends BaseEntity
     URL:        PUT ~/system/dept
     参数:       SysDept
     参数方式:   请求体json
-    返回值:     int 本次插入影响的数据库表中的行数
+    返回值:     成功与否和消息
     权限:       system:dept:edit
     ```
 
@@ -199,7 +199,7 @@ public class SysDept extends BaseEntity
     URL:        DELETE ~/system/dept/{deptId}
     参数:       Long deptId
     参数方式:   路径参数
-    返回值:     int 本次插入影响的数据库表中的行数
+    返回值:     成功与否和消息
     权限:       system:dept:remove
     ```
 
@@ -282,7 +282,7 @@ public class SysDeptCourse extends BaseEntity {
     URL:        POST ~/system/deptCourse
     参数:       SysDeptCourse
     参数方式:   请求体json
-    返回值:     int 数据库表变动的行数
+    返回值:     成功与否和消息
     权限:       system:deptCourse:add
     ```
 
@@ -292,7 +292,7 @@ public class SysDeptCourse extends BaseEntity {
     URL:        PUT ~/system/deptCourse
     参数:       SysDeptCourse
     参数方式:   请求体json
-    返回值:     int 数据库表变动的行数
+    返回值:     成功与否和消息
     权限:       system:deptCourse:edit
     ```
 
@@ -303,7 +303,7 @@ public class SysDeptCourse extends BaseEntity {
     参数:       Long[] courseIds
     参数方式:   非键值对的路径参数, 以逗号分割
                 - e.g. ~/system/deptCourse/1,2
-    返回值:     int 数据库表变动的行数
+    返回值:     成功与否和消息
     权限:       system:deptCourse:edit
     ```
 
@@ -366,7 +366,7 @@ public class SysDeptApply extends BaseEntity {
     URL:        POST ~/system/deptApply
     参数:       SysDeptApply
     参数方式:   请求体json
-    返回值:     int 操作影响的数据库表行数
+    返回值:     成功与否和消息
     权限:       system:deptApply:add
     ```
 
@@ -376,7 +376,7 @@ public class SysDeptApply extends BaseEntity {
     URL:        PUT ~/system/deptApply/{applyId}/approve
     参数:       Long applyId
     参数方式:   路径参数
-    返回值:     int 影响的表行数
+    返回值:     成功与否和消息
     权限:       system:deptApply:approve
     ```
 
@@ -386,7 +386,7 @@ public class SysDeptApply extends BaseEntity {
     URL:        PUT ~/system/deptApply/{applyId}/reject
     参数:       Long applyId
     参数方式:   路径参数
-    返回值:     int 影响的表行数
+    返回值:     成功与否和消息
     权限:       system:deptApply:reject
     ```
 
@@ -397,7 +397,7 @@ public class SysDeptApply extends BaseEntity {
     URL:        PUT ~/system/deptApply/{applyIds}
     参数:       Long[] applyIds
     参数方式:   逗号分隔的非键值对路径参数
-    返回值:     int 影响的表行数
+    返回值:     成功与否和消息
     权限:       system:deptApply:reject
     ```
 
@@ -475,7 +475,7 @@ public class SysCourseSignin extends BaseEntity{
     URL:        POST ~/system/signin
     参数:       SysCourseSignin
     参数方式:   请求体json
-    返回值:     int 操作影响的表行数
+    返回值:     成功与否和消息
     权限:       system:signin:add
     ```
 
@@ -485,7 +485,7 @@ public class SysCourseSignin extends BaseEntity{
     URL:        PUT ~/system/signin
     参数:       SysCourseSignin
     参数方式:   请求体json
-    返回值:     int 操作影响的表行数
+    返回值:     成功与否和消息
     权限:       system:signin:edit
     ```
 
@@ -495,7 +495,7 @@ public class SysCourseSignin extends BaseEntity{
     URL:        DELETE ~/system/signin/{signinIds}
     参数:       Long signinIds
     参数方式:   逗号分隔的非键值对路径参数
-    返回值:     int 操作影响的表行数
+    返回值:     成功与否和消息
     权限:       system:signin:delete
     ```
 
@@ -528,11 +528,27 @@ public class SysCourseSigninRecord extends BaseEntity {
 ```
 1. 用户签到
     ```
-    URL:        PUT ~/system/doSignin
-    参数:       SysCourseSigninRecord
-    参数方式:   请求体json
-    返回值:     int 影响的表行数
-    权限:       system:doSignin:signin
+    URL:        PUT ~/system/signinRecord/doSignin/{signinId}
+    参数:       Long signinId
+    参数方式:   路径参数
+    返回值:     成功与否和消息
+    权限:       system:signinRecord:signin
     ```
 
+2. 查看当前用户的待签到记录
+    ```
+    URL:        GET ~/system/signinRecord/myPending
+    参数:       无
+    返回值:     表格数据对象
+    权限:       system:signinRecord:myPending
+    ```
+
+3. 查看某个签到的结果
+    ```
+    URL:        GET ~/system/signinRecord/list/{signinId}
+    参数:       Long signinId
+    参数方式:   路径参数
+    返回值:     成功与否
+    权限:       system:signinRecord:list
+    ```
 

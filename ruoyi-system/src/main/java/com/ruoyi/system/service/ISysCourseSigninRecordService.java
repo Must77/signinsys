@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.ruoyi.system.domain.SysCourseSignin;
 import com.ruoyi.system.domain.SysCourseSigninRecord;
 import java.util.List;
 
@@ -10,27 +11,59 @@ import java.util.List;
  */
 public interface ISysCourseSigninRecordService {
     /**
-     * 查询单个ID下的签到活动
-     * 
-     * @param userId 用户ID
-     * @return 签到活动列表
-     */
-    List<SysCourseSigninRecord> selectByUserId(Long userId);
-
-    /**
-     * 用户签到
-     * 
+     * 通过ID查询课程签到记录
      * @param recordId 签到记录ID
-     * @param userId 用户ID
-     * @return 操作影响的行数
+     * @return 课程签到记录
      */
-    int doSignin(Long recordId, Long userId);
+    SysCourseSigninRecord selectSigninRecordById(Long recordId);
 
     /**
-     * 批量插入签到记录。admin在创建签到元数据的时候，预生成该班级下所有用户的签到活动
-     * 
-     * @param records 需要插入的签到记录列表
-     * @return 插入操作影响的行数
+     * 条件查询签到记录列表
+     * @param record 签到任务查询条件
+     * @return 课程签到记录集合
      */
-    int batchInsert(List<SysCourseSigninRecord> records);
+    List<SysCourseSigninRecord> selectSigninRecordList(SysCourseSigninRecord record);
+
+    /**
+     * 新增课程签到记录
+     * @param record 课程签到记录
+     * @return 结果
+     */
+    int insertCourseSigninRecord(SysCourseSigninRecord record);
+
+    /**
+     * 批量新增课程签到记录
+     * @param records 课程签到记录集合
+     * @return 结果
+     */
+    int batchInsertSigninRecords(List<SysCourseSigninRecord> records);
+
+    /**
+     * 修改课程签到记录
+     * @param record 课程签到记录
+     * @return 结果
+     */
+    int updateSigninRecordStatus(SysCourseSigninRecord record);
+
+    /**
+     * 根据签到元数据为该班级下所有学生预生成签到记录
+     * @param signin 签到元数据
+     * @return void
+     */
+    void generateSigninRecords(SysCourseSignin signin);
+
+    /**
+     * 查询已签到用户列表
+     * @param signinId
+     * @return
+     */
+    public List<SysCourseSigninRecord> selectSignedUsers(Long signinId);
+
+    /**
+     * 查询未签到用户列表
+     * @param signinId
+     * @return
+     */
+    public List<SysCourseSigninRecord> selectUnsignedUsers(Long signinId);
 }
+

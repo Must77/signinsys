@@ -5,22 +5,110 @@
 
 <mapper namespace="com.ruoyi.system.mapper.SysCourseSigninRecordMapper">
 
-    <select id="selectByUserId" parameterType="long" resultType="com.ruoyi.system.domain.SysCourseSigninRecord">
-        SELECT * FROM sys_course_signin_record WHERE user_id = #{userId}
+    <!-- 签到记录结果映射 -->
+    <resultMap id="SysCourseSigninRecordResult" type="com.ruoyi.system.domain.SysCourseSigninRecord">
+        <id property="recordId" column="record_id"/>
+        <result property="signinId" column="signin_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="status" column="status"/>
+        <result property="signinTime" column="signin_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 公共SQL -->
+    <sql id="selectSigninRecordVo">
+        SELECT sr.record_id, sr.signin_id, sr.user_id, sr.course_id, sr.status, sr.signin_time, sr.remark, sr.create_by, sr.create_time, sr.update_by, sr.update_time,
+               u.user_name
+        FROM sys_course_signin_record sr
+        LEFT JOIN sys_user u ON sr.user_id = u.user_id
+    </sql>
+
+    <!-- 根据ID查询 -->
+    <select id="selectSigninRecordById" resultMap="SysCourseSigninRecordResult">
+        <include refid="selectSigninRecordVo"/>
+        WHERE sr.record_id = #{recordId}
     </select>
 
-    <update id="updateSigninStatus" parameterType="com.ruoyi.system.domain.SysCourseSigninRecord">
-        UPDATE sys_course_signin_record
-        SET status = #{status}, signin_time = #{signinTime}
-        WHERE id = #{id} AND user_id = #{userId}
-    </update>
+    <!-- 查询签到记录列表（带条件拼接） -->
+    <select id="selectSigninRecordList" parameterType="com.ruoyi.system.domain.SysCourseSigninRecord" resultMap="SysCourseSigninRecordResult">
+        <include refid="selectSigninRecordVo"/>
+        WHERE 1=1
+        <if test="signinId != null and signinId != 0">
+            AND sr.signin_id = #{signinId}
+        </if>
+        <if test="userId != null and userId != 0">
+            AND sr.user_id = #{userId}
+        </if>
+        <if test="courseId != null and courseId != 0">
+            AND sr.course_id = #{courseId}
+        </if>
+        <if test="status != null and status != ''">
+            AND sr.status = #{status}
+        </if>
+        ORDER BY sr.create_time DESC
+    </select>
 
-    <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO sys_course_signin_record (signin_id, user_id, course_id, status)
-        VALUES
+    <!-- 插入单条记录 -->
+    <insert id="insertCourseSigninRecord" parameterType="com.ruoyi.system.domain.SysCourseSigninRecord" useGeneratedKeys="true" keyProperty="recordId">
+        insert into sys_course_signin_record(
+            <if test="signinId != null">signin_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="courseId != null">course_id,</if>
+            <if test="status != null">status,</if>
+            <if test="signinTime != null">signin_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) values (
+            <if test="signinId != null">#{signinId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="courseId != null">#{courseId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="signinTime != null">#{signinTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+        )
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsertSigninRecords" parameterType="java.util.List">
+        insert into sys_course_signin_record(signin_id, user_id, course_id, status, create_by, create_time)
+        values
         <foreach collection="list" item="item" separator=",">
-            (#{item.signinId}, #{item.userId}, #{item.courseId}, #{item.status})
+            (#{item.signinId}, #{item.userId}, #{item.courseId}, #{item.status}, #{item.createBy}, sysdate())
         </foreach>
     </insert>
+
+    <!-- 更新签到状态 -->
+    <update id="updateSigninRecordStatus">
+        update sys_course_signin_record
+        <set>
+            <if test="status != null">status = #{status},</if>
+            signin_time = sysdate(),
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where 1=1
+        <if test="signinId != null and signinId != 0">
+            AND signin_id = #{signinId}
+        </if>
+        <if test="userId != null and userId != 0">
+            AND user_id = #{userId}
+        </if>
+        <if test="recordId != null and recordId != 0">
+            AND record_id = #{recordId}
+        </if>
+    </update>
+
+    <!-- 删除记录（逻辑删除可扩展） -->
+    <delete id="deleteSigninRecordById">
+        <!-- UPDATE -->
+    </delete>
 
 </mapper>

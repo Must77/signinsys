@@ -10,26 +10,43 @@ import java.util.List;
  */
 public interface SysCourseSigninRecordMapper {
     /**
-     * 查询单个ID下的签到活动
-     * 
-     * @param userId 用户ID
-     * @return 签到活动列表
+     * 根据ID查询签到记录
+     * @param recordId 签到记录ID
+     * @return 签到记录
      */
-    List<SysCourseSigninRecord> selectByUserId(Long userId);
+    SysCourseSigninRecord selectSigninRecordById(Long recordId);
 
     /**
-     * 更新签到活动的状态
-     * 
-     * @param record 需要更新的签到活动
-     * @return 更新操作影响的行数
+     * 条件查询签到记录列表
+     * @param record 查询条件
+     * @return 签到记录列表
      */
-    int updateSigninStatus(SysCourseSigninRecord record);
+    List<SysCourseSigninRecord> selectSigninRecordList(SysCourseSigninRecord record);
 
     /**
-     * 批量插入签到记录。admin在创建签到元数据的时候，预生成该班级下所有用户的签到活动
-     * 
-     * @param records 需要插入的签到记录列表
-     * @return 插入操作影响的行数
+     * 插入单条记录
+     * @param record 签到记录
+     * @return 影响的行数
      */
-    int batchInsert(List<SysCourseSigninRecord> records);
+    int insertCourseSigninRecord(SysCourseSigninRecord record);
+
+    /**
+     * 批量插入签到记录
+     * @param records 签到记录列表
+     * @return 影响的行数
+     */
+    int batchInsertSigninRecords(List<SysCourseSigninRecord> records);
+
+    /**
+     * 更新签到记录的状态
+     * @param record 签到记录
+     * @return 影响的行数
+     */
+    int updateSigninRecordStatus(SysCourseSigninRecord record);
+
+    /**
+     * 删除签到记录
+     * 没想好要不要做
+     */
+    int deleteSigninRecordById(Long recordId);
 }

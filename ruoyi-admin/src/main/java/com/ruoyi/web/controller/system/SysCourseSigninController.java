@@ -1,6 +1,9 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -8,8 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysCourseSignin;
+import com.ruoyi.system.domain.SysCourseSigninRecord;
+import com.ruoyi.system.service.ISysCourseSigninRecordService;
 import com.ruoyi.system.service.ISysCourseSigninService;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -25,6 +31,9 @@ public class SysCourseSigninController extends BaseController
     @Autowired
     private ISysCourseSigninService signinService;
 
+    @Autowired
+    private ISysCourseSigninRecordService recordService;
+
     /**
      * 查询课程签到列表（admin）
      */
@@ -39,24 +48,42 @@ public class SysCourseSigninController extends BaseController
     /**
      * 获取课程签到详细信息（admin）
      */
-    @GetMapping("/{id}")
-    public AjaxResult getInfo(@PathVariable Long id)
+    @GetMapping("/{signinId}")
+    public AjaxResult getInfo(@PathVariable Long signinId)
     {
-        return AjaxResult.success(signinService.selectCourseSigninById(id));
+        return AjaxResult.success(signinService.selectCourseSigninById(signinId));
     }
 
     /**
      * 新增课程签到（admin发布签到）
      * 
-     * TODO:    这里需要在新增签到的同时，给该课程下的所有学生生成一条签到记录（未签到状态）
-     * TODO:   需要判断当前时间是不是在这个新增签到的时间段内, 如果是, 则状态为进行中, 否则为未开始, 超过的话为已结束
+     * TODO: 插入签到元数据时还预生成签到记录, 因此之后需要新增加一个@Transactional的Service, 通过事务保证一次性都成功或者都失败
      */
     @Log(title = "课程签到", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysCourseSignin signin)
     {
-        
-        return toAjax(signinService.insertCourseSignin(signin));
+        // 判断签到状态：0未开始,1进行中,2已结束
+        Date now = new Date();
+        if (now.before(signin.getStartTime())) {
+            signin.setStatus("0");
+        } else if (now.after(signin.getEndTime())) {
+            signin.setStatus("2");
+        } else {
+            signin.setStatus("1");
+        }
+        signin.setCreateBy(getUsername());
+
+        int rows = signinService.insertCourseSignin(signin);
+
+        Long signinId = signin.getId();
+        if (rows > 0 && signinId != null) {
+            // 预生成签到记录
+            recordService.generateSigninRecords(signin); // 里面用 signin.getId()
+        } else if (rows > 0) {
+            return error("创建签到成功但未获取到主键ID，请检查 Mapper 的 useGeneratedKeys 配置");
+        }
+        return toAjax(rows);
     }
 
     /**
@@ -73,37 +100,28 @@ public class SysCourseSigninController extends BaseController
      * 删除课程签到（admin）
      */
     @Log(title = "课程签到", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
+    @DeleteMapping("/{signinIds}")
+    public AjaxResult remove(@PathVariable Long[] signinIds)
     {
-        return toAjax(signinService.deleteCourseSigninByIds(ids));
+        return toAjax(signinService.deleteCourseSigninByIds(signinIds));
     }
 
-    /**
-     * 用户进行签到（普通用户）
-     * 这里需要在数据库中保存一条签到记录（签到表 + 签到记录表）
-     */
-    @PostMapping("/doSignin/{signinId}")
-    public AjaxResult doSignin(@PathVariable Long signinId)
-    {
-        // TODO: 这里建议在 SysCourseSigninRecordService 中实现签到逻辑
-        // 1. 判断是否在有效时间段内
-        // 2. 判断该用户是否已经签过到
-        // 3. 插入一条签到记录（signinId, userId, deptId, signTime）
-        return AjaxResult.success("签到成功");
-    }
 
     /**
      * 查看某个签到的签到结果（admin）
-     *  已签到人员 / 未签到人员
+     * 已签到人员 / 未签到人员
      */
     @GetMapping("/result/{signinId}")
     public AjaxResult result(@PathVariable Long signinId)
     {
-        // TODO: 需要实现 SysCourseSigninRecordService
-        // List<SysUser> signedUsers = recordService.selectSignedUsers(signinId);
-        // List<SysUser> unsignedUsers = recordService.selectUnsignedUsers(signinId);
-        // return AjaxResult.success(Map.of("signed", signedUsers, "unsigned", unsignedUsers));
-        return AjaxResult.success("签到结果查询接口（待实现）");
+        List<SysCourseSigninRecord> signed = recordService.selectSignedUsers(signinId);
+        List<SysCourseSigninRecord> unsigned = recordService.selectUnsignedUsers(signinId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("signed", signed);
+        result.put("unsigned", unsigned);
+
+        return AjaxResult.success(result);
     }
+
 }

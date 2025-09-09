@@ -84,15 +84,5 @@ public class SysCourseSigninRecord extends BaseEntity {
     public void setSigninTime(Date signinTime) {
         this.signinTime = signinTime;
     }
-
-    @Override
-    public String getRemark() {
-        return remark;
-    }
-
-    @Override
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-    
+  
 }
