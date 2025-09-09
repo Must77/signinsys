@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 public class SysCourseSignin extends BaseEntity{
     /** 签到的ID **/
-    private Long id;
+    private Long signinId;
 
     /** 课程ID **/
     @Excel(name = "课程ID")
@@ -45,12 +45,12 @@ public class SysCourseSignin extends BaseEntity{
     private String delFlag;
 
     // getter/setter
-    public Long getId() {
-      return id;
+    public Long getSigninId() {
+      return signinId;
     }
 
-    public void setId(Long id) {
-      this.id = id;
+    public void setSigninId(Long signinId) {
+      this.signinId = signinId;
     }
 
     public Long getCourseId() {

@@ -440,12 +440,12 @@ public class SysCourseSignin extends BaseEntity{
     private String delFlag;
 }
 ```
-1. 根据班级Id查询所有的签到
+1. 条件筛选签到活动
     - admin
     ```
-    URL:        GET ~/system/signin/list/{signinId}
-    参数:       Long signinId
-    参数方式:   路径参数
+    URL:        GET ~/system/signin/list
+    参数:       SysCourseSignin
+    参数方式:   路径参数自动绑定到类对象
     返回值:     List<SysCourseSignin> 签到元数据列表
     权限:       system:signin:list
     ```
