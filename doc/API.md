@@ -233,7 +233,7 @@ public class SysDeptCourse extends BaseEntity {
     private String deptName;
 
     /** 课程名称, 描述, 人数, 容量, 封面 */
-    private String name;
+    private String courseName;
     private String brief;
     private Integer size;
     private Integer cap;
