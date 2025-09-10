@@ -24,7 +24,7 @@ public class SysDeptCourse extends BaseEntity {
 
     /** 课程名称, 描述, 人数, 容量, 封面 */
     @Excel(name = "课程名称")
-    private String name;
+    private String courseName;
 
     @Excel(name = "课程描述")
     private String brief;
@@ -48,8 +48,8 @@ public class SysDeptCourse extends BaseEntity {
     public String getDeptName() { return deptName; }
     public void setDeptName(String deptName) { this.deptName = deptName; }
 
-    public String getName() { return name; }
-    public void setName(String courseName) { this.name = courseName; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 
     public String getBrief() { return brief; }
     public void setBrief(String courseDesc) { this.brief = courseDesc; }
