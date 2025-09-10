@@ -6,6 +6,33 @@
       </div>
       
       <el-row :gutter="10" class="mb8">
+        <el-col :span="4">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入课程名称"
+            clearable
+            size="small"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-col>
+        <el-col :span="4">
+          <treeselect
+            v-model="queryParams.deptId"
+            :options="deptOptions"
+            :normalizer="normalizer"
+            :show-count="true"
+            placeholder="请选择所属部门"
+            clearable
+            size="small"
+          />
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        </el-col>
+        <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      </el-row>
+      
+      <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
             v-hasPermi="['system:deptCourse:add']"
@@ -44,11 +71,12 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="courseId" label="ID" width="80" />
+        <el-table-column prop="courseId" label="课程ID" width="80" />
+                <el-table-column prop="name" label="课程名称" width="120"  />
         <el-table-column prop="deptId" label="部门ID" width="120" />
-        <el-table-column prop="deptName" label="部门名称" width="120" />
-        <el-table-column prop="courseName" label="课程名称" />
-        <el-table-column prop="courseDesc" label="课程描述" />
+        <el-table-column prop="deptName" label="部门名称" />
+
+        <el-table-column prop="brief" label="课程描述" />
         <el-table-column label="操作" width="150" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
           <template slot-scope="scope">
             <el-button 
@@ -81,11 +109,11 @@
             placeholder="请选择所属部门"
           />
         </el-form-item>
-        <el-form-item label="课程名称" prop="courseName">
-          <el-input v-model="form.courseName" placeholder="请输入课程名称" />
+        <el-form-item label="课程名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入课程名称" />
         </el-form-item>
-        <el-form-item label="课程描述" prop="courseDesc">
-          <el-input type="textarea" v-model="form.courseDesc" placeholder="请输入课程描述" />
+        <el-form-item label="课程描述" prop="brief">
+          <el-input type="textarea" v-model="form.brief" placeholder="请输入课程描述" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -120,17 +148,22 @@ export default {
       courseList: [],
       deptOptions: [],
       dialogVisible: false,
+      // 查询参数
+      queryParams: {
+        name: undefined,
+        deptId: undefined
+      },
       form: {
         courseId: undefined,
         deptId: undefined,
-        courseName: "",
-        courseDesc: ""
+        name: "",
+        brief: ""
       },
       rules: {
         deptId: [
           { required: true, message: "所属部门不能为空", trigger: "blur" }
         ],
-        courseName: [
+        name: [
           { required: true, message: "课程名称不能为空", trigger: "blur" }
         ]
       }
@@ -144,10 +177,19 @@ export default {
     /** 查询部门课程列表 */
     getList() {
       this.loading = true;
-      listDeptCourse().then(res => {
+      listDeptCourse(this.queryParams).then(res => {
         this.courseList = res.rows;
         this.loading = false;
       })
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.getList();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.handleQuery();
     },
     /** 查询部门下拉树结构 */
     getDeptTree() {

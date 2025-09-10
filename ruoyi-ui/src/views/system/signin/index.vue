@@ -47,7 +47,7 @@
     <!-- 表格 -->
     <el-table v-loading="loading" :data="signinList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column prop="signinId" label="ID" width="80" />
       <el-table-column prop="title" label="签到标题" />
       <el-table-column prop="courseId" label="课程ID" />
       <el-table-column prop="deptId" label="部门ID" />
@@ -130,7 +130,7 @@ export default {
       multiple: true,
       ids: [],
       form: {
-        id: undefined,
+        signinId: undefined,
         title: "",
         courseId: "",
         deptId: "",
@@ -169,14 +169,14 @@ export default {
     },
     // 多选
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id);
+      this.ids = selection.map(item => item.signinId);
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
     // 新增
     handleAdd() {
       this.form = {
-        id: undefined,
+        signinId: undefined,
         title: "",
         courseId: "",
         deptId: "",
@@ -188,9 +188,9 @@ export default {
     },
     // 修改（支持工具栏与行内）
     handleUpdate(row) {
-      const id = (row && row.id) || this.ids[0];
-      if (!id) return;
-      getSignin(id).then(res => {
+      const signinId = (row && row.signinId) || this.ids[0];
+      if (!signinId) return;
+      getSignin(signinId).then(res => {
         this.form = Object.assign({}, res.data || {});
         this.open = true;
         this.title = "修改签到";
@@ -198,7 +198,7 @@ export default {
     },
     // 提交
     submitForm() {
-      if (this.form.id) {
+      if (this.form.signinId) {
         updateSignin(this.form).then(() => {
           this.$message.success("修改成功");
           this.open = false;
@@ -214,7 +214,7 @@ export default {
     },
     // 删除
     handleDelete(row) {
-      const ids = row && row.id ? [row.id] : this.ids;
+      const ids = row && row.signinId ? [row.signinId] : this.ids;
       if (!ids.length) return;
       this.$confirm("确认删除选中的签到记录吗？", "提示", { type: "warning" })
         .then(() => delSignin(ids.toString()))
@@ -226,15 +226,15 @@ export default {
     },
     // 用户签到
     handleSignin(row) {
-      if (!row || !row.id) return;
-      doSignin(row.id).then(() => {
+      if (!row || !row.signinId) return;
+      doSignin(row.signinId).then(() => {
         this.$message.success("签到成功");
       });
     },
     // 查看结果
     handleResult(row) {
-      if (!row || !row.id) return;
-      getResult(row.id).then(res => {
+      if (!row || !row.signinId) return;
+      getResult(row.signinId).then(res => {
         const data = res.data || {};
         this.$alert(
           `已签到用户: ${JSON.stringify(data.signed || [])}\n未签到用户: ${JSON.stringify(data.unsigned || [])}`,
