@@ -17,6 +17,8 @@
     <result column="apply_time" property="applyTime"/>
     <result column="email" property="email"/>
     <result column="job" property="job"/>
+    <result column="dept_name" property="deptName"/>
+    <result column="user_name" property="userName"/>
 
   </resultMap>
 
@@ -24,9 +26,10 @@
     SELECT
       a.apply_id, a.user_id, a.dept_id, a.status,
       a.phone, a.apply_time, a.email, a.job,
-      d.dept_name
+      d.dept_name, u.user_name
     FROM sys_dept_apply a
     LEFT JOIN sys_dept d ON a.dept_id = d.dept_id
+    left join sys_user u on a.user_id = u.user_id
   </sql>
 
   <select id="selectDeptApplyList" resultMap="SysDeptApplyResult">

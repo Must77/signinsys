@@ -341,6 +341,10 @@ public class SysDeptApply extends BaseEntity {
     private String email;
     private String job; // 我也不知道为什么要有这个字段
 
+    /** 用于前端展示的字段: 申请者名字, 申请部门 **/
+    private String userName;
+    private String deptName;
+
     }
 ```
 1. 查询申请
