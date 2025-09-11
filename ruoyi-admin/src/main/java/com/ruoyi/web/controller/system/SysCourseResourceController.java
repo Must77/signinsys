@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.system;
 import java.util.List;
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ import com.ruoyi.system.service.ISysCourseResourceService;
 @RequestMapping("/system/deptCourse/resource")
 public class SysCourseResourceController extends BaseController {
 
-    @Resource
+    @Autowired
     private ISysCourseResourceService resourceService;
 
     /**

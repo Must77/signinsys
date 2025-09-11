@@ -19,12 +19,19 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <sql id="selectResVo">
+        select resource_id, course_id, dept_id, file_name, file_path, file_type, file_size, remark, create_by, create_time, update_by, update_time
+        from sys_course_resource
+    </sql>
+
     <select id="selectCourseResourceById" resultMap="SysCourseResourceResult">
-        select * from sys_course_resource where resource_id = #{resourceId}
+        <include refid="selectResVo"/>
+        where del_flag = '0'
+            AND resource_id = #{resourceId}
     </select>
 
     <select id="selectCourseResourceList" resultMap="SysCourseResourceResult" parameterType="com.ruoyi.system.domain.SysCourseResource">
-        select * from sys_course_resource
+        <include refid="selectResVo"/>
         where del_flag = '0'
         <if test="courseId != null and courseId != 0">
             and course_id = #{courseId}
@@ -39,12 +46,35 @@
     </select>
 
     <select id="selectResourcesByCourseId" resultMap="SysCourseResourceResult" parameterType="long">
-        select * from sys_course_resource where del_flag = '0' and course_id = #{courseId} order by create_time desc
+        <include refid="selectResVo"/>
+        where del_flag = '0' 
+            and course_id = #{courseId} 
+        order by create_time desc
     </select>
 
     <insert id="insertCourseResource" parameterType="com.ruoyi.system.domain.SysCourseResource" useGeneratedKeys="true" keyProperty="resourceId">
-        insert into sys_course_resource(course_id, dept_id, file_name, file_path, file_type, file_size, remark, create_by, create_time)
-        values(#{courseId}, #{deptId}, #{fileName}, #{filePath}, #{fileType}, #{fileSize}, #{remark}, #{createBy}, sysdate())
+        insert into sys_course_resource(
+            <if test="courseId != null and courseId != 0">course_id,</if>
+            <if test="deptId != null and deptId != 0">dept_id,</if>
+            <if test="fileName != null and fileName != ''">file_name,</if>
+            <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="fileType != null and fileType != ''">file_type,</if>
+            <if test="fileSize != null and fileSize != 0">file_size,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        )values(
+            <!-- #{courseId}, #{deptId}, #{fileName}, #{filePath}, #{fileType}, #{fileSize}, #{remark}, #{createBy}, sysdate() -->
+            <if test="courseId != null and courseId != 0">#{courseId},</if>
+            <if test="deptId != null and deptId != 0">#{deptId},</if>
+            <if test="fileName != null and fileName != ''">#{fileName},</if>
+            <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="fileType != null and fileType != ''">#{fileType},</if>
+            <if test="fileSize != null and fileSize != 0">#{fileSize},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+        )
     </insert>
 
     <update id="updateCourseResource" parameterType="com.ruoyi.system.domain.SysCourseResource">

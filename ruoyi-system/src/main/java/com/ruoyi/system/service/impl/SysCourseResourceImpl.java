@@ -3,15 +3,17 @@ package com.ruoyi.system.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.ruoyi.system.domain.SysCourseResource;
 import com.ruoyi.system.mapper.SysCourseResourceMapper;
 import com.ruoyi.system.service.ISysCourseResourceService;
 
-public class SysCourseResourceImpl implements ISysCourseResourceService{
+@Service
+public class SysCourseResourceImpl implements ISysCourseResourceService
+{
     @Autowired
     private SysCourseResourceMapper resourceMapper;
-
 
     /**
      * 根据ID查询课程资源

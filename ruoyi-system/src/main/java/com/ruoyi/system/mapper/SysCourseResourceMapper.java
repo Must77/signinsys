@@ -24,36 +24,36 @@ public interface SysCourseResourceMapper
 
     /**
      * 用户根据课程来查询课程资源
-     * @param courseId
-     * @return
+     * @param courseId 课程ID
+     * @return 课程资源列表
      */
     List<SysCourseResource> selectResourcesByCourseId(Long courseId);
 
     /**
      * 新增课程资源
-     * @param resource
-     * @return
+     * @param resource 课程资源
+     * @return 影响的表行数
      */
     int insertCourseResource(SysCourseResource resource);
 
     /**
      * 修改课程资源
-     * @param resource
-     * @return
+     * @param resource 课程资源
+     * @return 影响的表行数
      */
     int updateCourseResource(SysCourseResource resource);
 
     /**
      * 删除课程资源
-     * @param resourceId
-     * @return
+     * @param resourceId 课程资源ID
+     * @return 影响的表行数
      */
     int deleteCourseResourceById(Long resourceId);
 
     /**
      * 删除多个课程资源
-     * @param resourceId
-     * @return
+     * @param resourceId 课程资源ID数组
+     * @return 影响的表行数
      */
     int deleteCourseResourceByIds(Long[] resourceIds);
 }
