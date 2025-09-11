@@ -40,6 +40,12 @@ public class SysDeptApply extends BaseEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date applyTime;
 
+    /** 用于前端展示的字段: 申请者名字, 申请部门 **/
+    private String userName;
+    private String deptName;
+
+
+
     // getter/setter
     public Long getApplyId() { return applyId; }
     public void setApplyId(Long applyId) { this.applyId = applyId; }
@@ -73,6 +79,17 @@ public class SysDeptApply extends BaseEntity {
     public void setApplyTime(Date applyTime) {
         this.applyTime = applyTime;
     }
-    
+        public String getUserName() {
+        return userName;
+    }
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+    public String getDeptName() {
+        return deptName;
+    }
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+    }
 
 }
