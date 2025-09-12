@@ -44,6 +44,10 @@ public class SysCourseSignin extends BaseEntity{
     /** 删除标记(0存在,2删除) **/
     private String delFlag;
 
+    /** 用于前端显示的字段: 部门名字和课程名字**/
+    private String deptName;
+    private String courseName;
+
     // getter/setter
     public Long getSigninId() {
       return signinId;
@@ -108,5 +112,23 @@ public class SysCourseSignin extends BaseEntity{
     public void setDelFlag(String delFlag) {
       this.delFlag = delFlag;
     }
+
+    public String getDeptName() {
+      return deptName;
+    }
+
+    public void setDeptName(String deptName) {
+      this.deptName = deptName;
+    }
+
+    public String getCourseName() {
+      return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+      this.courseName = courseName;
+    }
+
+    
     
 }

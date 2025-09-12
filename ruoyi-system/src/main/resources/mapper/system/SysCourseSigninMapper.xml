@@ -18,6 +18,9 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
+        <!-- 额外的显示字段 -->
+        <result property="deptName" column="dept_name"/>
+        <result property="courseName" column="course_name"/>
     </resultMap>
 
     <sql id="selectCourseSigninVo">
@@ -87,7 +90,7 @@
     <!-- 修改签到 -->
     <update id="updateCourseSignin" parameterType="com.ruoyi.system.domain.SysCourseSignin">
         UPDATE sys_course_signin
-        <set>
+        <set> 
             <if test="courseId != null">course_id = #{courseId},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="title != null">title = #{title},</if>
