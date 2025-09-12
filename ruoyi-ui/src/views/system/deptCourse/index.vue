@@ -2,8 +2,30 @@
   <div class="app-container">
     <el-card>
       <div slot="header" class="clearfix">
-        <span>部门课程管理</span>
+        <span>班级内课程管理</span>
       </div>
+      <!-- 添加班级筛选条件 -->
+      <el-row :gutter="20" class="mb8">
+        <el-col :span="6">
+          <el-select 
+            v-model="queryDeptId" 
+            placeholder="请选择班级" 
+            clearable 
+            filterable
+            @change="handleDeptChange"
+          >
+            <el-option
+              v-for="dept in deptOptions"
+              :key="dept.id"
+              :label="dept.label"
+              :value="dept.id">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="2">
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">查询</el-button>
+        </el-col>
+      </el-row>
       
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
@@ -45,10 +67,10 @@
       >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="courseId" label="ID" width="80" />
-        <el-table-column prop="deptId" label="部门ID" width="120" />
-        <el-table-column prop="deptName" label="部门名称" width="120" />
+        <el-table-column prop="deptId" label="班级ID" width="120" />
+        <el-table-column prop="deptName" label="班级名称" width="120" />
         <el-table-column prop="courseName" label="课程名称" />
-        <el-table-column prop="courseDesc" label="课程描述" />
+        <el-table-column prop="brief" label="课程描述" />
         <el-table-column label="操作" width="150" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
           <template slot-scope="scope">
             <el-button 
@@ -72,20 +94,20 @@
 
     <el-dialog :title="title" :visible.sync="dialogVisible" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="所属部门" prop="deptId" v-if="!form.courseId">
+        <el-form-item label="所属班级" prop="deptId" v-if="!form.courseId">
           <treeselect
             v-model="form.deptId"
             :options="deptOptions"
             :normalizer="normalizer"
             :show-count="true"
-            placeholder="请选择所属部门"
+            placeholder="请选择所属班级"
           />
         </el-form-item>
         <el-form-item label="课程名称" prop="courseName">
           <el-input v-model="form.courseName" placeholder="请输入课程名称" />
         </el-form-item>
-        <el-form-item label="课程描述" prop="courseDesc">
-          <el-input type="textarea" v-model="form.courseDesc" placeholder="请输入课程描述" />
+        <el-form-item label="课程描述" prop="brief">
+          <el-input type="textarea" v-model="form.brief" placeholder="请输入课程描述" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -97,7 +119,7 @@
 </template>
 
 <script>
-import { listDeptCourse, addDeptCourse, updateDeptCourse, delDeptCourse } from "@/api/system/deptCourse"
+import { listDeptCourse, listDeptCourseByDeptId, addDeptCourse, updateDeptCourse, delDeptCourse } from "@/api/system/deptCourse"
 import { listDept } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -120,11 +142,12 @@ export default {
       courseList: [],
       deptOptions: [],
       dialogVisible: false,
+      queryDeptId: undefined, // 用于筛选的部门ID
       form: {
         courseId: undefined,
         deptId: undefined,
         courseName: "",
-        courseDesc: ""
+        brief: ""
       },
       rules: {
         deptId: [
@@ -132,30 +155,62 @@ export default {
         ],
         courseName: [
           { required: true, message: "课程名称不能为空", trigger: "blur" }
+        ],
+        brief: [
+          { required: true, message: "课程描述不能为空", trigger: "blur" }
         ]
       }
     }
   },
   created() {
     this.getList();
-    this.getDeptTree();
+    this.getDeptTree(); // 确保在组件创建时获取部门树数据
   },
   methods: {
     /** 查询部门课程列表 */
     getList() {
       this.loading = true;
-      listDeptCourse().then(res => {
-        this.courseList = res.rows;
-        this.loading = false;
-      })
+      // 如果选择了班级，则根据班级查询课程
+      if (this.queryDeptId) {
+        listDeptCourseByDeptId(this.queryDeptId).then(res => {
+          // 统一处理返回数据，确保 data 字段存在
+          const data = res.data || res.rows || [];
+          this.courseList = Array.isArray(data) ? data : [];
+          this.loading = false;
+        }).catch(() => {
+          this.loading = false;
+          this.courseList = [];
+        });
+      } else {
+        // 否则查询所有课程
+        listDeptCourse().then(res => {
+          // 统一处理返回数据，确保 data 字段存在
+          const data = res.data || res.rows || [];
+          this.courseList = Array.isArray(data) ? data : [];
+          this.loading = false;
+        }).catch(() => {
+          this.loading = false;
+          this.courseList = [];
+        });
+      }
     },
     /** 查询部门下拉树结构 */
     getDeptTree() {
-      listDept().then(res => {
-        this.deptOptions = this.handleTree(res.data, "deptId");
+      listDept().then(response => {
+        if (response && response.data) {
+          this.deptOptions = response.data.map(item => ({
+            id: item.deptId,
+            label: item.deptName,
+            children: item.children || []
+          }));
+        } else {
+          console.error('Failed to fetch department options:', response);
+        }
+      }).catch(error => {
+        console.error('Error fetching department options:', error);
       });
     },
-    /** 转换部门数据结构 */
+    // 树形结构转换
     normalizer(node) {
       if (node.children && !node.children.length) {
         delete node.children;
@@ -165,6 +220,14 @@ export default {
         label: node.deptName,
         children: node.children
       };
+    },
+    /** 班级选择变化 */
+    handleDeptChange(value) {
+      this.queryDeptId = value;
+    },
+    /** 查询按钮点击事件 */
+    handleQuery() {
+      this.getList();
     },
     // 取消按钮
     cancel() {

@@ -18,9 +18,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="申请ID" prop="applyId" width="90"/>
       <el-table-column label="申请人" prop="userName"/>
-      <el-table-column label="昵称" prop="nickName"/>
       <el-table-column label="部门" prop="deptName"/>
-      <el-table-column label="备注" prop="remark" show-overflow-tooltip/>
       <el-table-column label="状态" prop="status" width="100">
         <template slot-scope="scope">
           <el-tag v-if="scope.row.status==='0'">待审核</el-tag>

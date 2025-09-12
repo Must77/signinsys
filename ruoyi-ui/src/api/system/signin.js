@@ -51,6 +51,31 @@ export function doSignin(id) {
   })
 }
 
+// 用户签到记录签到
+export function doSigninRecord(signinId) {
+  return request({
+    url: '/system/signinRecord/doSignin/' + signinId,
+    method: 'put'
+  })
+}
+
+// 查看我的所有未签到
+export function listMyPendingSignin() {
+  return request({
+    url: '/system/signinRecord/myPending',
+    method: 'get'
+  })
+}
+
+// 条件查询我的签到活动
+export function listMySignin(query) {
+  return request({
+    url: '/system/signinRecord/list',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查看签到结果
 export function getResult(id) {
   return request({

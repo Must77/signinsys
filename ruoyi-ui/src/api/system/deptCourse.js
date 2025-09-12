@@ -9,6 +9,14 @@ export function listDeptCourse(query) {
   })
 }
 
+// 根据部门ID查询课程列表
+export function listDeptCourseByDeptId(deptId) {
+  return request({
+    url: '/system/deptCourse/list/' + deptId,
+    method: 'get'
+  })
+}
+
 // 查询我的课程（仅本部门）
 export function listMyDeptCourse(query) {
   return request({

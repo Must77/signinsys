@@ -53,7 +53,7 @@ export const constantRoutes = [
   },
   {
     path: '/404',
-    component: () => import('@/views/error/404'),
+    component: () => import('@/views/error/401'),
     hidden: true
   },
   {
@@ -104,6 +104,20 @@ export const dynamicRoutes = [
         component: () => import('@/views/system/dict/data'),
         name: 'Data',
         meta: { title: '字典数据', activeMenu: '/system/dict' }
+      }
+    ]
+  },
+  {
+    path: '/system/mySignin',
+    component: Layout,
+    hidden: false,
+    permissions: ['system:mysignin:list'],
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/system/mySignin/index'),
+        name: 'MySignin',
+        meta: { title: '我的签到', icon: 'form', activeMenu: '/system/mySignin' }
       }
     ]
   },
