@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 列表
 export function listDeptApply(query) {
   return request({
-    url: '/system/dept/apply/list',
+    url: '/system/deptApply/list',
     method: 'get',
     params: query
   })
@@ -12,7 +12,7 @@ export function listDeptApply(query) {
 // 用户提交申请
 export function addDeptApply(data) {
   return request({
-    url: '/system/dept/apply',
+    url: '/system/deptApply',
     method: 'post',
     data: data
   })
@@ -21,7 +21,7 @@ export function addDeptApply(data) {
 // 审批通过
 export function approveDeptApply(applyId) {
   return request({
-    url: `/system/dept/apply/${applyId}/approve`,
+    url: `/system/deptApply/${applyId}/approve`,
     method: 'put'
   })
 }
@@ -29,7 +29,7 @@ export function approveDeptApply(applyId) {
 // 审批拒绝
 export function rejectDeptApply(applyId) {
   return request({
-    url: `/system/dept/apply/${applyId}/reject`,
+    url: `/system/deptApply/${applyId}/reject`,
     method: 'put'
   })
 }
@@ -37,7 +37,7 @@ export function rejectDeptApply(applyId) {
 // 删除
 export function delDeptApply(applyIds) {
   return request({
-    url: `/system/dept/apply/${applyIds}`,
+    url: `/system/deptApply/${applyIds}`,
     method: 'delete'
   })
 }
