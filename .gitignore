@@ -45,3 +45,9 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+
+######################################################################
+# 忽视配置文件
+# ruoyi-admin/src/main/resources/logback.xml
+# ruoyi-admin/src/main/resources/application.yml
+# ruoyi-admin/src/main/resources/application-druid.yml
