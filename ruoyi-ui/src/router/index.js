@@ -148,6 +148,19 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
+  },
+  {
+    path: '/signin/course/:courseId(\\d+)',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/system/signin/course'),
+        name: 'CourseSignin',
+        meta: { title: '课程签到管理', icon: 'date', activeMenu: '/system/deptCourse' }
+      }
+    ]
   }
 ]
 

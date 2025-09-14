@@ -49,8 +49,8 @@
       <el-table-column type="selection" width="55" />
       <el-table-column prop="signinId" label="ID" width="80" />
       <el-table-column prop="title" label="签到标题" />
-      <el-table-column prop="courseId" label="课程ID" />
-      <el-table-column prop="deptId" label="部门ID" />
+      <el-table-column prop="courseName" label="课程名称" />
+      <el-table-column prop="deptName" label="班级名称" />
       <el-table-column prop="startTime" label="开始时间" width="160">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
@@ -100,11 +100,26 @@
         <el-form-item label="签到标题" prop="title">
           <el-input v-model="form.title" />
         </el-form-item>
-        <el-form-item label="课程ID" prop="courseId">
-          <el-input v-model="form.courseId" />
+        <el-form-item label="课程" prop="courseId">
+          <el-select v-model="form.courseId" placeholder="请选择课程" @change="handleCourseChange">
+            <el-option
+              v-for="course in courseOptions"
+              :key="course.courseId"
+              :label="course.courseName"
+              :value="course.courseId">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="部门ID" prop="deptId">
-          <el-input v-model="form.deptId" />
+        <el-form-item label="部门" prop="deptId">
+          <el-select v-model="form.deptId" placeholder="请选择部门" :disabled="!form.courseId">
+            <el-option
+              v-for="course in courseOptions"
+              :key="course.courseId"
+              :label="course.deptName"
+              :value="course.deptId"
+              v-if="course.courseId == form.courseId">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker 
@@ -141,6 +156,7 @@ import {
   doSigninRecord,
   getResult
 } from "@/api/system/signin";
+import { listDeptCourse } from "@/api/system/deptCourse";
 
 export default {
   name: "Signin",
@@ -154,6 +170,7 @@ export default {
       single: true,
       multiple: true,
       ids: [],
+      courseOptions: [],
       form: {
         signinId: undefined,
         title: "",
@@ -172,10 +189,10 @@ export default {
           { required: true, message: "签到标题不能为空", trigger: "blur" }
         ],
         courseId: [
-          { required: true, message: "课程ID不能为空", trigger: "blur" }
+          { required: true, message: "课程不能为空", trigger: "blur" }
         ],
         deptId: [
-          { required: true, message: "部门ID不能为空", trigger: "blur" }
+          { required: true, message: "部门不能为空", trigger: "blur" }
         ],
         startTime: [
           { required: true, message: "开始时间不能为空", trigger: "blur" }
@@ -188,6 +205,7 @@ export default {
   },
   created() {
     this.getList();
+    this.getCourseList();
   },
   methods: {
     // 查询列表
@@ -198,6 +216,25 @@ export default {
         this.total = res.total || 0;
         this.loading = false;
       }).catch(() => { this.loading = false; });
+    },
+    // 获取课程列表
+    getCourseList() {
+      listDeptCourse().then(res => {
+        this.courseOptions = res.rows || [];
+      });
+    },
+    // 课程选择变化处理
+    handleCourseChange(courseId) {
+      // 清空之前选择的部门
+      this.form.deptId = "";
+      
+      // 如果选择了课程，则自动选择该课程所属的部门
+      if (courseId) {
+        const selectedCourse = this.courseOptions.find(course => course.courseId == courseId);
+        if (selectedCourse) {
+          this.form.deptId = selectedCourse.deptId;
+        }
+      }
     },
     // 搜索
     handleQuery() {

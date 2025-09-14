@@ -83,6 +83,13 @@
             <el-button 
               size="mini" 
               type="text" 
+              icon="el-icon-user" 
+              v-hasPermi="['system:signin:list']"
+              @click="handleSigninManage(scope.row)"
+            >签到管理</el-button>
+            <el-button 
+              size="mini" 
+              type="text" 
               icon="el-icon-delete" 
               v-hasPermi="['system:deptCourse:remove']"
               @click="handleDelete(scope.row)"
@@ -277,13 +284,25 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const courseIds = row.courseId ? [row.courseId] : this.ids;
-      this.$confirm('确认删除吗?').then(() => {
-        delDeptCourse(courseIds).then(() => {
-          this.getList();
-          this.$modal.msgSuccess("删除成功");
-        })
+      const courseIds = row.courseId || this.ids;
+      this.$modal.confirm('是否确认删除课程编号为"' + courseIds + '"的数据项？').then(function() {
+        return delDeptCourse(courseIds);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
+    },
+    /** 签到管理按钮操作 */
+    handleSigninManage(row) {
+      this.$router.push({ 
+        name: 'CourseSignin',
+        params: { 
+          courseId: row.courseId
+        },
+        query: { 
+          deptId: row.deptId
+        }
+      });
     },
     /** 提交按钮 */
     submitForm() {

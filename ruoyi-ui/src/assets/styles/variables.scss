@@ -11,15 +11,15 @@ $panGreen: #30B08F;
 // 默认菜单主题风格
 $base-menu-color:#bfcbd9;
 $base-menu-color-active:#f4f4f5;
-$base-menu-background:#304156;
+$base-menu-background:#8B0000; // 将菜单背景颜色改为深红色
 $base-logo-title-color: #ffffff;
 
 $base-menu-light-color:rgba(0,0,0,.70);
-$base-menu-light-background:#ffffff;
+$base-menu-light-background:#8B0000; // 将浅色主题菜单背景颜色改为深红色
 $base-logo-light-title-color: #001529;
 
-$base-sub-menu-background:#1f2d3d;
-$base-sub-menu-hover:#001528;
+$base-sub-menu-background:#660000; // 将子菜单背景颜色改为更深的红色
+$base-sub-menu-hover:#4D0000; // 将子菜单悬停背景颜色改为最深的红色
 
 // 自定义暗色菜单风格
 /**
@@ -49,6 +49,4 @@ $base-sidebar-width: 200px;
   subMenuBackground: $base-sub-menu-background;
   subMenuHover: $base-sub-menu-hover;
   sideBarWidth: $base-sidebar-width;
-  logoTitleColor: $base-logo-title-color;
-  logoLightTitleColor: $base-logo-light-title-color
 }
