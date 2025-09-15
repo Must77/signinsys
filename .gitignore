@@ -46,6 +46,10 @@ nbdist/
 !*/build/*.html
 !*/build/*.xml
 
+###############################################
+# Password
+ruoyi-admin/src/main/resources/application-druid.yml
+
 ######################################################################
 # 忽视配置文件
 # ruoyi-admin/src/main/resources/logback.xml
