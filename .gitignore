@@ -46,12 +46,10 @@ nbdist/
 !*/build/*.html
 !*/build/*.xml
 
-###############################################
-# Password
-ruoyi-admin/src/main/resources/application-druid.yml
 
 ######################################################################
-# 忽视配置文件
-# ruoyi-admin/src/main/resources/logback.xml
-# ruoyi-admin/src/main/resources/application.yml
-# ruoyi-admin/src/main/resources/application-druid.yml
+# 忽略配置文件的同步
+ruoyi-admin/src/main/resources/logback.xml 
+ruoyi-admin/src/main/resources/application.yml
+ruoyi-admin/src/main/resources/application-druid.yml
+
