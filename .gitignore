@@ -46,8 +46,10 @@ nbdist/
 !*/build/*.html
 !*/build/*.xml
 
+
 ######################################################################
 # 忽略配置文件的同步
 ruoyi-admin/src/main/resources/logback.xml 
 ruoyi-admin/src/main/resources/application.yml
 ruoyi-admin/src/main/resources/application-druid.yml
+
