@@ -18,6 +18,7 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
+
     </resultMap>
 
     <!-- 公共SQL -->
@@ -54,6 +55,22 @@
             AND sr.record_id = #{recordId}
         </if>
         ORDER BY sr.create_time DESC
+    </select>
+
+    <!-- 查询用户的未签到记录 -->
+    <select id="selectSigninRecordPending" resultMap="SysCourseSigninRecordResult">
+        <include refid="selectSigninRecordVo"/>
+        LEFT JOIN sys_course_signin s on sr.signin_id = s.signin_id
+        WHERE 1=1
+        <!-- 条件: 筛选出来活动签到记录和未开始的签到记录, 但是不要已经过期的签到记录 -->
+        AND s.end_time &gt; sysdate()
+        <if test="status != null and status != ''">
+            AND sr.status = 0
+        </if>
+        <if test="userId != null and userId != 0">
+            AND sr.user_id = #{userId}
+        </if>
+        ORDER BY sr.record_id DESC
     </select>
 
     <!-- 插入单条记录 -->
