@@ -66,12 +66,12 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="courseId" label="ID" width="80" />
+        <el-table-column prop="courseId" label="课程ID" width="80" />
         <el-table-column prop="deptId" label="班级ID" width="120" />
         <el-table-column prop="deptName" label="班级名称" width="120" />
         <el-table-column prop="courseName" label="课程名称" />
         <el-table-column prop="brief" label="课程描述" />
-        <el-table-column label="操作" width="150" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
+        <el-table-column label="操作" width="200" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
           <template slot-scope="scope">
             <el-button 
               size="mini" 
@@ -80,13 +80,7 @@
               v-hasPermi="['system:deptCourse:edit']"
               @click="handleEdit(scope.row)"
             >编辑</el-button>
-            <el-button 
-              size="mini" 
-              type="text" 
-              icon="el-icon-user" 
-              v-hasPermi="['system:signin:list']"
-              @click="handleSigninManage(scope.row)"
-            >签到管理</el-button>
+            
             <el-button 
               size="mini" 
               type="text" 
@@ -94,6 +88,13 @@
               v-hasPermi="['system:deptCourse:remove']"
               @click="handleDelete(scope.row)"
             >删除</el-button>
+            
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-folder"
+              @click="handleResourceManage(scope.row)"
+            >资源管理</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -104,7 +105,7 @@
         <el-form-item label="所属班级" prop="deptId" v-if="!form.courseId">
           <treeselect
             v-model="form.deptId"
-            :options="deptOptions"
+            :options="deptTreeOptions"
             :normalizer="normalizer"
             :show-count="true"
             placeholder="请选择所属班级"
@@ -148,6 +149,7 @@ export default {
       title: "",
       courseList: [],
       deptOptions: [],
+      deptTreeOptions: [], // 用于treeselect的部门选项
       dialogVisible: false,
       queryDeptId: undefined, // 用于筛选的部门ID
       form: {
@@ -205,11 +207,15 @@ export default {
     getDeptTree() {
       listDept().then(response => {
         if (response && response.data) {
+          // 为筛选下拉框准备数据
           this.deptOptions = response.data.map(item => ({
             id: item.deptId,
             label: item.deptName,
             children: item.children || []
           }));
+          
+          // 为treeselect准备数据（使用原始数据结构）
+          this.deptTreeOptions = response.data;
         } else {
           console.error('Failed to fetch department options:', response);
         }
@@ -247,7 +253,7 @@ export default {
         courseId: undefined,
         deptId: undefined,
         courseName: "",
-        courseDesc: ""
+        brief: ""
       };
       if (this.$refs.form) {
         this.$refs.form.resetFields();
@@ -292,18 +298,6 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-    /** 签到管理按钮操作 */
-    handleSigninManage(row) {
-      this.$router.push({ 
-        name: 'CourseSignin',
-        params: { 
-          courseId: row.courseId
-        },
-        query: { 
-          deptId: row.deptId
-        }
-      });
-    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -321,6 +315,17 @@ export default {
               this.$modal.msgSuccess("新增成功");
             })
           }
+        }
+      });
+    },
+    /** 课程资源管理 */
+    handleResourceManage(row) {
+      // 跳转到课程资源管理页面，传入课程ID
+      this.$router.push({
+        name: 'CourseResource',
+        params: { 
+          courseId: row.courseId,
+          courseName: row.courseName
         }
       });
     }
