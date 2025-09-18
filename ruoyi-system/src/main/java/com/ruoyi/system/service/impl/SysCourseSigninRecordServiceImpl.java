@@ -43,6 +43,16 @@ public class SysCourseSigninRecordServiceImpl implements ISysCourseSigninRecordS
     }
 
     /**
+     * 查看某个用户的待签到记录
+     * @param userId 用户id
+     */
+    @Override
+    public List<SysCourseSigninRecord> selectSigninRecordPending(Long userId)
+    {
+       return recordMapper.selectSigninRecordPending(userId); 
+    }
+
+    /**
      * 新增课程签到记录
      * @param record
      * @return

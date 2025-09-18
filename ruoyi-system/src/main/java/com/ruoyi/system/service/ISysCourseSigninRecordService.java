@@ -25,6 +25,13 @@ public interface ISysCourseSigninRecordService {
     List<SysCourseSigninRecord> selectSigninRecordList(SysCourseSigninRecord record);
 
     /**
+     * 查询某个用户的待签到记录
+     * @param userId 用户Id
+     * @return 待签到记录集合p
+     */
+    List<SysCourseSigninRecord> selectSigninRecordPending(Long userId);
+
+    /**
      * 新增课程签到记录
      * @param record 课程签到记录
      * @return 结果
