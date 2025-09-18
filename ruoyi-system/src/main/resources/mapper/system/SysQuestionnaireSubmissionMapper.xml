@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.system.mapper.SysQuestionnaireSubmissionMapper">
+
+    <resultMap id="SubmissionResult" type="com.ruoyi.system.domain.SysQuestionnaireSubmission">
+        <id property="submissionId" column="submission_id"/>
+        <result property="quesMetaId" column="ques_meta_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="submitTime" column="submit_time"/>
+    </resultMap>
+
+    <select id="selectSubmissionById" resultMap="SubmissionResult">
+        SELECT * FROM sys_questionnaire_submission WHERE submission_id=#{submissionId}
+    </select>
+
+    <select id="selectSubmissionByMetaAndUser" resultMap="SubmissionResult">
+        SELECT * FROM sys_questionnaire_submission WHERE ques_meta_id=#{quesMetaId} AND user_id=#{userId}
+    </select>
+
+    <select id="selectSubmissionList" resultMap="SubmissionResult">
+        SELECT * FROM sys_questionnaire_submission WHERE ques_meta_id=#{quesMetaId}
+    </select>
+
+    <insert id="insertSubmission" parameterType="com.ruoyi.system.domain.SysQuestionnaireSubmission" useGeneratedKeys="true" keyProperty="submissionId">
+        INSERT INTO sys_questionnaire_submission(ques_meta_id, user_id, submit_time)
+        VALUES (#{quesMetaId}, #{userId}, NOW())
+    </insert>
+
+</mapper>
