@@ -114,10 +114,18 @@ export default {
           
           this.signinList = records
           this.total = response.total || 0
+        } else {
+          this.signinList = []
+          this.total = 0
+          this.$message.error(response.msg || '数据加载失败')
         }
         this.loading = false
-      }).catch(() => {
+      }).catch(error => {
+        console.error('获取签到记录失败:', error)
+        this.signinList = []
+        this.total = 0
         this.loading = false
+        this.$message.error('获取签到记录失败')
       })
     },
 
