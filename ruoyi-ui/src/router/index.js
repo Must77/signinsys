@@ -41,6 +41,14 @@ export const constantRoutes = [
       }
     ]
   },
+  // 放在 constantRoutes 数组里
+{
+  path: '/course/:courseId(\\d+)/resource',
+  component: () => import('@/views/system/deptCourse/resource.vue'),
+  name: 'CourseResource',
+  hidden: true,
+  meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
+},
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -52,8 +60,35 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/',
+    component: Layout,
+    redirect: '/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/index.vue'),
+        name: 'Index',
+        meta: { title: '首页', icon: 'dashboard' }
+      }
+    ]
+  },
+  // {
+  //   path: '/class-display',
+  //   component: Layout,
+  //   redirect: '/class-display/index',
+  //   hidden: false,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/system/classDisplay/index.vue'),
+  //       name: 'ClassDisplay',
+  //       meta: { title: '班级广场', icon: 'peoples' }
+  //     }
+  //   ]
+  // },
+  {
     path: '/404',
-    component: () => import('@/views/error/401'),
+    component: () => import('@/views/error/404'),
     hidden: true
   },
   {
@@ -148,6 +183,14 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
+  },
+  // 新增的课程资源管理路由
+  {
+    path: '/course/:courseId(\\d+)/resource',
+    component: () => import('@/views/system/deptCourse/resource.vue'),
+    name: 'CourseResource',
+    hidden: true,
+    meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
   }
 ]
 

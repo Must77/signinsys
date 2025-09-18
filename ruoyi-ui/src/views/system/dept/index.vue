@@ -135,10 +135,23 @@
         </el-row>
         <el-row>
           <el-col :span="12">
+            <el-form-item label="父级部门" prop="parentId">
+              <treeselect 
+                v-model="form.parentId" 
+                :options="deptOptions" 
+                :normalizer="normalizer" 
+                :show-count="true" 
+                placeholder="请选择父级部门" 
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row>
           <el-col :span="12">
             <el-form-item label="班级状态">
               <el-radio-group v-model="form.status">

@@ -11,7 +11,7 @@ let downloadLoadingInstance
 // 是否显示重新登录
 export let isRelogin = { show: false }
 
-axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
+//axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
@@ -37,6 +37,9 @@ service.interceptors.request.use(config => {
     config.url = url
   }
   if (!isRepeatSubmit && (config.method === 'post' || config.method === 'put')) {
+    if (config.data instanceof FormData) {
+    return config;
+  }
     const requestObj = {
       url: config.url,
       data: typeof config.data === 'object' ? JSON.stringify(config.data) : config.data,
