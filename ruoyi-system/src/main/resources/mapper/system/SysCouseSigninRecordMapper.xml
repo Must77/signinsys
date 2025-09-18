@@ -18,7 +18,7 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
-        <!--<result property="userName" column="user_name"/>-->
+        <result property="userName" column="user_name"/>
         <result property="courseName" column="course_name"/>
         <result property="deptName" column="dept_name"/>
         <result property="title" column="title"/>
