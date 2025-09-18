@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <!-- 查询条件 -->
+    <!-- 顶部查询 -->
     <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="80px">
       <el-form-item label="签到标题">
         <el-input v-model="queryParams.title" placeholder="请输入签到标题" clearable />
@@ -70,12 +70,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="220">
         <template slot-scope="scope">
-          <el-button
-            v-hasPermi="['system:signin:do']"
-            size="mini"
-            type="text"
-            @click="handleSignin(scope.row)"
-          >签到</el-button>
+          <!-- 签到按钮已删除 -->
           <el-button
             v-hasPermi="['system:signin:result']"
             size="mini"
@@ -106,34 +101,34 @@
               v-for="course in courseOptions"
               :key="course.courseId"
               :label="course.courseName"
-              :value="course.courseId">
-            </el-option>
+              :value="course.courseId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="部门" prop="deptId">
           <el-select v-model="form.deptId" placeholder="请选择部门" :disabled="!form.courseId">
             <el-option
               v-for="course in courseOptions"
+              v-if="course.courseId == form.courseId"
               :key="course.courseId"
               :label="course.deptName"
               :value="course.deptId"
-              v-if="course.courseId == form.courseId">
-            </el-option>
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker 
-            v-model="form.startTime" 
-            type="datetime" 
-            value-format="yyyy-MM-dd HH:mm:ss" 
+          <el-date-picker
+            v-model="form.startTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间"
           />
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker 
-            v-model="form.endTime" 
-            type="datetime" 
-            value-format="yyyy-MM-dd HH:mm:ss" 
+          <el-date-picker
+            v-model="form.endTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间"
           />
         </el-form-item>
@@ -141,6 +136,50 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="open = false">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 查看结果 - 表格预览 -->
+    <el-dialog
+      :title="resultTitle"
+      :visible.sync="resultDialog"
+      width="800px"
+      append-to-body
+      :close-on-click-modal="false"
+    >
+      <el-tabs v-model="resultActiveName">
+        <el-tab-pane label="已签到" name="signed">
+          <el-table :data="pagedTable(signedList, resultPage.signed)" border>
+            <el-table-column prop="userName" label="姓名" />
+            <el-table-column prop="nickName" label="昵称" />
+            <el-table-column prop="signinTime" label="签到时间" />
+          </el-table>
+          <pagination
+            small
+            layout="prev, pager, next"
+            :total="resultTotal.signed"
+            :page.sync="resultPage.signed"
+            :limit="resultPageSize"
+            @pagination="() => {}"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="未签到" name="unsigned">
+          <el-table :data="pagedTable(unsignedList, resultPage.unsigned)" border>
+            <el-table-column prop="userName" label="姓名" />
+            <el-table-column prop="nickName" label="昵称" />
+          </el-table>
+          <pagination
+            small
+            layout="prev, pager, next"
+            :total="resultTotal.unsigned"
+            :page.sync="resultPage.unsigned"
+            :limit="resultPageSize"
+            @pagination="() => {}"
+          />
+        </el-tab-pane>
+      </el-tabs>
+      <div slot="footer">
+        <el-button @click="resultDialog = false">关闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -153,7 +192,6 @@ import {
   addSignin,
   updateSignin,
   delSignin,
-  doSigninRecord,
   getResult
 } from "@/api/system/signin";
 import { listDeptCourse } from "@/api/system/deptCourse";
@@ -185,22 +223,21 @@ export default {
         title: ""
       },
       rules: {
-        title: [
-          { required: true, message: "签到标题不能为空", trigger: "blur" }
-        ],
-        courseId: [
-          { required: true, message: "课程不能为空", trigger: "blur" }
-        ],
-        deptId: [
-          { required: true, message: "部门不能为空", trigger: "blur" }
-        ],
-        startTime: [
-          { required: true, message: "开始时间不能为空", trigger: "blur" }
-        ],
-        endTime: [
-          { required: true, message: "结束时间不能为空", trigger: "blur" }
-        ]
-      }
+        title: [{ required: true, message: "签到标题不能为空", trigger: "blur" }],
+        courseId: [{ required: true, message: "课程不能为空", trigger: "blur" }],
+        deptId: [{ required: true, message: "部门不能为空", trigger: "blur" }],
+        startTime: [{ required: true, message: "开始时间不能为空", trigger: "blur" }],
+        endTime: [{ required: true, message: "结束时间不能为空", trigger: "blur" }]
+      },
+      // 查看结果 - 表格预览
+      resultDialog: false,
+      resultTitle: "",
+      resultActiveName: "signed",
+      signedList: [],
+      unsignedList: [],
+      resultTotal: { signed: 0, unsigned: 0 },
+      resultPage: { signed: 1, unsigned: 1 },
+      resultPageSize: 10
     };
   },
   created() {
@@ -208,6 +245,11 @@ export default {
     this.getCourseList();
   },
   methods: {
+    // 表格分页计算
+    pagedTable(list, page) {
+      const start = (page - 1) * this.resultPageSize;
+      return list.slice(start, start + this.resultPageSize);
+    },
     // 查询列表
     getList() {
       this.loading = true;
@@ -225,10 +267,7 @@ export default {
     },
     // 课程选择变化处理
     handleCourseChange(courseId) {
-      // 清空之前选择的部门
       this.form.deptId = "";
-      
-      // 如果选择了课程，则自动选择该课程所属的部门
       if (courseId) {
         const selectedCourse = this.courseOptions.find(course => course.courseId == courseId);
         if (selectedCourse) {
@@ -265,7 +304,7 @@ export default {
       this.open = true;
       this.title = "新增签到";
     },
-    // 修改（支持工具栏与行内）
+    // 修改
     handleUpdate(row) {
       const signinId = (row && row.signinId) || this.ids[0];
       if (!signinId) return;
@@ -307,27 +346,20 @@ export default {
         })
         .catch(() => {});
     },
-    // 用户签到
-    handleSignin(row) {
-      if (!row || !row.signinId) return;
-      doSigninRecord(row.signinId).then(() => {
-        this.$message.success("签到成功");
-      });
-    },
-    // 查看结果
+    // 查看结果 - 表格预览
     handleResult(row) {
-      if (!row || !row.signinId) return;
+      if (!row?.signinId) return;
       getResult(row.signinId).then(res => {
         const data = res.data || {};
-        this.$alert(
-          `<div><strong>已签到用户:</strong><br/>${JSON.stringify(data.signed || [])}</div>
-           <div><strong>未签到用户:</strong><br/>${JSON.stringify(data.unsigned || [])}</div>`,
-          "签到结果",
-          { 
-            dangerouslyUseHTMLString: true,
-            customClass: "result-dialog"
-          }
-        );
+        this.resultTitle = `「${row.title}」签到结果`;
+        this.signedList = data.signed || [];
+        this.unsignedList = data.unsigned || [];
+        this.resultTotal = {
+          signed: this.signedList.length,
+          unsigned: this.unsignedList.length
+        };
+        this.resultPage = { signed: 1, unsigned: 1 };
+        this.resultDialog = true;
       });
     }
   }
@@ -336,9 +368,5 @@ export default {
 
 <style scoped>
 .mb8 { margin-bottom: 8px; }
-
-.result-dialog {
-  white-space: pre-wrap;
-  word-break: break-all;
-}
+.result-dialog { white-space: pre-wrap; word-break: break-all; }
 </style>
