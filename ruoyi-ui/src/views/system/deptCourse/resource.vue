@@ -219,9 +219,15 @@ export default {
             this.$modal.msgSuccess("资源上传成功");
             this.upload.open = false;
             this.getList();
-          }).catch(() => {
-            this.$modal.msgError("资源上传失败");
-          });
+          // }).catch(() => {
+          //   this.$modal.msgError("资源上传失败");
+          // });
+          }).catch((error) => {
+  // ✅ 加这行：打印真实错误
+  console.log('上传接口错误:', error);
+  console.log('错误信息:', error.message || error);
+  this.$modal.msgError("上传失败：" + (error.message || "未知错误"));
+});
         }
       });
     },
