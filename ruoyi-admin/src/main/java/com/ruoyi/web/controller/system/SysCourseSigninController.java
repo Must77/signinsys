@@ -63,6 +63,7 @@ public class SysCourseSigninController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody SysCourseSignin signin)
     {
+        // TODO 确认字段status的必要性和更新逻辑
         // 判断签到状态：0未开始,1进行中,2已结束
         Date now = new Date();
         if (now.before(signin.getStartTime())) {

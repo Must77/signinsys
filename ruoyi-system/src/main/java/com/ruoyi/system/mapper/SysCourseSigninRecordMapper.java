@@ -24,6 +24,13 @@ public interface SysCourseSigninRecordMapper {
     List<SysCourseSigninRecord> selectSigninRecordList(SysCourseSigninRecord record);
 
     /**
+     * 查看用户的待签到记录
+     * @param userId 用户Id
+     * @return
+     */
+    List<SysCourseSigninRecord> selectSigninRecordPending(Long userId);
+
+    /**
      * 插入单条记录
      * @param record 签到记录
      * @return 影响的行数

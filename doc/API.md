@@ -233,7 +233,7 @@ public class SysDeptCourse extends BaseEntity {
     private String deptName;
 
     /** 课程名称, 描述, 人数, 容量, 封面 */
-    private String name;
+    private String courseName;
     private String brief;
     private Integer size;
     private Integer cap;
@@ -340,6 +340,10 @@ public class SysDeptApply extends BaseEntity {
     private String phone;
     private String email;
     private String job; // 我也不知道为什么要有这个字段
+
+    /** 用于前端展示的字段: 申请者名字, 申请部门 **/
+    private String userName;
+    private String deptName;
 
     }
 ```
@@ -552,3 +556,100 @@ public class SysCourseSigninRecord extends BaseEntity {
     权限:       system:signinRecord:list
     ```
 
+
+# 添加课程资料
+```java
+public class SysCourseResource extends BaseEntity 
+{
+    private static final long serialVersionUID = 1L;
+
+    /** 资源ID */
+    private Long resourceId;
+
+    /** 课程ID */
+    private Long courseId;
+
+    /** 部门ID */
+    private Long deptId;
+
+    /** 原始文件名 */
+    private String fileName;
+
+    /** 文件访问路径/URL */
+    private String filePath;
+
+    /** 文件类型（扩展名） */
+    private String fileType;
+
+    /** 文件大小（字节） */
+    private Long fileSize;
+}
+```
+
+
+1. 上传单个资料
+    - 先上传资料, 才能将材料添加到课程中
+    - 没有防盗链
+    ```
+    URL:        POST /common/upload
+    参数:       <file, 上传文件的客户端路径>
+    参数方式:    form-data, 请求体中的一组键值对
+    返回值:      - msg
+                - code
+                - newFileName 被修改的文件名
+                - filename 服务器相对路径+newFileName
+                - url 允许外网访问的路径
+    权限:       无
+    ```
+
+2.  给课程新增资源
+    - 需要POST /common/upload中的url返回值
+    ```
+    URL:        POST /system/deptCourse/resource/
+    参数:       SysCourseResource
+    参数方式:    请求体json
+    返回值:     成功与否
+    权限:       system:deptCourse:resource:add
+    ```
+
+3. 查看某个课程下的所有资源
+    - 感觉是没办法做简单的权限限制的, 因此理论上来说用户可以通过该接口获取任意课程下的任意资源
+    - 如果确实需要权限限制的话, 需要建立一张用户-课程表, 用户在变更班级时要更新该表中多条记录. 则需要修改班级, 课程等多个服务接口
+    - TODO: 确认等级
+    ```
+    URL:        GET /system/deptCourse/resource/course/{courseId}   
+    参数:       Long courseId
+    参数方式:    路径参数
+    返回值:     List<SysCourseResource>
+    权限:       无
+    ```
+
+4. 根据资源Id查看资源
+    - admin
+    ```
+    URL:        GET /system/deptCourse/resource/{resourceId}
+    参数:       Long resourceId
+    参数方式:   路径参数
+    返回值:     SysCourseResource
+    权限:       system:deptCourse:resource:query
+    ```
+
+5. 条件筛选查看资源
+    - admin
+    ```
+    URL:        GET /system/deptCourse/resource/list
+    参数:       SysCourseResource
+    参数方式:   路径参数自动绑定到类对象
+    返回值:     SysCourseResource
+    权限:       ystem:deptCourse:resource:list
+    ```
+
+6. 逻辑批量删除资源
+    - admin
+    ```
+    URL:        DELETE /system/deptCourse/resource/{resourceIds}
+    参数:       Long[] resourceIds
+    参数方式:   路径参数,以逗号分割
+    返回值:     成功与否
+    权限:       system:deptCourse:resource:remove
+    ```

@@ -38,12 +38,8 @@ public class SysCourseSigninRecordController extends BaseController {
     @GetMapping("/myPending")
     public TableDataInfo listMyPending()
     {
-        SysCourseSigninRecord query = new SysCourseSigninRecord();
-        query.setUserId(getUserId());
-        query.setStatus("0"); // 待签到
-
         startPage();
-        List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
+        List<SysCourseSigninRecord> list = recordService.selectSigninRecordPending(getUserId());
         return getDataTable(list);
     }
 

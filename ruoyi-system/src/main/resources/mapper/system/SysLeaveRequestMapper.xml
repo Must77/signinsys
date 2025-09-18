@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysLeaveRequestMapper">
+
+    <!-- 实体映射 -->
+    <resultMap type="SysLeaveRequest" id="SysLeaveRequestResult">
+        <id     property="leaveId"   column="leave_id"/>
+        <result property="userId"      column="user_id"/>
+        <result property="deptId"      column="dept_id"/>
+        <result property="reason"      column="reason"/>
+        <result property="status"      column="status"/>
+        <result property="remark"      column="remark"/>
+        <result property="createBy"    column="create_by"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="updateBy"    column="update_by"/>
+        <result property="updateTime"  column="update_time"/>
+        <result property="userName"    column="user_name"/>
+        <result property="deptName"    column="dept_name"/>
+    </resultMap>
+
+    <!-- 可复用的查询 SQL -->
+    <sql id="selectLeaveRequestVo">
+        SELECT lr.leave_id, lr.user_id, lr.dept_id, lr.reason, lr.status, lr.remark,
+               lr.create_by, lr.create_time, lr.update_by, lr.update_time,
+               u.user_name, d.dept_name
+        FROM sys_leave_request lr
+        LEFT JOIN sys_user u ON lr.user_id = u.user_id
+        LEFT JOIN sys_dept d ON lr.dept_id = d.dept_id
+    </sql>
+
+    <!-- 查询请假申请列表 -->
+    <select id="selectLeaveRequestList" parameterType="SysLeaveRequest" resultMap="SysLeaveRequestResult">
+        <include refid="selectLeaveRequestVo"/>
+        WHERE 1=1
+        <if test="leaveId != null"> AND lr.leave_id = #{leaveId}</if>
+        <if test="userId != null"> AND lr.user_id = #{userId}</if>
+        <if test="deptId != null"> AND lr.dept_id = #{deptId}</if>
+        <if test="status != null and status != ''"> AND lr.status = #{status}</if>
+        <if test="reason != null and reason != ''"> AND lr.reason like concat('%', #{reason}, '%')</if>
+        <if test="createBy != null and createBy != ''"> AND lr.create_by = #{createBy}</if>
+        order by lr.create_time desc
+    </select>
+
+    <!-- 根据 ID 查询 -->
+    <select id="selectLeaveRequestById" parameterType="Long" resultMap="SysLeaveRequestResult">
+        <include refid="selectLeaveRequestVo"/>
+        WHERE lr.leave_id = #{leaveId}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insertLeaveRequest" parameterType="SysLeaveRequest" useGeneratedKeys="true" keyProperty="leaveId">
+        INSERT INTO sys_leave_request (
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="reason != null and reason != ''">reason,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) VALUES (
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="reason != null and reason != ''">#{reason},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+        )
+    </insert>
+
+    <!-- 更新 -->
+    <update id="updateLeaveRequest" parameterType="SysLeaveRequest">
+        UPDATE sys_leave_request
+        <set>
+            <if test="reason != null and reason != ''">reason = #{reason},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        WHERE leave_id = #{leaveId}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteLeaveRequestById" parameterType="Long">
+        DELETE FROM sys_leave_request WHERE leave_id = #{leaveId}
+    </delete>
+
+    <delete id="deleteLeaveRequestByIds" parameterType="Long">
+        DELETE FROM sys_leave_request WHERE leave_id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

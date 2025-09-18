@@ -8,7 +8,7 @@
         <id     property="courseId" column="course_id"/>
         <result property="deptId" column="dept_id"/>
         <result property="deptName" column="dept_name"/>
-        <result property="name" column="name"/>
+        <result property="courseName" column="course_name"/>
         <result property="brief" column="brief"/>
         <result property="size" column="size"/>
         <result property="cap" column="cap"/>
@@ -24,7 +24,7 @@
         SELECT c.course_id,
                c.dept_id,
                d.dept_name,
-               c.name,
+               c.course_name,
                c.brief,
                c.size,
                c.cap,
@@ -48,8 +48,8 @@
         <if test="deptName != null and deptName != ''">
             AND c.dept_name = #{deptName}
         </if>
-        <if test="name != null and name != ''">
-            AND c.name like concat('%', #{name}, '%')
+        <if test="courseName != null and courseName != ''">
+            AND c.course_name like concat('%', #{courseName}, '%')
         </if>
         <!-- TODO 数据范围过滤-->
         order by c.dept_id
@@ -59,7 +59,7 @@
         insert into sys_dept_course(
             <if test="courseId != null and courseId != 0">course_id,</if>
             <if test="deptId != null and deptId != 0">dept_id,</if>
-            <if test="name != null and name != ''">name,</if>
+            <if test="courseName != null and courseName != ''">course_name,</if>
             <if test="brief != null and brief !=''">brief,</if>
             <if test="size != null">size,</if>
             <if test="cap != null">cap,</if>
@@ -68,7 +68,7 @@
         )values(
             <if test="courseId != null and courseId != 0">#{courseId}</if>
             <if test="deptId != null and deptId != 0">#{deptId},</if>
-            <if test="name != null and name != ''">#{name},</if>
+            <if test="courseName != null and courseName != ''">#{courseName},</if>
             <if test="brief != null and brief != ''">#{brief},</if>
             <if test="size != null">#{size},</if>
             <if test="cap != null">#{cap},</if>
@@ -81,7 +81,7 @@
         update sys_dept_course
         <set>
             <if test="deptId != null and deptId != 0">dept_id = #{deptId},</if>
-            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="courseName != null and courseName != ''">course_name = #{courseName},</if>
             <if test="brief != null and brief != ''">brief = #{brief},</if>
             
             <if test="size != null">size = #{size},</if>
