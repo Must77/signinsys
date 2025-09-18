@@ -1,21 +1,21 @@
 <template>
   <div class="app-container">
-    <!-- 查询条件 -->
-    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="100px">
-      <el-form-item label="签到活动名称" prop="title">
-        <el-input
-          v-model="queryParams.title"
-          placeholder="请输入签到活动名称"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+    <!-- 顶部切换 -->
+    <el-radio-group v-model="activeTab" @change="getList" size="small" style="margin-bottom:10px">
+      <el-radio-button label="pending">我的待签到</el-radio-button>
+      <el-radio-button label="all">全部活动</el-radio-button>
+    </el-radio-group>
+
+    <!-- 查询条件（仅全部活动显示） -->
+    <el-form v-show="activeTab==='all'" :model="queryParams" ref="queryForm" :inline="true" label-width="100px">
+      <el-form-item label="活动名称" prop="title">
+        <el-input v-model="queryParams.title" placeholder="请输入" clearable size="small" @keyup.enter.native="handleQuery"/>
       </el-form-item>
-      <el-form-item label="签到状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择签到状态" clearable size="small">
-          <el-option label="未开始" value="0"></el-option>
-          <el-option label="进行中" value="1"></el-option>
-          <el-option label="已结束" value="2"></el-option>
+      <el-form-item label="活动状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择" clearable size="small">
+          <el-option label="未开始" value="0"/>
+          <el-option label="进行中" value="1"/>
+          <el-option label="已结束" value="2"/>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -26,64 +26,63 @@
 
     <!-- 数据表格 -->
     <el-table v-loading="loading" :data="signinList" border>
-      <el-table-column label="记录ID" prop="recordId" width="80" />
-      <el-table-column label="签到活动名称" prop="title" :show-overflow-tooltip="true" />
-      <el-table-column label="课程ID" prop="courseId" width="100" />
-      <el-table-column label="部门ID" prop="deptId" width="100" />
-      <el-table-column label="开始时间" prop="startTime" width="160">
+      <el-table-column label="记录ID" prop="recordId" width="80"/>
+      <el-table-column label="活动名称" prop="title" :show-overflow-tooltip="true"/>
+      <el-table-column label="课程名称" prop="courseName" width="100"/>
+      <el-table-column label="班级名称" prop="deptName" width="100"/>
+      <el-table-column label="开始时间" width="160">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.startTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" prop="endTime" width="160">
+      <el-table-column label="结束时间" width="160">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.endTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="签到状态" width="120">
+      <el-table-column label="活动状态" width="100">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
-          <el-tag type="success" v-else-if="scope.row.status === '1'">进行中</el-tag>
-          <el-tag type="danger" v-else-if="scope.row.status === '2'">已结束</el-tag>
+          <el-tag v-if="scope.row.status==='0'">未开始</el-tag>
+          <el-tag type="success" v-else-if="scope.row.status==='1'">进行中</el-tag>
+          <el-tag type="danger" v-else>已结束</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="我的签到状态" width="120">
+      <el-table-column label="我的签到" width="100">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.status === '1' && scope.row.mySigninStatus === '1'" type="success">已签到</el-tag>
-          <el-tag v-else-if="scope.row.status !== '1'" type="info">不可签到</el-tag>
+          <el-tag v-if="scope.row.mySigninStatus==='1'" type="success">已签到</el-tag>
+          <el-tag v-else-if="scope.row.status!=='1'" type="info">不可签</el-tag>
           <el-tag v-else type="warning">未签到</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="150" align="center">
+      <el-table-column label="操作" width="120" align="center">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="primary"
-            @click="handleSignin(scope.row)"
-            v-hasPermi="['system:signin:do']"
-            :disabled="scope.row.status !== '1' || scope.row.mySigninStatus === '1'"
-          >签到</el-button>
+          <el-button size="mini" type="primary"
+                     @click="handleSignin(scope.row)"
+                     v-hasPermi="['system:signin:do']"
+                     :disabled="scope.row.status!=='1' || scope.row.mySigninStatus==='1'">
+            签到
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <!-- 分页（仅全部活动） -->
+    <pagination v-show="activeTab==='all' && total>0"
+                :total="total"
+                :page.sync="queryParams.pageNum"
+                :limit.sync="queryParams.pageSize"
+                @pagination="getList"/>
   </div>
 </template>
 
 <script>
-import { listSigninRecord, doSignin } from '@/api/system/userSignin'
+import { listSigninRecord, doSignin, listMyPendingSignin } from '@/api/system/userSignin'
 
 export default {
   name: 'MySignin',
   data() {
     return {
+      activeTab: 'pending', // 默认待签到
       loading: true,
       signinList: [],
       total: 0,
@@ -99,78 +98,60 @@ export default {
     this.getList()
   },
   methods: {
-    /** 查询签到记录列表 */
     getList() {
       this.loading = true
-      listSigninRecord(this.queryParams).then(response => {
-        if (response.code === 200) {
-          // 处理返回的数据，添加我的签到状态字段
-          const records = response.rows || []
-          records.forEach(record => {
-            // 根据status字段设置我的签到状态
-            // status为1表示已签到，0表示未签到
-            record.mySigninStatus = record.status === '1' ? '1' : '0'
-          })
-          
-          this.signinList = records
-          this.total = response.total || 0
-        } else {
-          this.signinList = []
-          this.total = 0
-          this.$message.error(response.msg || '数据加载失败')
-        }
+      const done = (rows, total) => {
+        this.signinList = rows
+        this.total = total
         this.loading = false
-      }).catch(error => {
-        console.error('获取签到记录失败:', error)
-        this.signinList = []
-        this.total = 0
-        this.loading = false
-        this.$message.error('获取签到记录失败')
-      })
-    },
+      }
+      if (this.activeTab === 'pending') {
+        listMyPendingSignin().then(res => {
+            console.log('myPending row:', res.rows?.[0])   // ← 加这里
 
-    /** 搜索查询 */
+          const rows = (res.rows || []).map(r => ({
+            ...r,
+            mySigninStatus: '0', // 接口只返未签到
+            status: '1'          // 接口只返进行中
+          }))
+          done(rows, rows.length)
+        }).catch(() => done([], 0))
+      } else {
+        listSigninRecord(this.queryParams).then(res => {
+            console.log('list row:', res.data?.[0])       // ← 加这里
+
+          const rows = (res.data || []).map(r => ({
+            ...r,
+            mySigninStatus: r.signStatus === '1' ? '1' : '0' // 需要后端返回signStatus
+          }))
+          done(rows, res.total || 0)
+        }).catch(() => done([], 0))
+      }
+    },
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-
-    /** 重置查询条件 */
     resetQuery() {
       this.resetForm('queryForm')
       this.handleQuery()
     },
-
-    /** 签到 */
     handleSignin(row) {
-      this.$confirm('确认要签到吗？', '提示', {
+      this.$confirm('确认签到？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        // 调用签到接口
-        doSignin(row.recordId).then(response => {
-          if (response.code === 200) {
-            this.$message.success('签到成功')
-            // 更新当前行的签到状态
-            row.mySigninStatus = '1'
-            row.status = '1'
-          } else {
-            this.$message.error(response.msg || '签到失败')
-          }
-        }).catch(() => {
-          this.$message.error('签到失败')
+      }).then(() =>
+        doSignin(row.recordId).then(() => {
+          this.$message.success('签到成功')
+          this.getList() // 刷新当前Tab
         })
-      }).catch(() => {
-        this.$message.info('已取消签到')
-      })
+      )
     }
   }
 }
 </script>
 
 <style scoped>
-.app-container {
-  padding: 20px;
-}
+.app-container { padding: 20px; }
 </style>
