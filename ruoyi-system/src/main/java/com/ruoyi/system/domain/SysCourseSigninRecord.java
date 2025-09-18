@@ -39,6 +39,7 @@ public class SysCourseSigninRecord extends BaseEntity {
     private String title;   // 签到活动的标题
     private String courseName;
     private String deptName;
+    private String userName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -137,6 +138,12 @@ public class SysCourseSigninRecord extends BaseEntity {
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
-    
-    
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 }
