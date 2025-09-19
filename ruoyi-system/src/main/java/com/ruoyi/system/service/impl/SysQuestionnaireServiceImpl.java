@@ -35,45 +35,59 @@ public class SysQuestionnaireServiceImpl implements ISysQuestionnaireService {
 
     @Override
     @Transactional
-    public int insertMeta(SysQuestionnaireMeta meta, List<SysQuestionnaireItem> items) {
+    public int insertMeta(SysQuestionnaireMeta meta) {
         int rows = metaMapper.insertQuestionnaireMeta(meta);
-        for (SysQuestionnaireItem item : items) {
-            item.setQuesMetaId(meta.getQuesMetaId());
-            itemMapper.insertQuestionnaireItem(item);
+        Long metaId = meta.getMetaId();
+        List<SysQuestionnaireItem> items = meta.getItems();
+        // 允许只创建问卷的meta而不创建具体题目item
+        if (items != null && !items.isEmpty()) {
+            for (SysQuestionnaireItem item : items) {
+                item.setMetaId(metaId);
+                rows += itemMapper.insertQuestionnaireItem(item);
+            }
         }
         return rows;
     }
 
     @Override
     @Transactional
-    public int updateMeta(SysQuestionnaireMeta meta, List<SysQuestionnaireItem> items) {
+    public int updateMeta(SysQuestionnaireMeta meta) {
         int rows = metaMapper.updateQuestionnaireMeta(meta);
-        itemMapper.deleteQuestionnaireItemByMetaId(meta.getQuesMetaId());
-        for (SysQuestionnaireItem item : items) {
-            item.setQuesMetaId(meta.getQuesMetaId());
-            itemMapper.insertQuestionnaireItem(item);
+        Long metaId = meta.getMetaId();
+
+        // 如果更新了item, 就逻辑删除再插入
+        // TODO：考虑要不要直接更新而非逻辑删除再插入
+        List<SysQuestionnaireItem> items = meta.getItems();
+        if (items != null && !items.isEmpty()) {
+            itemMapper.deleteQuestionnaireItemByMetaId(metaId);
+            for (SysQuestionnaireItem item : items) {
+                item.setMetaId(metaId);
+                rows += itemMapper.insertQuestionnaireItem(item);
+            }
         }
         return rows;
     }
 
     @Override
     @Transactional
-    public int deleteMetaByIds(Long[] quesMetaIds) {
-        for (Long id : quesMetaIds) {
-            itemMapper.deleteQuestionnaireItemByMetaId(id);
+    public int deleteMetaByIds(Long[] metaIds) {
+        int rows = 0;
+        for (Long id : metaIds) {
+            rows += itemMapper.deleteQuestionnaireItemByMetaId(id);
         }
-        return metaMapper.deleteQuestionnaireMetaByIds(quesMetaIds);
+        rows += metaMapper.deleteQuestionnaireMetaByIds(metaIds);
+        return rows;
     }
 
     @Override
     @Transactional
-    public int submitAnswers(Long quesMetaId, Long userId, List<SysQuestionnaireAnswer> answers) {
-        SysQuestionnaireSubmission submission = submissionMapper.selectSubmissionByMetaAndUser(quesMetaId, userId);
+    public int submitAnswers(Long metaId, Long userId, List<SysQuestionnaireAnswer> answers) {
+        SysQuestionnaireSubmission submission = submissionMapper.selectSubmissionByMetaAndUser(metaId, userId);
         if (submission != null) {
             throw new RuntimeException("该用户已提交过该问卷");
         }
         submission = new SysQuestionnaireSubmission();
-        submission.setQuesMetaId(quesMetaId);
+        submission.setMetaId(metaId);
         submission.setUserId(userId);
         submissionMapper.insertSubmission(submission);
 
@@ -84,8 +98,8 @@ public class SysQuestionnaireServiceImpl implements ISysQuestionnaireService {
     }
 
     @Override
-    public List<SysQuestionnaireSubmission> selectSubmissions(Long quesMetaId) {
-        return submissionMapper.selectSubmissionList(quesMetaId);
+    public List<SysQuestionnaireSubmission> selectSubmissions(Long metaId) {
+        return submissionMapper.selectSubmissionList(metaId);
     }
 
     @Override

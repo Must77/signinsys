@@ -37,56 +37,81 @@ public class SysQuestionnaireController extends BaseController {
      * @param quesMetaId 问卷ID
      * @return 问卷及其题目列表
      */
-    @GetMapping("/{quesMetaId}")
-    public AjaxResult getInfo(@PathVariable Long quesMetaId) {
-        return success(questionnaireService.selectMetaById(quesMetaId));
+    @GetMapping("/{questionnaireMetaId}")
+    public AjaxResult getInfo(@PathVariable Long questionnaireMetaId) {
+        return success(questionnaireService.selectMetaById(questionnaireMetaId));
     }
 
+    /**
+     * 新增问卷
+     * @param questionnaireMeta 问卷meta+item
+     * @return 影响的表行数
+     */
     @Log(title = "问卷管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody SysQuestionnaireMetaWrapper wrapper) {
-        return toAjax(questionnaireService.insertMeta(wrapper.getMeta(), wrapper.getItems()));
+    public AjaxResult add(@RequestBody SysQuestionnaireMeta questionnaireMeta) {
+        return toAjax(questionnaireService.insertMeta(questionnaireMeta));
     }
 
+    /**
+     * 修改问卷。如果传入item也会一并更新，否则只更新meta
+     * @param questionnaireMeta 问卷meta+item
+     * @return 影响的表行数
+     */
     @Log(title = "问卷管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody SysQuestionnaireMetaWrapper wrapper) {
-        return toAjax(questionnaireService.updateMeta(wrapper.getMeta(), wrapper.getItems()));
+    public AjaxResult edit(@RequestBody SysQuestionnaireMeta questionnaireMeta) {
+        return toAjax(questionnaireService.updateMeta(questionnaireMeta));
     }
 
+    /**
+     * 删除问卷
+     * @param questionnaireMetaIds 问卷ID数组
+     * @return 影响的表行数
+     */
     @Log(title = "问卷管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{quesMetaIds}")
-    public AjaxResult remove(@PathVariable Long[] quesMetaIds) {
-        return toAjax(questionnaireService.deleteMetaByIds(quesMetaIds));
+    @DeleteMapping("/{questionnaireMetaIds}")
+    public AjaxResult remove(@PathVariable Long[] questionnaireMetaIds) {
+        return toAjax(questionnaireService.deleteMetaByIds(questionnaireMetaIds));
     }
 
-    @PostMapping("/{quesMetaId}/submit")
-    public AjaxResult submit(@PathVariable Long quesMetaId, @RequestBody List<SysQuestionnaireAnswer> answers) {
+    /**
+     * 提交问卷答案
+     * @param questionnaireMetaId 问卷ID
+     * @param answers 答案列表
+     * @return 影响的表行数
+     */
+    @PostMapping("/{questionnaireMetaId}/submit")
+    public AjaxResult submit(@PathVariable Long questionnaireMetaId, @RequestBody List<SysQuestionnaireAnswer> answers) {
         Long userId = getUserId();
-        return toAjax(questionnaireService.submitAnswers(quesMetaId, userId, answers));
+        int rows = 0;
+        try{
+            rows = questionnaireService.submitAnswers(questionnaireMetaId, userId, answers);
+        }catch(RuntimeException e){
+            return AjaxResult.error(e.getMessage());
+        }
+        return toAjax(rows);
     }
 
-    @GetMapping("/{quesMetaId}/submissions")
-    public AjaxResult listSubmissions(@PathVariable Long quesMetaId) {
-        return success(questionnaireService.selectSubmissions(quesMetaId));
+    /**
+     * 查看问卷提交记录
+     * @param questionnaireMetaId 问卷ID
+     * @return 提交记录列表
+     */
+    @GetMapping("/{questionnaireMetaId}/submissions")
+    public AjaxResult listSubmissions(@PathVariable Long questionnaireMetaId) {
+        return success(questionnaireService.selectSubmissions(questionnaireMetaId));
     }
 
+    /**
+     * 查看某次提交的问卷答案
+     * @param submissionId 提交记录ID
+     * @return 答案列表
+     */
     @GetMapping("/answers/{submissionId}")
     public AjaxResult listAnswers(@PathVariable Long submissionId) {
         return success(questionnaireService.selectAnswers(submissionId));
     }
 
-    /**
-     * 包装类：用于新增/修改时接收 meta + items
-     */
-    public static class SysQuestionnaireMetaWrapper {
-        private SysQuestionnaireMeta meta;
-        private List<SysQuestionnaireItem> items;
 
-        public SysQuestionnaireMeta getMeta() { return meta; }
-        public void setMeta(SysQuestionnaireMeta meta) { this.meta = meta; }
-
-        public List<SysQuestionnaireItem> getItems() { return items; }
-        public void setItems(List<SysQuestionnaireItem> items) { this.items = items; }
-    }
 }

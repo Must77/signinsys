@@ -6,26 +6,35 @@
 <mapper namespace="com.ruoyi.system.mapper.SysQuestionnaireItemMapper">
 
     <resultMap id="ItemResult" type="com.ruoyi.system.domain.SysQuestionnaireItem">
-        <id property="quesItemId" column="ques_item_id"/>
-        <result property="quesMetaId" column="ques_meta_id"/>
-        <result property="questionText" column="question_text"/>
+        <id property="itemId" column="item_id"/>
+        <result property="metaId" column="meta_id"/>
         <result property="itemType" column="item_type"/>
+        <result property="questionText" column="question_text"/>
+        <result property="required" column="required"/>
         <result property="orderNum" column="order_num"/>
-        <result property="createBy" column="create_by"/>
+        <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
-        <result property="updateBy" column="update_by"/>
+        <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
     </resultMap>
 
+    <sql id="selectItemVo">
+        select * from sys_questionnaire_item
+    </sql>
+
     <select id="selectQuestionnaireItemById" resultMap="ItemResult">
-        SELECT * FROM sys_questionnaire_item WHERE ques_item_id=#{quesItemId}
+        <include refid="selectItemVo"/>
+        where item_id = #{itemId}
     </select>
 
     <select id="selectQuestionnaireItemList" resultMap="ItemResult">
-        SELECT * FROM sys_questionnaire_item WHERE ques_meta_id=#{quesMetaId} ORDER BY order_num ASC
+        <include refid="selectItemVo"/>
+        where ques_meta_id = #{quesMetaId} ORDER BY order_num ASC
     </select>
 
-    <insert id="insertQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem" useGeneratedKeys="true" keyProperty="quesItemId">
+    <insert id="insertQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem" useGeneratedKeys="true" keyProperty="itemId">
         INSERT INTO sys_questionnaire_item(ques_meta_id, question_text, item_type, order_num, create_by, create_time)
         VALUES (#{quesMetaId}, #{questionText}, #{itemType}, #{orderNum}, #{createBy}, NOW())
     </insert>
@@ -33,11 +42,11 @@
     <update id="updateQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem">
         UPDATE sys_questionnaire_item
         SET question_text=#{questionText}, item_type=#{itemType}, order_num=#{orderNum}, update_by=#{updateBy}, update_time=NOW()
-        WHERE ques_item_id=#{quesItemId}
+        WHERE item_id=#{itemId}
     </update>
 
     <delete id="deleteQuestionnaireItemById">
-        DELETE FROM sys_questionnaire_item WHERE ques_item_id=#{quesItemId}
+        DELETE FROM sys_questionnaire_item WHERE item_id=#{itemId}
     </delete>
 
     <delete id="deleteQuestionnaireItemByMetaId">

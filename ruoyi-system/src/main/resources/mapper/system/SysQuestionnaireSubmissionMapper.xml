@@ -7,26 +7,41 @@
 
     <resultMap id="SubmissionResult" type="com.ruoyi.system.domain.SysQuestionnaireSubmission">
         <id property="submissionId" column="submission_id"/>
-        <result property="quesMetaId" column="ques_meta_id"/>
+        <result property="metaId" column="meta_id"/>
         <result property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
         <result property="submitTime" column="submit_time"/>
+        <result property="ipAddr" column="ip_addr"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
     </resultMap>
 
+    <sql id="selectSubmissionVo">
+        select * from sys_questionnaire_submission
+    </sql>
+
     <select id="selectSubmissionById" resultMap="SubmissionResult">
-        SELECT * FROM sys_questionnaire_submission WHERE submission_id=#{submissionId}
+        <include refid="selectSubmissionVo"/>
+        where submission_id=#{submissionId}
     </select>
 
     <select id="selectSubmissionByMetaAndUser" resultMap="SubmissionResult">
-        SELECT * FROM sys_questionnaire_submission WHERE ques_meta_id=#{quesMetaId} AND user_id=#{userId}
+        <include refid="selectSubmissionVo"/>
+        where meta_id=#{metaId} AND user_id=#{userId}
     </select>
 
     <select id="selectSubmissionList" resultMap="SubmissionResult">
-        SELECT * FROM sys_questionnaire_submission WHERE ques_meta_id=#{quesMetaId}
+        <include refid="selectSubmissionVo"/>
+        where meta_id=#{metaId}
     </select>
 
     <insert id="insertSubmission" parameterType="com.ruoyi.system.domain.SysQuestionnaireSubmission" useGeneratedKeys="true" keyProperty="submissionId">
-        INSERT INTO sys_questionnaire_submission(ques_meta_id, user_id, submit_time)
-        VALUES (#{quesMetaId}, #{userId}, NOW())
+        INSERT INTO sys_questionnaire_submission(meta_id, user_id, submit_time)
+        VALUES (#{metaId}, #{userId}, NOW())
     </insert>
 
 </mapper>

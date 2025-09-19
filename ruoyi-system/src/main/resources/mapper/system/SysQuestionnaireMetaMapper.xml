@@ -6,24 +6,38 @@
 <mapper namespace="com.ruoyi.system.mapper.SysQuestionnaireMetaMapper">
 
     <resultMap id="MetaResult" type="com.ruoyi.system.domain.SysQuestionnaireMeta">
-        <id property="quesMetaId" column="ques_meta_id"/>
-        <result property="title" column="title"/>
+        <id property="metaId" column="meta_id"/>
+        <result property="deptId" column="dept_id"/>
         <result property="targetType" column="target_type"/>
         <result property="targetId" column="target_id"/>
+        <result property="title" column="title"/>
         <result property="description" column="description"/>
-        <result property="publishTime" column="publish_time"/>
-        <result property="createBy" column="create_by"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="status" column="status"/>
+        <result property="allowRepeat" column="allow_repeat"/>
+        <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
-        <result property="updateBy" column="update_by"/>
+        <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
     </resultMap>
 
+    <sql id="selectMetaVo">
+        select m.meta_id, m.dept_id, m.target_type, m.target_id, m.title, m.description, m.start_time, m.end_time, m.status, m.allow_repeat, m.remark, m.create_by, m.create_time, m.update_by, m.update_time, m.del_flag,
+            d.dept_name
+        from sys_questionnaire_meta m
+        left join sys_dept d on m.dept_id = d.dept_id
+    </sql>
+
     <select id="selectQuestionnaireMetaById" resultMap="MetaResult">
-        SELECT * FROM sys_questionnaire_meta WHERE ques_meta_id = #{quesMetaId}
+        <include refid="selectMetaVo"/>
+        where m.meta_id = #{metaId}
     </select>
 
     <select id="selectQuestionnaireMetaList" resultMap="MetaResult">
-        SELECT * FROM sys_questionnaire_meta
+        <include refid="selectMetaVo"/>
         <where>
             <if test="title != null and title != ''">
                 AND title like concat('%', #{title}, '%')
@@ -34,7 +48,7 @@
         </where>
     </select>
 
-    <insert id="insertQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta" useGeneratedKeys="true" keyProperty="quesMetaId">
+    <insert id="insertQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta" useGeneratedKeys="true" keyProperty="metaId">
         INSERT INTO sys_questionnaire_meta(title, target_type, target_id, description, publish_time, create_by, create_time)
         VALUES (#{title}, #{targetType}, #{targetId}, #{description}, #{publishTime}, #{createBy}, NOW())
     </insert>
@@ -42,15 +56,15 @@
     <update id="updateQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta">
         UPDATE sys_questionnaire_meta
         SET title=#{title}, target_type=#{targetType}, target_id=#{targetId}, description=#{description}, update_by=#{updateBy}, update_time=NOW()
-        WHERE ques_meta_id=#{quesMetaId}
+        WHERE meta_id=#{metaId}
     </update>
 
     <delete id="deleteQuestionnaireMetaById">
-        DELETE FROM sys_questionnaire_meta WHERE ques_meta_id=#{quesMetaId}
+        DELETE FROM sys_questionnaire_meta WHERE meta_id=#{metaId}
     </delete>
 
     <delete id="deleteQuestionnaireMetaByIds">
-        DELETE FROM sys_questionnaire_meta WHERE ques_meta_id IN
+        DELETE FROM sys_questionnaire_meta WHERE meta_id IN
         <foreach collection="array" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>

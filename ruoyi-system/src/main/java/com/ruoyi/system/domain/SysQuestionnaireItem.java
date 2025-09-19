@@ -44,7 +44,7 @@ public class SysQuestionnaireItem {
     @Excel(name = "排序")
     private Integer orderNum;
 
-        /** 备注 **/
+    /** 备注 **/
     @Excel(name = "备注")
     private String remark;
 

@@ -7,15 +7,28 @@
 
     <resultMap id="AnswerResult" type="com.ruoyi.system.domain.SysQuestionnaireAnswer">
         <id property="answerId" column="answer_id"/>
+        <!-- submissionId metaId itemId userId score textAnswer remark createTime createBy updateTime updateBy delFlag-->
         <result property="submissionId" column="submission_id"/>
-        <result property="quesItemId" column="ques_item_id"/>
-        <result property="ratingValue" column="rating_value"/>
-        <result property="textValue" column="text_value"/>
+        <result property="metaId" column="meta_id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="score" column="score"/>
+        <result property="textAnswer" column="text_answer"/>
+        <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
     </resultMap>
 
+    <sql id="selectAnswerVo">
+        select * from sys_questionnaire_answer
+    </sql>
+
     <select id="selectAnswersBySubmissionId" resultMap="AnswerResult">
-        SELECT * FROM sys_questionnaire_answer WHERE submission_id=#{submissionId}
+        <include refid="selectAnswerVo"/>
+        where submission_id=#{submissionId}
     </select>
 
     <insert id="insertAnswer" parameterType="com.ruoyi.system.domain.SysQuestionnaireAnswer" useGeneratedKeys="true" keyProperty="answerId">

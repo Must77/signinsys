@@ -25,30 +25,28 @@ public interface ISysQuestionnaireService {
     /**
      * 新增问卷meta+item
      * @param meta
-     * @param items
      * @return 影响的行数
      */
-    int insertMeta(SysQuestionnaireMeta meta, List<SysQuestionnaireItem> items);
+    int insertMeta(SysQuestionnaireMeta meta);
 
     /**
      * 更新问卷meta+item
      * @param meta
-     * @param items
      * @return 影响的行数
      */
-    int updateMeta(SysQuestionnaireMeta meta, List<SysQuestionnaireItem> items);
+    int updateMeta(SysQuestionnaireMeta meta);
 
     /**
      * 通过Ids删除问卷meta
-     * @param quesMetaIds
+     * @param questionnaireMetaIds
      * @return 影响的行数
      */
-    int deleteMetaByIds(Long[] quesMetaIds);
+    int deleteMetaByIds(Long[] questionnaireMetaIds);
 
     /**
      * 用户提交问卷answer
      * @param quesMetaId 目标问卷meta的Id
-     * @param userId 废弃，应该使用getUserId()
+     * @param userId 提交用户的Id
      * @param answers 提交的问卷answer列表
      * @return 影响的行数
      */
