@@ -109,7 +109,7 @@ export default {
           ]
         }
       },
-      uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload",
+      uploadUrl: "http://117.72.126.104.8080" + "/common/upload",
       headers: { Authorization: "Bearer " + getToken() },
       queryParams: {
         pageNum: 1,

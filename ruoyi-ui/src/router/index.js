@@ -49,6 +49,19 @@ export const constantRoutes = [
   hidden: true,
   meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
 },
+{
+  path: '/myLeave',
+  component: Layout,
+  hidden: false,
+  children: [
+    {
+      path: '/myLeave',
+      component: () => import('@/views/system/myLeave/index.vue'),
+      name: 'MyLeave',
+      meta: { title: '我的请假', icon: 'form' }
+    }
+  ]
+},
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -60,15 +73,25 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/',
+    path: '/404',
+    component: () => import('@/views/error/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error/401'),
+    hidden: true
+  },
+  {
+    path: '',
     component: Layout,
-    redirect: '/index',
+    redirect: 'index',
     children: [
       {
         path: 'index',
-        component: () => import('@/views/index.vue'),
+        component: () => import('@/views/index'),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard' }
+        meta: { title: '首页', icon: 'dashboard', noCache: true, affix: true }
       }
     ]
   },
