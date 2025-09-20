@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.system.mapper.SysQuestionnaireAnswerMapper">
+
+    <resultMap id="AnswerResult" type="com.ruoyi.system.domain.SysQuestionnaireAnswer">
+        <id property="answerId" column="answer_id"/>
+        <!-- submissionId metaId itemId userId score textAnswer remark createTime createBy updateTime updateBy delFlag-->
+        <result property="submissionId" column="submission_id"/>
+        <result property="metaId" column="meta_id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="score" column="score"/>
+        <result property="textAnswer" column="text_answer"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectAnswerVo">
+        select * from sys_questionnaire_answer
+    </sql>
+
+    <select id="selectAnswersBySubmissionId" resultMap="AnswerResult">
+        <include refid="selectAnswerVo"/>
+        where submission_id=#{submissionId}
+    </select>
+
+    <insert id="insertAnswer" parameterType="com.ruoyi.system.domain.SysQuestionnaireAnswer" useGeneratedKeys="true" keyProperty="answerId">
+        INSERT INTO sys_questionnaire_answer(submission_id, ques_item_id, rating_value, text_value, create_time)
+        VALUES (#{submissionId}, #{quesItemId}, #{ratingValue}, #{textValue}, NOW())
+    </insert>
+
+    <insert id="batchInsertAnswers" parameterType="java.util.List">
+        INSERT INTO sys_questionnaire_answer(submission_id, ques_item_id, rating_value, text_value, create_time)
+        VALUES
+        <foreach collection="list" item="ans" separator=",">
+            (#{ans.submissionId}, #{ans.quesItemId}, #{ans.ratingValue}, #{ans.textValue}, NOW())
+        </foreach>
+    </insert>
+
+</mapper>
