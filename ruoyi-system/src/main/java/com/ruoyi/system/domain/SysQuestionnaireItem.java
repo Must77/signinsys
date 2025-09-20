@@ -28,7 +28,7 @@ public class SysQuestionnaireItem {
     @Excel(name = "所属问卷ID")
     private Long metaId;
     
-    /** 题目类型: S-单选 T-多选 M-文本 Q-评分 **/
+    /** 题目类型: S-单选 M-多选 T-文本 Q-评分 **/
     @Excel(name = "题目类型")
     private String itemType; 
 

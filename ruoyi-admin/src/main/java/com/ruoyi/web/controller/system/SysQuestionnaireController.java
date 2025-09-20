@@ -33,7 +33,7 @@ public class SysQuestionnaireController extends BaseController {
     }
 
     /**
-     * 获取问卷详细信息
+     * 获取问卷meta
      * @param quesMetaId 问卷ID
      * @return 问卷及其题目列表
      */

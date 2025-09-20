@@ -9,7 +9,7 @@
         <id property="metaId" column="meta_id"/>
         <result property="deptId" column="dept_id"/>
         <result property="targetType" column="target_type"/>
-        <result property="targetId" column="target_id"/>
+        <result property="targetRefId" column="target_ref_id"/>
         <result property="title" column="title"/>
         <result property="description" column="description"/>
         <result property="startTime" column="start_time"/>
@@ -25,7 +25,7 @@
     </resultMap>
 
     <sql id="selectMetaVo">
-        select m.meta_id, m.dept_id, m.target_type, m.target_id, m.title, m.description, m.start_time, m.end_time, m.status, m.allow_repeat, m.remark, m.create_by, m.create_time, m.update_by, m.update_time, m.del_flag,
+        select m.meta_id, m.dept_id, m.target_type, m.target_ref_id, m.title, m.description, m.start_time, m.end_time, m.status, m.allow_repeat, m.remark, m.create_by, m.create_time, m.update_by, m.update_time, m.del_flag,
             d.dept_name
         from sys_questionnaire_meta m
         left join sys_dept d on m.dept_id = d.dept_id
@@ -49,13 +49,32 @@
     </select>
 
     <insert id="insertQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta" useGeneratedKeys="true" keyProperty="metaId">
-        INSERT INTO sys_questionnaire_meta(title, target_type, target_id, description, publish_time, create_by, create_time)
-        VALUES (#{title}, #{targetType}, #{targetId}, #{description}, #{publishTime}, #{createBy}, NOW())
+        INSERT INTO sys_questionnaire_meta(
+            <if test="title != null and title != ''">title, </if>
+            <if test="deptId != null">dept_id, </if>
+            <if test="targetType != null and targetType != ''">target_type, </if>
+            <if test="targetRefId != null">target_ref_id, </if>
+            <if test="description != null and description != ''">description, </if>
+            <if test="startTime != null">start_time, </if>
+            <if test="endTime != null">end_time, </if>
+            <if test="createBy != null and createBy != ''">create_by, </if>
+            create_time
+        )VALUES (
+            <if test="title != null and title != ''">#{title}, </if>
+            <if test="deptId != null">#{deptId}, </if>
+            <if test="targetType != null and targetType != ''">#{targetType}, </if>
+            <if test="targetRefId != null">#{targetRefId}, </if>
+            <if test="description != null and description != ''">#{description}, </if>
+            <if test="startTime != null">#{startTime}, </if>
+            <if test="endTime != null">#{endTime}, </if>
+            <if test="createBy != null and createBy != ''">#{createBy}, </if>
+            sysdate()
+        )
     </insert>
 
     <update id="updateQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta">
         UPDATE sys_questionnaire_meta
-        SET title=#{title}, target_type=#{targetType}, target_id=#{targetId}, description=#{description}, update_by=#{updateBy}, update_time=NOW()
+        SET title=#{title}, target_type=#{targetType}, target_ref_id=#{targetRefId}, description=#{description}, update_by=#{updateBy}, update_time=NOW()
         WHERE meta_id=#{metaId}
     </update>
 

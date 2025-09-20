@@ -31,12 +31,12 @@
 
     <select id="selectQuestionnaireItemList" resultMap="ItemResult">
         <include refid="selectItemVo"/>
-        where ques_meta_id = #{quesMetaId} ORDER BY order_num ASC
+        where meta_id = #{metaId} ORDER BY order_num ASC
     </select>
 
     <insert id="insertQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem" useGeneratedKeys="true" keyProperty="itemId">
-        INSERT INTO sys_questionnaire_item(ques_meta_id, question_text, item_type, order_num, create_by, create_time)
-        VALUES (#{quesMetaId}, #{questionText}, #{itemType}, #{orderNum}, #{createBy}, NOW())
+        INSERT INTO sys_questionnaire_item(meta_id, question_text, item_type, order_num, create_by, create_time)
+        VALUES (#{metaId}, #{questionText}, #{itemType}, #{orderNum}, #{createBy}, NOW())
     </insert>
 
     <update id="updateQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem">
@@ -50,7 +50,7 @@
     </delete>
 
     <delete id="deleteQuestionnaireItemByMetaId">
-        DELETE FROM sys_questionnaire_item WHERE ques_meta_id=#{quesMetaId}
+        DELETE FROM sys_questionnaire_item WHERE meta_id=#{metaId}
     </delete>
 
 </mapper>
