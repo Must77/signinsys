@@ -36,6 +36,8 @@ public class SysCourseResource extends BaseEntity
     @Excel(name = "文件大小")
     private Long fileSize;
 
+    /** 删除（0正常，2删除）**/
+    private Integer delFlag;
 
     // getter / setter
     public Long getResourceId() {
@@ -80,5 +82,7 @@ public class SysCourseResource extends BaseEntity
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
     }
+    public Integer getDelFlag() { return delFlag; }
+    public void setDelFlag(Integer delFlag) { this.delFlag = delFlag; }
 
 }

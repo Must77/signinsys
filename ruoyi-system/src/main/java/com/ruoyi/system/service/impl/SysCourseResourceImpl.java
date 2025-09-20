@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ruoyi.system.domain.SysCourseResource;
 import com.ruoyi.system.mapper.SysCourseResourceMapper;
+import com.ruoyi.system.mapper.SysDeptCourseMapper;
 import com.ruoyi.system.service.ISysCourseResourceService;
 
 @Service
@@ -14,6 +15,9 @@ public class SysCourseResourceImpl implements ISysCourseResourceService
 {
     @Autowired
     private SysCourseResourceMapper resourceMapper;
+
+    @Autowired
+    private SysDeptCourseMapper courseMapper;
 
     /**
      * 根据ID查询课程资源
@@ -52,6 +56,12 @@ public class SysCourseResourceImpl implements ISysCourseResourceService
      */
     @Override
     public int insertCourseResource(SysCourseResource resource){
+        // 允许前端不传入resource的deptId, 后端自动根据courseId找到deptId
+        if(resource.getDeptId() == null || resource.getDeptId() == 0){
+            Long courseId = resource.getCourseId();
+            Long deptId = courseMapper.selectDeptCourseById(courseId).getDeptId();
+            resource.setDeptId(deptId);
+        }
         return resourceMapper.insertCourseResource(resource);
     }
 
