@@ -10,10 +10,10 @@ import java.util.List;
 public interface ISysQuestionnaireService {
     /**
      * 根据Id查看问卷meta
-     * @param quesMetaId
+     * @param metaId
      * @return 问卷meta
      */
-    SysQuestionnaireMeta selectMetaById(Long quesMetaId);
+    SysQuestionnaireMeta selectMetaById(Long metaId);
 
     /**
      * 条件筛选问卷meta
@@ -38,26 +38,26 @@ public interface ISysQuestionnaireService {
 
     /**
      * 通过Ids删除问卷meta
-     * @param questionnaireMetaIds
+     * @param metaIds
      * @return 影响的行数
      */
-    int deleteMetaByIds(Long[] questionnaireMetaIds);
+    int deleteMetaByIds(Long[] metaIds);
 
     /**
      * 用户提交问卷answer
-     * @param quesMetaId 目标问卷meta的Id
+     * @param metaId 目标问卷meta的Id
      * @param userId 提交用户的Id
      * @param answers 提交的问卷answer列表
      * @return 影响的行数
      */
-    int submitAnswers(Long quesMetaId, Long userId, List<SysQuestionnaireAnswer> answers);
+    int submitAnswers(Long metaId, Long userId, List<SysQuestionnaireAnswer> answers);
 
     /**
      * 条件筛选问卷submission
-     * @param quesMetaId 目标问卷meta的Id
+     * @param metaId 目标问卷meta的Id
      * @return 问卷submission列表
      */
-    List<SysQuestionnaireSubmission> selectSubmissions(Long quesMetaId);
+    List<SysQuestionnaireSubmission> selectSubmissions(Long metaId);
 
     /**
      * 条件筛选问卷answer

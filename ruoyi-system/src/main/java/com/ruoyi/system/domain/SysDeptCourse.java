@@ -38,6 +38,9 @@ public class SysDeptCourse extends BaseEntity {
     @Excel(name = "课程封面")
     private String coverURL;
 
+    @Excel(name = "删除")
+    private Integer delFlag;
+
     // getter/setter
     public Long getCourseId() { return courseId; }
     public void setCourseId(Long courseId) { this.courseId = courseId; }
@@ -71,5 +74,13 @@ public class SysDeptCourse extends BaseEntity {
     }
     public void setCoverURL(String coverURL) {
         this.coverURL = coverURL;
+    }
+
+    public Integer getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(Integer delFlag) {
+        this.delFlag = delFlag;
     }
 }

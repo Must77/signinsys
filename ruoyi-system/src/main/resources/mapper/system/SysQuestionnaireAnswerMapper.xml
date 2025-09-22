@@ -7,7 +7,6 @@
 
     <resultMap id="AnswerResult" type="com.ruoyi.system.domain.SysQuestionnaireAnswer">
         <id property="answerId" column="answer_id"/>
-        <!-- submissionId metaId itemId userId score textAnswer remark createTime createBy updateTime updateBy delFlag-->
         <result property="submissionId" column="submission_id"/>
         <result property="metaId" column="meta_id"/>
         <result property="itemId" column="item_id"/>
@@ -32,15 +31,41 @@
     </select>
 
     <insert id="insertAnswer" parameterType="com.ruoyi.system.domain.SysQuestionnaireAnswer" useGeneratedKeys="true" keyProperty="answerId">
-        INSERT INTO sys_questionnaire_answer(submission_id, ques_item_id, rating_value, text_value, create_time)
-        VALUES (#{submissionId}, #{quesItemId}, #{ratingValue}, #{textValue}, NOW())
+        insert into sys_questionnaire_answer(
+            <if test="answerId != null">answer_id,</if>
+            <if test="submissionId != null">submission_id,</if>
+            <if test="metaId != null">meta_id,</if>
+            <if test="itemId != null">item_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="score != null">score,</if>
+            <if test="textAnswer != null and textAnswer != ''">text_answer,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            create_time
+        )values(
+            <if test="answerId != null">#{answerId},</if>
+            <if test="submissionId != null">#{submissionId},</if>
+            <if test="metaId != null">#{metaId},</if>
+            <if test="itemId != null">#{itemId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="textAnswer != null and textAnswer != ''">#{textAnswer},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            sysdate()
+        )
     </insert>
 
     <insert id="batchInsertAnswers" parameterType="java.util.List">
-        INSERT INTO sys_questionnaire_answer(submission_id, ques_item_id, rating_value, text_value, create_time)
+        INSERT INTO sys_questionnaire_answer(
+            submission_id, item_id, meta_id, user_id, score, text_answer, create_time)
         VALUES
         <foreach collection="list" item="ans" separator=",">
-            (#{ans.submissionId}, #{ans.quesItemId}, #{ans.ratingValue}, #{ans.textValue}, NOW())
+            (#{ans.submissionId}, #{ans.itemId}, #{ans.metaId}, #{ans.userId}, #{ans.score}, #{ans.textAnswer}, sysdate())
         </foreach>
     </insert>
 

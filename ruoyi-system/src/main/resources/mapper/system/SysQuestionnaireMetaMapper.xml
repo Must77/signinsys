@@ -38,14 +38,23 @@
 
     <select id="selectQuestionnaireMetaList" resultMap="MetaResult">
         <include refid="selectMetaVo"/>
-        <where>
+        where m.del_flag = '0'
+            <if test="deptId != null and deptId != 0">
+                AND m.dept_id = #{deptId}
+            </if>
+            <if test="targetRefId != null and targetRefId != 0">
+                AND m.target_ref_id = #{targetRefId}
+            </if>
+            <if test="metaId != null and metaId != 0">
+                AND m.meta_id = #{metaId}
+            </if>
             <if test="title != null and title != ''">
                 AND title like concat('%', #{title}, '%')
             </if>
             <if test="targetType != null and targetType != ''">
                 AND target_type = #{targetType}
             </if>
-        </where>
+            
     </select>
 
     <insert id="insertQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta" useGeneratedKeys="true" keyProperty="metaId">
@@ -74,7 +83,7 @@
 
     <update id="updateQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta">
         UPDATE sys_questionnaire_meta
-        SET title=#{title}, target_type=#{targetType}, target_ref_id=#{targetRefId}, description=#{description}, update_by=#{updateBy}, update_time=NOW()
+        SET title=#{title}, target_type=#{targetType}, target_ref_id=#{targetRefId}, description=#{description}, update_by=#{updateBy}, update_time=sysdate()
         WHERE meta_id=#{metaId}
     </update>
 
