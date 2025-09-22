@@ -114,4 +114,15 @@ public class SysQuestionnaireController extends BaseController {
     }
 
 
+    /**
+     * 条件筛选查看submission, 不区分问卷meta
+     * @param query 查询条件
+     * @return submission列表
+     */
+    // @GetMapping("/submission/list")
+    // public AjaxResult listSubmissions(SysQuestionnaireSubmission query) {
+    //     List<SysQuestionnaireSubmission> list = questionnaireService.selectSubmissionsList(query);
+    //     return success(list);
+    // }
+
 }

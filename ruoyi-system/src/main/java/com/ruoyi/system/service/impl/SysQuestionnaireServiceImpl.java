@@ -24,8 +24,8 @@ public class SysQuestionnaireServiceImpl implements ISysQuestionnaireService {
     private SysQuestionnaireAnswerMapper answerMapper;
 
     @Override
-    public SysQuestionnaireMeta selectMetaById(Long quesMetaId) {
-        return metaMapper.selectQuestionnaireMetaById(quesMetaId);
+    public SysQuestionnaireMeta selectMetaById(Long metaId) {
+        return metaMapper.selectQuestionnaireMetaById(metaId);
     }
 
     @Override
@@ -82,17 +82,24 @@ public class SysQuestionnaireServiceImpl implements ISysQuestionnaireService {
     @Override
     @Transactional
     public int submitAnswers(Long metaId, Long userId, List<SysQuestionnaireAnswer> answers) {
+        // 检查用户是否重复提交submission
         SysQuestionnaireSubmission submission = submissionMapper.selectSubmissionByMetaAndUser(metaId, userId);
         if (submission != null) {
             throw new RuntimeException("该用户已提交过该问卷");
         }
+        // 创建一次新的提交submission
         submission = new SysQuestionnaireSubmission();
         submission.setMetaId(metaId);
         submission.setUserId(userId);
         submissionMapper.insertSubmission(submission);
+        Long submissionId = submission.getSubmissionId();
 
+        // 插入所有回答answer
         for (SysQuestionnaireAnswer ans : answers) {
-            ans.setSubmissionId(submission.getSubmissionId());
+            // 后端确保sys_questionnaire_answer每个answer项的NOT NULL字段正常
+            ans.setSubmissionId(submissionId);
+            ans.setMetaId(metaId);
+            ans.setUserId(userId);
         }
         return answerMapper.batchInsertAnswers(answers);
     }
