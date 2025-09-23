@@ -20,7 +20,7 @@
 
     <!-- 工具栏 -->
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           v-hasPermi="['system:leave:add']"
           type="primary"
@@ -28,7 +28,7 @@
           icon="el-icon-plus"
           @click="handleAdd"
         >新增</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['system:leave:remove']"
@@ -46,9 +46,9 @@
       <el-table-column type="selection" width="55" />
       <el-table-column prop="leaveId" label="编号" width="80" />
       <el-table-column prop="userName" label="请假人" />
-      <el-table-column prop="leaveType" label="类型" :formatter="typeFmt" />
-      <el-table-column prop="startDate" label="开始时间" width="160" />
-      <el-table-column prop="endDate" label="结束时间" width="160" />
+      <!-- <el-table-column prop="leaveType" label="类型" :formatter="typeFmt" /> -->
+      <el-table-column prop="startTime" label="开始时间" width="160" />
+      <el-table-column prop="endTime" label="结束时间" width="160" />
       <el-table-column prop="reason" label="事由" show-overflow-tooltip />
       <el-table-column prop="status" label="状态" width="100">
         <template slot-scope="scope">
@@ -59,7 +59,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="220">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" @click="handleUpdate(scope.row)">修改</el-button>
+          <!-- <el-button size="mini" type="text" @click="handleUpdate(scope.row)">修改</el-button> -->
           <el-button size="mini" type="text" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
             v-if="scope.row.status==='0'"
@@ -75,7 +75,7 @@
             type="text"
             @click="handleReject(scope.row)"
           >拒绝</el-button>
-          <el-button size="mini" type="text" @click="handleDelete(scope.row)">删除</el-button>
+          <!-- <el-button size="mini" type="text" @click="handleDelete(scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -98,11 +98,11 @@
             <el-option label="年假" value="3"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="开始时间" prop="startDate">
-          <el-date-picker v-model="form.startDate" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
+        <el-form-item label="开始时间" prop="startTime">
+          <el-date-picker v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
         </el-form-item>
-        <el-form-item label="结束时间" prop="endDate">
-          <el-date-picker v-model="form.endDate" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
+        <el-form-item label="结束时间" prop="endTime">
+          <el-date-picker v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"/>
         </el-form-item>
         <el-form-item label="请假事由" prop="reason">
           <el-input v-model="form.reason" type="textarea" :rows="3"/>
@@ -119,9 +119,9 @@
       <el-descriptions :column="2" border>
         <el-descriptions-item label="编号">{{ detail.leaveId }}</el-descriptions-item>
         <el-descriptions-item label="请假人">{{ detail.userName }}</el-descriptions-item>
-        <el-descriptions-item label="类型">{{ typeFmt(null,null,detail.leaveType) }}</el-descriptions-item>
-        <el-descriptions-item label="开始时间">{{ detail.startDate }}</el-descriptions-item>
-        <el-descriptions-item label="结束时间">{{ detail.endDate }}</el-descriptions-item>
+        <!-- <el-descriptions-item label="类型">{{ typeFmt(null,null,detail.leaveType) }}</el-descriptions-item> -->
+        <el-descriptions-item label="开始时间">{{ detail.startTime }}</el-descriptions-item>
+        <el-descriptions-item label="结束时间">{{ detail.endTime }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ statusFmt(null,null,detail.status) }}</el-descriptions-item>
         <el-descriptions-item label="事由" :span="2">{{ detail.reason }}</el-descriptions-item>
       </el-descriptions>
@@ -162,14 +162,14 @@ export default {
       form: {
         leaveId: undefined,
         leaveType: '1',
-        startDate: '',
-        endDate: '',
+        startTime: '',
+        endTime: '',
         reason: ''
       },
       rules: {
-        leaveType: [{ required: true, message: '请选择类型', trigger: 'change' }],
-        startDate: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
-        endDate: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
+        // leaveType: [{ required: true, message: '请选择类型', trigger: 'change' }],
+        startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
+        endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
         reason: [{ required: true, message: '请填写事由', trigger: 'blur' }]
       },
       detail: {}
@@ -211,7 +211,7 @@ export default {
       this.multiple = !selection.length
     },
     handleAdd() {
-      this.form = { leaveId: undefined, leaveType: '1', startDate: '', endDate: '', reason: '' }
+      this.form = { leaveId: undefined, leaveType: '1', startTime: '', endTime: '', reason: '' }
       this.open = true
       this.title = '新增请假'
     },

@@ -26,12 +26,12 @@
           <el-tag type="danger" v-else>已拒绝</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="申请时间" prop="createTime" width="160"/>
+      <!-- <el-table-column label="申请时间" prop="createTime" width="160"/> -->
       <el-table-column label="操作" width="220" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" type="success" @click="handleApprove(scope.row)" v-hasPermi="['system:deptApply:approve']" :disabled="scope.row.status!=='0'">通过</el-button>
           <el-button size="mini" type="warning" @click="handleReject(scope.row)" v-hasPermi="['system:deptApply:reject']" :disabled="scope.row.status!=='0'">拒绝</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row)" v-hasPermi="['system:deptApply:remove']">删除</el-button>
+          <!-- <el-button size="mini" type="danger" @click="handleDelete(scope.row)" v-hasPermi="['system:deptApply:remove']">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>

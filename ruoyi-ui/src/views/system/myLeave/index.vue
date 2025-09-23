@@ -9,11 +9,11 @@
       <!-- 请假列表 -->
       <el-table v-loading="loading" :data="leaveList" style="width: 100%">
         <el-table-column prop="leaveId" label="编号" width="80" />
-        <el-table-column prop="leaveType" label="请假类型" width="100">
+        <!-- <el-table-column prop="leaveType" label="请假类型" width="100">
           <template slot-scope="scope">
             <span>{{ leaveTypeFormat(scope.row) }}</span>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column prop="startTime" label="开始时间" width="160">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.startTime) }}</span>
@@ -35,10 +35,10 @@
         <el-table-column label="操作" width="150" align="center">
           <template slot-scope="scope">
             <el-button size="mini" type="text" @click="handleDetail(scope.row)">详情</el-button>
-            <el-button v-if="scope.row.status === '0'" size="mini" type="text"
+            <!-- <el-button v-if="scope.row.status === '0'" size="mini" type="text"
               @click="handleUpdate(scope.row)">修改</el-button>
             <el-button v-if="scope.row.status === '0'" size="mini" type="text"
-              @click="handleDelete(scope.row)">删除</el-button>
+              @click="handleDelete(scope.row)">删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -51,12 +51,15 @@
     <!-- 新增/修改请假对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="请假类型" prop="leaveType">
+        <!-- <el-form-item label="请假类型" prop="leaveType">
           <el-select v-model="form.leaveType" placeholder="请选择请假类型">
             <el-option label="事假" value="1" />
             <el-option label="病假" value="2" />
             <el-option label="年假" value="3" />
           </el-select>
+        </el-form-item> -->
+        <el-form-item label="请假标题" prop="title">
+          <el-input v-model="form.title" type="textarea" :rows="3" placeholder="请输入请假标题" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
@@ -65,9 +68,6 @@
         <el-form-item label="结束时间" prop="endTime">
           <el-date-picker v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="请假标题" prop="title">
-          <el-input v-model="form.title" type="textarea" :rows="3" placeholder="请输入请假标题" />
         </el-form-item>
         <el-form-item label="请假事由" prop="reason">
           <el-input v-model="form.reason" type="textarea" :rows="3" placeholder="请输入请假事由" />
@@ -83,7 +83,7 @@
     <el-dialog title="请假详情" :visible.sync="detailOpen" width="700px" append-to-body>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="编号">{{ detailInfo.leaveId }}</el-descriptions-item>
-        <el-descriptions-item label="请假类型">{{ leaveTypeFormat(detailInfo) }}</el-descriptions-item>
+        <!-- <el-descriptions-item label="请假类型">{{ leaveTypeFormat(detailInfo) }}</el-descriptions-item> -->
         <el-descriptions-item label="开始时间">{{ parseTime(detailInfo.startTime) }}</el-descriptions-item>
         <el-descriptions-item label="结束时间">{{ parseTime(detailInfo.endTime) }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ statusFormat(detailInfo) }}</el-descriptions-item>
@@ -126,9 +126,9 @@ export default {
       detailInfo: {},
       // 表单校验
       rules: {
-        leaveType: [
-          { required: true, message: '请假类型不能为空', trigger: 'change' }
-        ],
+        // leaveType: [
+        //   { required: true, message: '请假类型不能为空', trigger: 'change' }
+        // ],
         startTime: [
           { required: true, message: '开始时间不能为空', trigger: 'change' }
         ],
