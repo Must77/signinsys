@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface SysQuestionnaireItemMapper {
     SysQuestionnaireItem selectQuestionnaireItemById(Long itemId);
-    List<SysQuestionnaireItem> selectQuestionnaireItemList(Long metaId);
+    List<SysQuestionnaireItem> selectQuestionnaireItemByMetaId(Long metaId);
     int insertQuestionnaireItem(SysQuestionnaireItem item);
     int updateQuestionnaireItem(SysQuestionnaireItem item);
     int deleteQuestionnaireItemById(Long itemId);

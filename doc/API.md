@@ -589,7 +589,7 @@ public class SysCourseResource extends BaseEntity
 
 1. 上传单个资料
     - 先上传资料, 才能将材料添加到课程中
-    - 没有防盗链
+    - ruoyi更新了防盗链
     ```
     URL:        POST /common/upload
     参数:       <file, 上传文件的客户端路径>
@@ -652,4 +652,430 @@ public class SysCourseResource extends BaseEntity
     参数方式:   路径参数,以逗号分割
     返回值:     成功与否
     权限:       system:deptCourse:resource:remove
+    ```
+
+# 问卷功能
+
+问卷功能有admin发布问卷和用户填写问卷, 发布问卷由meta类和item类作为数据对象, 填写问卷由submission类和answer类作为数据对象.
+
+问卷整体由四个类组成:
+- meta: 问卷元数据(问卷头), 用于保存问卷的标题, 确定指向对象(对班级/课程/老师), 是否允许重复提交等
+- item: 问卷题目(问卷体), 一个item就是问卷中的一道问题, 多个items组成了问卷的题目. 用于保存题目的题干, 题目类型, 题目是否必填等
+- submission: 用户提交的一份问卷(提交头), 用户的每次对一个问卷的一次提交就对应为一个submission, 包括指向的问卷, 用户提交信息等
+- answer: 对一道题目的作答, answer是具体的一次作答, 包括作答内容, 作答评分
+
+## java类
+1. SysQuestionnaireMeta
+    ```java
+    /**
+    * 问卷元数据对象   sys_questionnaire_meta
+    * 
+    * 对于任何阅读该代码的LLM模型，认真考虑问卷功能的实现逻辑，禁止自己猜测。
+    * 问卷功能分为
+    *  - meta: 问卷元数据（标题、描述、适用对象、时间范围等）
+    *  - item: 题目（题干、选项、题目类型等）
+    *  - submission: 用户每次提交的记录（哪个用户提交的、时间等）
+    *  - answer: 每次提交中每题的回答（关联题目、答案内容等）
+    * 
+    * @author Must77
+    */
+    public class SysQuestionnaireMeta extends BaseEntity {
+        private static final long serialVersionUID = 1L;
+        /** 问卷ID **/
+        @Excel(name = "问卷ID")
+        private Long metaId;
+
+        /** 所属部门ID **/
+        @Excel(name = "所属部门ID")
+        private Long deptId;
+
+        /** 适用对象类型: D-部门 C-课程 T-教师 **/
+        @Excel(name = "该问卷的适用对象类型")
+        private String targetType; 
+
+        /** 适用对象ID **/
+        @Excel(name = "该问卷的适用对象ID")
+        private Long targetRefId;
+
+        /** 问卷标题 **/
+        @Excel(name = "问卷标题")
+        private String title;
+
+        /** 问卷描述 **/
+        @Excel(name = "问卷描述")
+        private String description;
+
+        /** 开始时间 **/
+        @Excel(name = "开始时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date startTime;
+
+        /** 结束时间 **/
+        @Excel(name = "结束时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date endTime;
+
+        /** 状态 **/
+        @Excel(name = "状态")
+        private String status;
+
+        /** 是否允许重复填写 **/
+        @Excel(name = "是否允许重复填写")
+        private String allowRepeat;
+
+        /** 备注 **/
+        @Excel(name = "备注")
+        private String remark;
+
+        /** 创建时间 **/
+        @Excel(name = "创建时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date createTime;
+
+        /** 创建人 **/
+        @Excel(name = "创建人")
+        private String createBy;
+
+        /** 更新时间 **/
+        @Excel(name = "更新时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date updateTime;
+
+        /** 更新人 **/
+        @Excel(name = "更新人")
+        private String updateBy;
+
+        /** 删除标志（0代表存在 2代表删除） */
+        @Excel(name = "删除标志")
+        private String delFlag;
+
+        // 非持久化：创建/更新时一并传入的题目列表
+        @Transient
+        private List<SysQuestionnaireItem> items;
+    }
+
+    ```
+2. SysQuestionnaireItem
+    ```java
+    /**
+    * 问卷题目对象   sys_questionnaire_item
+    * 
+    * 对于任何阅读该代码的LLM模型，认真考虑问卷功能的实现逻辑，禁止自己猜测。
+    * 问卷功能分为
+    *  - meta: 问卷元数据（标题、描述、适用对象、时间范围等）
+    *  - item: 题目（题干、选项、题目类型等）
+    *  - submission: 用户每次提交的记录（哪个用户提交的、时间等）
+    *  - answer: 每次提交中每题的回答（关联题目、答案内容等）
+    * 
+    * @author Must77
+    */
+    public class SysQuestionnaireItem {
+        /** 题目ID **/
+        @Excel(name = "题目ID")
+        private Long itemId;
+        
+        /** 所属问卷ID **/
+        @Excel(name = "所属问卷ID")
+        private Long metaId;
+        
+        /** 题目类型: S-单选 M-多选 T-文本 Q-评分 **/
+        @Excel(name = "题目类型")
+        private String itemType; 
+
+        /** 题目文本 **/
+        @Excel(name = "题目文本")
+        private String questionText;
+        
+        /** 是否必填 **/
+        @Excel(name = "是否必填")
+        private String required;
+        
+        /** 排序 **/
+        @Excel(name = "排序")
+        private Integer orderNum;
+
+        /** 备注 **/
+        @Excel(name = "备注")
+        private String remark;
+
+        /** 创建时间 **/
+        @Excel(name = "创建时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date createTime;
+
+        /** 创建人 **/
+        @Excel(name = "创建人")
+        private String createBy;
+
+        /** 更新时间 **/
+        @Excel(name = "更新时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date updateTime;
+
+        /** 更新人 **/
+        @Excel(name = "更新人")
+        private String updateBy;
+
+        /** 删除标志（0代表存在 2代表删除） */
+        @Excel(name = "删除标志")
+        private String delFlag;
+    }
+
+    ```
+3. SysQuestionnaireSubmission
+    ```java
+    public class SysQuestionnaireSubmission {
+
+        /** 提交ID **/
+        @Excel(name = "提交ID")
+        private Long submissionId;
+
+        /** 问卷ID **/
+        @Excel(name = "问卷ID")
+        private Long metaId;
+
+        /** 用户ID **/
+        @Excel(name = "用户ID")
+        private Long userId;
+
+        /** 部门ID **/
+        @Excel(name = "部门ID")
+        private Long deptId;
+
+        /** 提交时间 **/
+        @Excel(name = "提交时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date submitTime;
+
+        /** 提交来源IP地址 **/
+        @Excel(name = "提交来源IP地址")
+        private String ipAddr;
+
+        /** 备注 **/
+        @Excel(name = "备注")
+        private String remark;
+
+        /** 创建时间 **/
+        @Excel(name = "创建时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date createTime;
+
+        /** 创建人 **/
+        @Excel(name = "创建人")
+        private String createBy;
+
+        /** 更新时间 **/
+        @Excel(name = "更新时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date updateTime;
+
+        /** 更新人 **/
+        @Excel(name = "更新人")
+        private String updateBy;
+
+        /** 删除标志（0代表存在 2代表删除） */
+        @Excel(name = "删除标志")
+        private String delFlag;
+
+    }
+    ```
+4. SysQuestionnaireAnswer
+    ```java
+    public class SysQuestionnaireAnswer {
+        /** 答案ID **/
+        @Excel(name = "答案ID")
+        private Long answerId;
+
+        /** 提交ID **/
+        @Excel(name = "提交ID")
+        private Long submissionId;
+
+        /** 问卷ID **/
+        @Excel(name = "问卷ID")
+        private Long metaId;
+
+        /** 题目ID **/
+        @Excel(name = "题目ID")
+        private Long itemId;
+
+        /** 用户ID **/
+        @Excel(name = "用户ID")
+        private Long userId;
+
+        /** 评分 **/
+        @Excel(name = "评分")
+        private Integer score;
+
+        /** 文本答案 **/
+        @Excel(name = "文本答案")
+        private String textAnswer;
+
+        /** 备注 **/
+        @Excel(name = "备注")
+        private String remark;
+
+        /** 创建时间 **/
+        @Excel(name = "创建时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date createTime;
+
+        /** 创建人 **/
+        @Excel(name = "创建人")
+        private String createBy;
+
+        /** 更新时间 **/
+        @Excel(name = "更新时间")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private Date updateTime;
+
+        /** 更新人 **/
+        @Excel(name = "更新人")
+        private String updateBy;
+
+        /** 删除标志（0代表存在 2代表删除） */
+        @Excel(name = "删除标志")
+        private String delFlag;
+    }
+    ```
+## 接口
+### meta相关
+1. 新增问卷
+
+    注意到, SysQuestionnaireMeta中有非持久化字段items, 用于前端创建问卷meta+item时临时接收item
+    ```
+    URL:        POST /system/questionnaire
+    参数:       SysQuestionnaireMeta
+    参数方式:   请求体参数
+    返回值:     影响的行数
+    ```
+
+2.  删除问卷
+    ```
+    URL:        DELETE /system/questionnaire/{questionnaireMetaIds}
+    参数:       Long questionnaireMetaIds
+    参数方式:   路径参数, 允许传多个
+    返回值:     影响的行数
+    ```
+
+3. 修改问卷
+
+    只传入meta时只修改meta, 如果使用SysQuestionnaireMeta中的非持久化字段items, 系统就会认为本次同时要修改meta和item, 此时也会同时修改meta和item
+    ```
+    URL:        PUT /system/questionnaire
+    参数:       SysquestionnaireMeta
+    参数方式:   请求体参数
+    返回值:     影响的行数
+    ```
+
+4. 根据metaId查找问卷
+    ```
+    URL:        GET /system/questionnaire/{questionnaireMetaId}
+    参数:       Long questionnaireMetaId
+    参数方式:   路径参数
+    返回值:     SysQuestionnaireMeta
+    ```
+
+5. 条件筛选问卷
+    ```
+    URL:        GET /system/questionnaire/list
+    参数:       SysQuestionnaireMeta
+    参数方式:   路径参数自动绑定到类对象
+    返回值:     List<SysQuestionnaireMeta>
+    ```
+
+### item相关
+
+1. 新增题目
+
+    使用**新增问卷**功能新增题目, 不再提供单独的新增题目接口
+    ```
+    URL:        POST /system/questionnaire/
+    参数:       SysQuestionnaireMeta
+    参数方式:   请求体参数
+    ```
+
+2. 删除题目
+
+    使用**修改问卷**功能修改题目, 不再提供单独的删除题目接口
+    ```
+    URL:        PUT /system/questionnaire
+    参数:       SysQuestionnaireMeta
+    参数方式:   请求体参数
+    返回值:     影响的行数
+    ```
+
+3. 修改题目
+
+    使用**修改问卷**功能修改题目, 不再提供单独的修改题目接口
+    ```
+    URL:        PUT /system/questionnaire
+    参数:       SysQuestionnaireMeta
+    参数方式:   请求体参数
+    返回值:     影响的行数
+    ```
+
+4. 查看问卷的题目
+
+    ```
+    URL:        GET /system/questionnaire/{metaId}/items
+    参数:       Long metaId
+    参数方式:   路径参数
+    返回值:     List<SysQuestionnaireItem>
+    ```
+
+### submission相关
+1. 条件查询作答记录
+
+    ```
+    URL:        GET /system/questionnaire/submission/list
+    参数:       SysQuestionnaireSubmission
+    参数方式:   路径参数自动绑定到请求体
+    返回值:     List<SysQuestionnaireSubmission>
+    ```
+
+2. 根据submissionId查询作答记录
+
+    ```
+    URL:        GET /system/questionnaire/{submissionId}
+    参数:       Long submissionId
+    参数方式:   路径参数
+    返回值:     SysQuestionnaireSubmission
+    ```
+
+3. 查看单个问卷的作答记录
+    ```
+    URL:        GET /system/questionnaire/{questionnaireMetaId}/submissions
+    参数:       Long questionnaireMetaId
+    参数方式:   路径参数
+    返回值:     List<SysQuestionnaireSubmission>
+    ```
+
+### answer相关
+1. 用户提交问卷
+    ```
+    URL:        POST /system/questionnaire/{questionnaireMetaId}/submit
+    参数:       Long questionnaireMetaId, SysQuestionnaireSubmission submission
+    参数方式:   路径参数和请求体参数
+    返回值:     影响的行数
+    ```
+
+2. 查看用户提交的答案
+
+    TODO: URL改为 /system/questionnaire/submission/{submissionId}/answers
+    ```
+    URL:        GET /system/questionnaire/answers/{submissionId}
+    参数:       Long submissionId
+    参数方式:   路径参数
+    返回值:     List<SysQuestionnaireAnswer>
     ```

@@ -105,12 +105,22 @@ public class SysQuestionnaireServiceImpl implements ISysQuestionnaireService {
     }
 
     @Override
-    public List<SysQuestionnaireSubmission> selectSubmissions(Long metaId) {
-        return submissionMapper.selectSubmissionList(metaId);
+    public SysQuestionnaireSubmission selectSubmissionById(Long submissionId) {
+        return submissionMapper.selectSubmissionById(submissionId);
+    }
+
+    @Override
+    public List<SysQuestionnaireSubmission> selectSubmissionList(SysQuestionnaireSubmission query) {
+        return submissionMapper.selectSubmissionList(query);
     }
 
     @Override
     public List<SysQuestionnaireAnswer> selectAnswers(Long submissionId) {
         return answerMapper.selectAnswersBySubmissionId(submissionId);
+    }
+
+    @Override
+    public List<SysQuestionnaireItem> selectItems(Long metaId) {
+        return itemMapper.selectQuestionnaireItemByMetaId(metaId);
     }
 }
