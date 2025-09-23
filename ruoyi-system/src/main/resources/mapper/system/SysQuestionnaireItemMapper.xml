@@ -29,7 +29,7 @@
         where item_id = #{itemId}
     </select>
 
-    <select id="selectQuestionnaireItemList" resultMap="ItemResult">
+    <select id="selectQuestionnaireItemByMetaId" resultMap="ItemResult">
         <include refid="selectItemVo"/>
         where meta_id = #{metaId} ORDER BY order_num ASC
     </select>

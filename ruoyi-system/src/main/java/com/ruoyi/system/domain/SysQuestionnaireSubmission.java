@@ -27,6 +27,8 @@ public class SysQuestionnaireSubmission {
 
     /** 提交时间 **/
     @Excel(name = "提交时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date submitTime;
 
     /** 提交来源IP地址 **/

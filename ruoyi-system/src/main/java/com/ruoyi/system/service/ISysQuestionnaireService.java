@@ -54,15 +54,29 @@ public interface ISysQuestionnaireService {
 
     /**
      * 条件筛选问卷submission
-     * @param metaId 目标问卷meta的Id
+     * @param query 查询条件
      * @return 问卷submission列表
      */
-    List<SysQuestionnaireSubmission> selectSubmissions(Long metaId);
+    List<SysQuestionnaireSubmission> selectSubmissionList(SysQuestionnaireSubmission query);
 
     /**
-     * 条件筛选问卷answer
+     * 通过Id查询问卷submission
+     * @param submissionId 问卷submission的Id
+     * @return 问卷submission
+     */
+    SysQuestionnaireSubmission selectSubmissionById(Long submissionId);
+
+    /**
+     * 查看某次回答
      * @param submissionId 目标问卷submission的Id
      * @return 问卷answer列表
      */
     List<SysQuestionnaireAnswer> selectAnswers(Long submissionId);
+
+    /**
+     * 查看某个问卷的题目
+     * @param metaId 目标问卷meta的Id
+     * @return 问卷题目item列表
+     */
+    List<SysQuestionnaireItem> selectItems(Long metaId);
 }

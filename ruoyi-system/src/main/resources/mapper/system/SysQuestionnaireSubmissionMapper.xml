@@ -34,9 +34,24 @@
         where meta_id=#{metaId} AND user_id=#{userId}
     </select>
 
-    <select id="selectSubmissionList" resultMap="SubmissionResult">
+    <select id="selectSubmissionList" resultMap="SubmissionResult" parameterType="com.ruoyi.system.domain.SysQuestionnaireSubmission">
         <include refid="selectSubmissionVo"/>
-        where meta_id=#{metaId}
+        where del_flag = '0'
+            <if test="submissionId != null and submissionId != 0">
+                AND submission_id = #{submissionId}
+            </if>
+            <if test="metaId != null and metaId != 0">
+                AND meta_id = #{metaId}
+            </if>
+            <if test="userId != null and userId != 0">
+                AND user_id = #{userId}
+            </if>
+            <if test="deptId != null and deptId != 0">
+                AND dept_id = #{deptId}
+            </if>
+            <if test="submitTime != null">
+                AND DATE(submit_time) = DATE(#{submitTime})
+            </if>
     </select>
 
     <insert id="insertSubmission" parameterType="com.ruoyi.system.domain.SysQuestionnaireSubmission" useGeneratedKeys="true" keyProperty="submissionId">

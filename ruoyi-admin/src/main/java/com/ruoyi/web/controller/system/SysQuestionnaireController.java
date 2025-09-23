@@ -100,11 +100,14 @@ public class SysQuestionnaireController extends BaseController {
      */
     @GetMapping("/{questionnaireMetaId}/submissions")
     public AjaxResult listSubmissions(@PathVariable Long questionnaireMetaId) {
-        return success(questionnaireService.selectSubmissions(questionnaireMetaId));
+        SysQuestionnaireSubmission query = new SysQuestionnaireSubmission();
+        query.setMetaId(questionnaireMetaId);
+        return success(questionnaireService.selectSubmissionList(query));
     }
 
     /**
      * 查看某次提交的问卷答案
+     * TODO: 这里的URL是不是应该为 /submission/{submissionId}/answers 更合适一些？
      * @param submissionId 提交记录ID
      * @return 答案列表
      */
@@ -113,16 +116,34 @@ public class SysQuestionnaireController extends BaseController {
         return success(questionnaireService.selectAnswers(submissionId));
     }
 
-
     /**
      * 条件筛选查看submission, 不区分问卷meta
      * @param query 查询条件
      * @return submission列表
      */
-    // @GetMapping("/submission/list")
-    // public AjaxResult listSubmissions(SysQuestionnaireSubmission query) {
-    //     List<SysQuestionnaireSubmission> list = questionnaireService.selectSubmissionsList(query);
-    //     return success(list);
-    // }
+    @GetMapping("/submission/list")
+    public AjaxResult listSubmissions(SysQuestionnaireSubmission query) {
+        List<SysQuestionnaireSubmission> list = questionnaireService.selectSubmissionList(query);
+        return success(list);
+    }
 
+    /**
+     * 根据Id查看submission
+     * @param submissionId submission的Id
+     * @return submission
+     */
+    @GetMapping("/submission/{submissionId}")
+    public AjaxResult getSubmission(@PathVariable Long submissionId) {
+        return success(questionnaireService.selectSubmissionById(submissionId));
+    }
+
+    /** 
+     * 查看某个问卷的所有item
+     * @param metaId
+     * @return 题目列表
+    */
+    @GetMapping("/{metaId}/items")
+    public AjaxResult listItems(@PathVariable Long metaId) {
+        return success(questionnaireService.selectItems(metaId));
+    }
 }
