@@ -130,11 +130,11 @@ export default {
                   {{ formatFileSize(r.row.fileSize) }}
                 </template>
               </el-table-column>
-              <el-table-column label="上传时间" width="150">
+              <!-- <el-table-column label="上传时间" width="150">
                 <template slot-scope="r">
                   {{ parseTime(r.row.createTime) }}
                 </template>
-              </el-table-column>
+              </el-table-column> -->
               <el-table-column label="操作" width="200">
                 <template slot-scope="r">
                   <el-button size="mini" type="text" icon="el-icon-download"
