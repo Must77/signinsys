@@ -123,10 +123,10 @@ export default {
     // 获取路由参数中的课程ID和课程名称
     this.courseId = this.$route.params.courseId;
     this.courseName = this.$route.params.courseName || '';
-    
+
     // 设置查询参数中的课程ID
     this.queryParams.courseId = this.courseId;
-    
+
     // 根据课程ID查询资源列表
     this.getList();
   },
@@ -134,7 +134,7 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
-    
+
     handleFileChange(file, fileList) {
       // 只保留最新文件
       if (fileList.length > 1) fileList.splice(0, 1);
@@ -147,13 +147,18 @@ export default {
     },   /** 查询资源列表 */
     getList() {
       this.loading = true;
-      // 传递课程ID参数，获取指定课程的资源
+      // 确保传递课程ID参数，只获取指定课程的资源
+      if (this.courseId) {
+        this.queryParams.courseId = this.courseId;
+      }
+
       listCourseResource(this.queryParams).then(res => {
         this.resourceList = res.rows || [];
         this.total = res.total || 0;
         this.loading = false;
       }).catch(() => {
         this.loading = false;
+        this.$message.error('获取资源列表失败');
       });
     },
     /** 上传资源 */
@@ -192,42 +197,38 @@ export default {
             return;
           }
 
+          // 检查课程ID是否存在
+          if (!this.courseId) {
+            this.$modal.msgError("课程ID不存在，无法关联资源");
+            return;
+          }
+
           // 先上传文件
           const formData = new FormData();
           formData.append("file", this.upload.form.resourceFile);
-          
+
           uploadFile(formData).then(response => {
-            if (response.code === 200) {
-              // 文件上传成功，获取文件信息
-              const fileInfo = response.data;
-              
-              // 构造课程资源对象
-              const courseResource = {
-                courseId: this.courseId,
-                fileName: this.upload.form.fileName,
-                filePath: fileInfo.url, // 使用上传接口返回的文件路径
-                fileType: fileInfo.fileName.substring(fileInfo.fileName.lastIndexOf('.') + 1), // 从文件名提取文件类型
-                fileSize: this.upload.form.resourceFile.size
-              };
-              
-              // 将资源添加到课程
-              return addCourseResource(courseResource);
-            } else {
-              throw new Error("文件上传失败");
+            // 后端把字段平铺在根对象，不再包 data
+            const fileUrl = response.url || response.fileName || response.fullPath || ''
+            const originalName = response.originalFilename || response.newFileName || ''
+            if (!fileUrl) {
+              throw new Error('上传接口未返回有效文件路径')
             }
+            const courseResource = {
+              courseId: this.courseId,
+              fileName: this.upload.form.fileName || originalName,
+              filePath: fileUrl,
+              fileType: originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase(),
+              fileSize: this.upload.form.resourceFile.size
+            }
+            return addCourseResource(courseResource)
           }).then(() => {
-            this.$modal.msgSuccess("资源上传成功");
-            this.upload.open = false;
-            this.getList();
-          // }).catch(() => {
-          //   this.$modal.msgError("资源上传失败");
-          // });
-          }).catch((error) => {
-  // ✅ 加这行：打印真实错误
-  console.log('上传接口错误:', error);
-  console.log('错误信息:', error.message || error);
-  this.$modal.msgError("上传失败：" + (error.message || "未知错误"));
-});
+            this.$modal.msgSuccess('资源上传成功')
+            this.upload.open = false
+            this.getList()
+          }).catch(err => {
+            this.$modal.msgError('上传失败：' + (err.message || err))
+          })
         }
       });
     },
@@ -254,12 +255,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const resourceIds = row.resourceId || this.ids;
-      this.$modal.confirm('是否确认删除资源编号为"' + resourceIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除资源编号为"' + resourceIds + '"的数据项？').then(function () {
         return delCourseResource(resourceIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }
 };

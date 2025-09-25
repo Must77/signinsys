@@ -41,6 +41,34 @@ export const constantRoutes = [
       }
     ]
   },
+  // 放在 constantRoutes 数组里
+{
+  path: '/course/:courseId(\\d+)/resource',
+  component: () => import('@/views/system/deptCourse/resource.vue'),
+  name: 'CourseResource',
+  hidden: true,
+  meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
+},
+  {
+    path: '/system/questionnaire',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'userList',
+        component: () => import('@/views/system/questionnaire/userList.vue'),
+        name: 'UserQuestionnaireList',
+        meta: { title: '问卷列表', icon: 'form' }
+      },
+      {
+        path: 'userSubmit/:questionnaireMetaId(\\d+)',
+        component: () => import('@/views/system/questionnaire/userSubmit.vue'),
+        name: 'UserQuestionnaireSubmit',
+        meta: { title: '填写问卷', icon: 'form' },
+        hidden: true
+      }
+    ]
+  },
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -88,39 +116,20 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/system/questionnaire',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/system/questionnaire/index'),
-        name: 'Questionnaire',
-        meta: { title: '问卷管理', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/user/questionnaire',
-    component: Layout,
-    hidden: false,
-    children: [
-      // {
-      //   path: 'list',
-      //   component: () => import('@/views/system/questionnaire/userList'),
-      //   name: 'UserQuestionnaireList',
-      //   meta: { title: '问卷列表', icon: 'form' }
-      // },
-      {
-        path: 'submit/:metaId',
-        component: () => import('@/views/system/questionnaire/userSubmit'),
-        name: 'UserQuestionnaireSubmit',
-        meta: { title: '问卷填写', icon: 'form' },
-        hidden: true
-      }
-    ]
-  },
+  // {
+  //   path: '/class-display',
+  //   component: Layout,
+  //   redirect: '/class-display/index',
+  //   hidden: false,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/system/classDisplay/index.vue'),
+  //       name: 'ClassDisplay',
+  //       meta: { title: '班级广场', icon: 'peoples' }
+  //     }
+  //   ]
+  // },
   {
     path: '/404',
     component: () => import('@/views/error/404'),

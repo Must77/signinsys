@@ -4,13 +4,6 @@
       <el-form-item label="问卷标题" prop="title">
         <el-input v-model="queryParams.title" placeholder="请输入问卷标题" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <!-- <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
-          <el-option label="草稿" value="0" />
-          <el-option label="发布" value="1" />
-          <el-option label="关闭" value="2" />
-        </el-select>
-      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -22,14 +15,6 @@
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['system:questionnaire:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
-          v-hasPermi="['system:questionnaire:edit']">修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
-          v-hasPermi="['system:questionnaire:remove']">删除</el-button>
-      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -38,13 +23,6 @@
       <el-table-column label="问卷ID" align="center" prop="metaId" />
       <el-table-column label="问卷标题" align="center" prop="title" :show-overflow-tooltip="true" />
       <el-table-column label="描述" align="center" prop="description" :show-overflow-tooltip="true" />
-      <!-- <el-table-column label="状态" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.status === '0'">草稿</el-tag>
-          <el-tag type="success" v-else-if="scope.row.status === '1'">发布</el-tag>
-          <el-tag type="danger" v-else>关闭</el-tag>
-        </template>
-</el-table-column> -->
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime) }}</span>
@@ -62,16 +40,14 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-view" @click="handleDetail(scope.row)"
-            v-hasPermi="['system:questionnaire:query']">详情</el-button>
+          <el-button size="mini" type="text" icon="el-icon-tickets" @click="handleViewItems(scope.row)"
+            v-hasPermi="['system:questionnaire:query']">查看题目</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['system:questionnaire:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['system:questionnaire:remove']">删除</el-button>
-          <el-button size="mini" type="text" icon="el-icon-tickets" @click="handleSubmissions(scope.row)"
+          <el-button size="mini" type="text" icon="el-icon-document" @click="handleSubmissions(scope.row)"
             v-hasPermi="['system:questionnaire:query']">提交记录</el-button>
-          <el-button size="mini" type="text" icon="el-icon-position" @click="handleUserSubmit(scope.row)"
-            v-if="scope.row.status === '0'">用户填写</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -80,7 +56,7 @@
       @pagination="getList" />
 
     <!-- 添加或修改问卷对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="780px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="900px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
@@ -113,61 +89,59 @@
           </el-col>
         </el-row>
         <el-row>
-          <!-- <el-col :span="12">
-            <el-form-item label="状态" prop="status">
-              <el-select v-model="form.status" placeholder="请选择状态">
-                <el-option label="草稿" value="0" />
-                <el-option label="发布" value="1" />
-                <el-option label="关闭" value="2" />
-              </el-select>
-            </el-form-item>
-          </el-col> -->
-          <el-col :span="12">
-            <el-form-item label="允许重复">
-              <el-radio-group v-model="form.allowRepeat">
-                <el-radio label="0">否</el-radio>
-                <el-radio label="1">是</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
           <el-col :span="24">
-            <el-form-item label="问题列表">
-              <el-button type="primary" size="mini" @click="addQuestion">添加问题</el-button>
-              <draggable v-model="form.items" tag="ul" class="question-list">
-                <li v-for="(question, index) in form.items" :key="index" class="question-item">
-                  <el-card class="question-card">
-                    <div slot="header" class="clearfix">
-                      <span>问题 {{ index + 1 }}</span>
-                      <el-button style="float: right; padding: 3px 0" type="text"
-                        @click="removeQuestion(index)">删除</el-button>
+            <el-card class="box-card">
+              <div slot="header" class="clearfix">
+                <span>问题列表</span>
+                <el-button style="float: right; padding: 3px 0" type="primary" icon="el-icon-plus"
+                  @click="addQuestion">添加问题</el-button>
+              </div>
+
+              <!-- 题目信息表格形式展示 -->
+              <el-table :data="form.items" style="width: 100%" border>
+                <el-table-column label="序号" type="index" width="50" align="center"></el-table-column>
+                <el-table-column label="题目类型" width="100">
+                  <template slot-scope="scope">
+                    <el-select v-model="scope.row.questionType" placeholder="请选择问题类型"
+                      @change="changeQuestionType(scope.row)">
+                      <el-option label="单选题" value="R" />
+                      <el-option label="文本题" value="T" />
+                    </el-select>
+                  </template>
+                </el-table-column>
+                <el-table-column label="题目内容" prop="questionText">
+                  <template slot-scope="scope">
+                    <el-input v-model="scope.row.questionText" placeholder="请输入题目内容" size="mini"></el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column label="选项" width="200">
+                  <template slot-scope="scope">
+                    <div
+                      v-if="scope.row.questionType === 'R' && scope.row.options && scope.row.options.length > 0">
+                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" style="margin-bottom: 5px;">
+                        <el-input v-model="scope.row.options[optIndex]" size="mini"
+                          style="width: calc(100% - 30px);"></el-input>
+                        <el-button @click="removeOption(scope.$index, optIndex)" type="danger" size="mini"
+                          icon="el-icon-delete" circle style="margin-left: 5px;"></el-button>
+                      </div>
+                      <el-button @click="addOption(scope.$index)" type="primary" size="mini"
+                        icon="el-icon-plus">添加选项</el-button>
                     </div>
-                    <el-form-item label="问题类型" :prop="'items.' + index + '.questionType'">
-                      <el-select v-model="question.questionType" placeholder="请选择问题类型"
-                        @change="changeQuestionType(question)">
-                        <el-option label="单选题" value="radio" />
-                        <el-option label="多选题" value="checkbox" />
-                        <el-option label="文本题" value="text" />
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="问题标题" :prop="'items.' + index + '.questionText'">
-                      <el-input v-model="question.questionText" placeholder="请输入问题标题" />
-                    </el-form-item>
-                    <div v-if="question.questionType === 'radio' || question.questionType === 'checkbox'">
-                      <el-form-item v-for="(option, optIndex) in question.options" :key="optIndex"
-                        :label="'选项' + (optIndex + 1)"
-                        :prop="'items.' + index + '.options.' + optIndex + '.optionText'">
-                        <el-input v-model="option.optionText" placeholder="请输入选项内容" style="width: 80%" />
-                        <el-button @click="removeOption(index, optIndex)" type="danger" size="mini"
-                          icon="el-icon-delete" circle></el-button>
-                      </el-form-item>
-                      <el-button @click="addOption(index)" type="primary" size="mini">添加选项</el-button>
-                    </div>
-                  </el-card>
-                </li>
-              </draggable>
-            </el-form-item>
+                    <div v-else>-</div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                  <template slot-scope="scope">
+                    <el-button @click="moveUp(scope.$index)" type="primary" size="mini" icon="el-icon-arrow-up" circle
+                      :disabled="scope.$index === 0"></el-button>
+                    <el-button @click="moveDown(scope.$index)" type="primary" size="mini" icon="el-icon-arrow-down"
+                      circle :disabled="scope.$index === form.items.length - 1"></el-button>
+                    <el-button @click="removeQuestion(scope.$index)" type="danger" size="mini" icon="el-icon-delete"
+                      circle></el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-card>
           </el-col>
         </el-row>
       </el-form>
@@ -207,11 +181,36 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <!-- 题目信息对话框 -->
+    <el-dialog title="题目信息" :visible.sync="itemsOpen" width="800px" append-to-body>
+      <el-table :data="questionItems" border>
+        <el-table-column label="序号" type="index" width="50" align="center" />
+        <el-table-column label="题目类型" prop="itemType" width="80" align="center">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.itemType === 'R'">单选</el-tag>
+            <el-tag v-else-if="scope.row.itemType === 'C'">多选</el-tag>
+            <el-tag v-else>文本</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="题目内容" prop="questionText" />
+        <!-- <el-table-column label="选项" prop="options">
+          <template slot-scope="scope">
+            <div v-if="scope.row.options && scope.row.options.length > 0">
+              <div v-for="(option, index) in scope.row.options" :key="index">
+                {{ index + 1 }}. {{ option }}
+              </div>
+            </div>
+            <span v-else>-</span>
+          </template>
+        </el-table-column> -->
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { addQuestionnaire, getQuestionnaire, listQuestionnaire, updateQuestionnaire, delQuestionnaire, listSubmissions, getSubmissionAnswers, listSubmission } from "@/api/system/questionnaire";
+import { addQuestionnaire, getQuestionnaire, listQuestionnaire, updateQuestionnaire, delQuestionnaire, listSubmissions, getSubmissionAnswers, listSubmission, getQuestionnaireItems } from "@/api/system/questionnaire";
 import draggable from 'vuedraggable'
 
 export default {
@@ -241,6 +240,8 @@ export default {
       open: false,
       // 是否显示提交记录弹出层
       submissionsOpen: false,
+      // 是否显示题目信息弹出层
+      itemsOpen: false,
       // 是否显示回答详情弹出层
       answersOpen: false,
       // 查询参数
@@ -259,6 +260,9 @@ export default {
         endTime: undefined,
         status: "0",
         allowRepeat: "0",
+        targetType: "C",
+        targetRefId: 120,
+        deptId: 16,
         items: []
       },
       // 表单校验
@@ -266,9 +270,6 @@ export default {
         title: [
           { required: true, message: "问卷标题不能为空", trigger: "blur" }
         ],
-        // status: [
-        //   { required: true, message: "状态不能为空", trigger: "change" }
-        // ],
         startTime: [
           { required: true, message: "开始时间不能为空", trigger: "change" }
         ],
@@ -278,6 +279,8 @@ export default {
       },
       // 提交记录数据
       submissions: [],
+      // 题目信息数据
+      questionItems: [],
       // 提交记录总数
       submissionsTotal: 0,
       // 提交记录查询参数
@@ -316,6 +319,13 @@ export default {
         this.answers = response.data;
       });
     },
+    /** 查询题目信息 */
+    getQuestionItems(metaId) {
+      getQuestionnaireItems(metaId).then(response => {
+        this.questionItems = response.data;
+        this.itemsOpen = true;
+      });
+    },
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
@@ -344,6 +354,38 @@ export default {
       const metaId = row.metaId || this.ids
       getQuestionnaire(metaId).then(response => {
         this.form = response.data;
+        
+        // 转换题目列表结构以适配前端表单
+        if (this.form.items && Array.isArray(this.form.items)) {
+          this.form.items = this.form.items.map(item => {
+            // 根据 itemType 设置 questionType
+            let questionType = "T"; // 默认为文本题
+            if (item.itemType === "R") {
+              questionType = "R";
+            }
+            
+            // 处理选项结构
+            let options = [];
+            if (item.options && Array.isArray(item.options)) {
+              // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
+              options = item.options.map(opt => 
+                typeof opt === 'object' && opt !== null ? opt.optionText : opt
+              );
+            }
+            
+            // 单选题确保有默认选项
+            if (questionType === "R" && options.length === 0) {
+              options = ["", "", ""];
+            }
+            
+            return {
+              questionType: questionType,
+              questionText: item.questionText,
+              options: options
+            };
+          });
+        }
+        
         this.open = true;
         this.title = "修改问卷";
       });
@@ -359,29 +401,9 @@ export default {
       this.getAnswers(row.submissionId);
       this.answersOpen = true;
     },
-    /** 用户填写按钮操作 */
-    handleUserSubmit(row) {
-      this.$router.push({
-        name: 'UserQuestionnaireSubmit',
-        params: { metaId: row.metaId }
-      });
-    },
-    /** 详情按钮操作 */
-    handleDetail(row) {
-      this.reset();
-      getQuestionnaire(row.metaId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "问卷详情";
-        // 禁用表单编辑
-        this.$nextTick(() => {
-          this.$refs.form.clearValidate();
-          const form = this.$refs.form;
-          for (let i = 0; i < form.fields.length; i++) {
-            form.fields[i].$el.disabled = true;
-          }
-        });
-      });
+    /** 查看题目按钮操作 */
+    handleViewItems(row) {
+      this.getQuestionItems(row.metaId);
     },
     /** 表单重置 */
     reset() {
@@ -393,6 +415,9 @@ export default {
         endTime: undefined,
         status: "0",
         allowRepeat: "0",
+        targetType: "C",
+        targetRefId: 120,
+        deptId: 16,
         items: []
       };
       this.resetForm("form");
@@ -403,26 +428,6 @@ export default {
       this.reset();
     },
     /** 提交按钮 */
-    // submitForm() {
-    //   this.$refs["form"].validate(valid => {
-    //     if (valid) {
-    //       if (this.form.metaId != null) {
-    //         updateQuestionnaire(this.form).then(response => {
-    //           this.$modal.msgSuccess("修改成功");
-    //           this.open = false;
-    //           this.getList();
-    //         });
-    //       } else {
-    //         addQuestionnaire(this.form).then(response => {
-    //           this.$modal.msgSuccess("新增成功");
-    //           this.open = false;
-    //           this.getList();
-    //         });
-    //       }
-    //     }
-    //   });
-    // },
-    /** 提交按钮 */
     submitForm() {
       this.$refs.form.validate(valid => {
         if (!valid) return;
@@ -430,15 +435,31 @@ export default {
         // 1. 深拷贝
         const postData = JSON.parse(JSON.stringify(this.form));
 
-        // 2. 关键：把 items 转成后端字段
-        postData.items = (postData.items || []).map((q, idx) => ({
-          questionText: q.questionText,
-          itemType: q.questionType,   // 就是这里缺
-          orderNum: idx + 1,
-          options: (q.options || []).map(opt => ({
-            optionText: opt.optionText
-          }))
-        }));
+        // 2. 转换数据格式以匹配后端API要求
+        // 添加缺失的字段
+        postData.targetType = "C";
+        postData.targetRefId = 120;
+        postData.deptId = 16;
+
+        // 转换 items 字段格式
+        postData.items = (postData.items || []).map((q, idx) => {
+          // 处理选项字段
+          let options = [];
+          if (q.options && Array.isArray(q.options)) {
+            // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
+            options = q.options.map(opt => 
+              typeof opt === 'object' && opt !== null ? opt.optionText : opt
+            );
+          }
+          
+          return {
+            itemType: q.questionType || "T",  // 默认为文本题
+            questionText: q.questionText,
+            orderNum: idx + 1,
+            required: q.questionType === "R",  // 只有单选题必填
+            options: options
+          };
+        });
 
         // 3. 发请求
         const api = postData.metaId
@@ -470,12 +491,9 @@ export default {
       }
 
       this.form.items.push({
-        questionType: "radio",
+        questionType: "R",
         questionText: "",
-
-        options: [
-          { optionText: "" }
-        ]
+        options: ["", "", ""]
       });
     },
     /** 删除问题 */
@@ -484,22 +502,38 @@ export default {
     },
     /** 添加选项 */
     addOption(questionIndex) {
-      this.form.items[questionIndex].options.push({ optionText: "" });
+      this.form.items[questionIndex].options.push("");
     },
     /** 删除选项 */
     removeOption(questionIndex, optionIndex) {
       this.form.items[questionIndex].options.splice(optionIndex, 1);
     },
+    /** 上移题目 */
+    moveUp(index) {
+      if (index > 0) {
+        const temp = this.form.items[index];
+        this.$set(this.form.items, index, this.form.items[index - 1]);
+        this.$set(this.form.items, index - 1, temp);
+      }
+    },
+    /** 下移题目 */
+    moveDown(index) {
+      if (index < this.form.items.length - 1) {
+        const temp = this.form.items[index];
+        this.$set(this.form.items, index, this.form.items[index + 1]);
+        this.$set(this.form.items, index + 1, temp);
+      }
+    },
     /** 改变问题类型 */
     changeQuestionType(question) {
-      if (question.questionType === "radio" || question.questionType === "checkbox") {
-        // 如果是选择题，确保有选项
+      if (question.questionType === "R") {
+        // 如果是单选题，确保有选项
         if (!question.options || question.options.length === 0) {
-          this.$set(question, "options", [{ optionText: "" }]);
+          this.$set(question, "options", ["", "", ""]);
         }
       } else {
-        // 如果是非选择题，删除选项
-        this.$delete(question, "options");
+        // 如果是文本题，清空选项
+        this.$set(question, "options", []);
       }
     },
     /** 格式化回答 */
