@@ -235,6 +235,33 @@ export const dynamicRoutes = [
     name: 'CourseResource',
     hidden: true,
     meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
+  },
+
+  {
+    path: '/system/myCourse/resource/:courseId',
+    component: () => import('@/views/system/myCourse/resource.vue'),
+    name: 'MyCourseResource',
+    meta: { title: '我的课程资源', icon: '' }
+  },
+  {
+    path: '/system/questionnaire',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/system/questionnaire/userList',
+        component: () => import('@/views/system/questionnaire/userList'),
+        name: 'QuestionnaireUserList',
+        meta: { title: '问卷提交记录', icon: '' }
+      },
+      
+{
+  path: '/system/myCourse/resource/:courseId',
+  component: () => import('@/views/system/myCourse/resource.vue'),
+  name: 'MyCourseResource',
+  meta: { title: '我的课程资源', icon: '' }
+}
+    ]
   }
 ]
 

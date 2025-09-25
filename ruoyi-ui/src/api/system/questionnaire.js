@@ -84,3 +84,12 @@ export function getQuestionnaireItems(metaId) {
     method: 'get'
   })
 }
+
+
+// 根据题目ID获取选项（字符串数组）
+export function getItemOptions(itemId) {
+  return request({
+    url: `/system/questionnaire/item/${itemId}/options`,
+    method: 'get'
+  })
+}
