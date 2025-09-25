@@ -14,19 +14,19 @@ public class SysCourseSigninRecord extends BaseEntity {
     private Long recordId;
 
     /** 对应的签到任务（签到元数据）的ID **/
-    @Excel(name = "对应的签到任务（签到元数据）的ID")
+    //@Excel(name = "对应的签到任务（签到元数据）的ID")
     private Long signinId;
 
     /** 用户ID **/
-    @Excel(name = "用户ID")
+    //@Excel(name = "用户ID")
     private Long userId;
 
     /** 需要签到的课程ID **/
-    @Excel(name = "需要签到的课程ID")
+    //@Excel(name = "需要签到的课程ID")
     private Long courseId;
 
     /** 签到状态（0未签到，1已签到） **/
-    @Excel(name = "签到状态（0未签到，1已签到）")
+    @Excel(name = "签到状态", readConverterExp = "0=未签到,1=已签到")
     private String status;
 
     /** 签到时间 **/
@@ -36,9 +36,13 @@ public class SysCourseSigninRecord extends BaseEntity {
     private Date signinTime;
 
     /** 用于前端展示的字段 **/
-    private String title;   // 签到活动的标题
+    @Excel(name = "签到活动标题")
+    private String title;   
+    @Excel(name = "课程名称")
     private String courseName;
+    @Excel(name = "班级名称")
     private String deptName;
+    @Excel(name = "用户名称")
     private String userName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

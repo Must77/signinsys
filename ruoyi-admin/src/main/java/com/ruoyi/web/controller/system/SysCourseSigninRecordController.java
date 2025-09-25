@@ -1,11 +1,19 @@
 package com.ruoyi.web.controller.system;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysCourseSigninRecord;
 import com.ruoyi.system.service.ISysCourseSigninRecordService;
 
@@ -53,5 +61,24 @@ public class SysCourseSigninRecordController extends BaseController {
     {
         List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 导出签到记录
+     * @param response 响应流
+     * @param query 查询条件
+     * @throws UnsupportedEncodingException 
+     */
+    @Log(title = "签到记录-导出", businessType = com.ruoyi.common.enums.BusinessType.EXPORT)
+    @PreAuthorize("@ss.hasPermi('system:signinRecord:export')")
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, @RequestBody SysCourseSigninRecord query) throws UnsupportedEncodingException
+    {
+        List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
+        ExcelUtil<SysCourseSigninRecord> util = new ExcelUtil<SysCourseSigninRecord>(SysCourseSigninRecord.class);
+        // 文件名中添加人类可读的时间戳
+        String fileName = DateUtils.dateTimeNow("yyyyMMdd_HHmmss") + "_签到记录数据.xlsx";
+        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
+        util.exportExcel(response, list, "签到记录数据");
     }
 }
