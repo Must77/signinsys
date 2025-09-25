@@ -209,6 +209,7 @@
   </div>
 </template>
 
+
 <script>
 import { addQuestionnaire, getQuestionnaire, listQuestionnaire, updateQuestionnaire, delQuestionnaire, listSubmissions, getSubmissionAnswers, listSubmission, getQuestionnaireItems } from "@/api/system/questionnaire";
 import draggable from 'vuedraggable'
@@ -373,9 +374,9 @@ export default {
               );
             }
             
-            // 单选题确保有默认选项
+            // 单选题确保有默认选项（修改为五个标准选项）
             if (questionType === "R" && options.length === 0) {
-              options = ["", "", ""];
+              options = ["非常满意", "满意", "一般", "不满意", "非常不满意"];
             }
             
             return {
@@ -493,7 +494,7 @@ export default {
       this.form.items.push({
         questionType: "R",
         questionText: "",
-        options: ["", "", ""]
+        options: ["非常满意", "满意", "一般", "不满意", "非常不满意"] // 五个标准默认选项
       });
     },
     /** 删除问题 */
@@ -527,9 +528,9 @@ export default {
     /** 改变问题类型 */
     changeQuestionType(question) {
       if (question.questionType === "R") {
-        // 如果是单选题，确保有选项
+        // 如果是单选题，确保有五个默认选项
         if (!question.options || question.options.length === 0) {
-          this.$set(question, "options", ["", "", ""]);
+          this.$set(question, "options", ["非常满意", "满意", "一般", "不满意", "非常不满意"]);
         }
       } else {
         // 如果是文本题，清空选项

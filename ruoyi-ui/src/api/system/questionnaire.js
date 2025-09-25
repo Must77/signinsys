@@ -73,7 +73,7 @@ export function submitQuestionnaire(metaId, data) {
   return request({
     url: '/system/questionnaire/' + metaId + '/submit',
     method: 'post',
-    data: answers
+    data: data
   })
 }
 
