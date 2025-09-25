@@ -12,14 +12,15 @@ public class SysDeptApply extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 申请ID */
+    @Excel(name = "申请ID")
     private Long applyId;
 
     /** 申请用户ID */
-    @Excel(name = "用户ID")
+    //@Excel(name = "用户ID")
     private Long userId;
 
     /** 申请部门ID */
-    @Excel(name = "部门ID")
+    //@Excel(name = "部门ID")
     private Long deptId;
 
     /** 申请状态（0待审核 1通过 2拒绝） */
@@ -40,8 +41,10 @@ public class SysDeptApply extends BaseEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date applyTime;
 
-    /** 用于前端展示的字段: 申请者名字, 申请部门 **/
+    /** 用于展示的字段: 申请者名字, 申请部门 **/
+    @Excel(name = "用户名")
     private String userName;
+    @Excel(name = "部门名称")
     private String deptName;
 
 

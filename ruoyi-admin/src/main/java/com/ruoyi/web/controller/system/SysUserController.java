@@ -1,9 +1,13 @@
 package com.ruoyi.web.controller.system;
 
+import java.beans.Encoder;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +28,7 @@ import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -68,10 +73,13 @@ public class SysUserController extends BaseController
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")
     @PostMapping("/export")
-    public void export(HttpServletResponse response, SysUser user)
+    public void export(HttpServletResponse response, SysUser user) throws UnsupportedEncodingException
     {
         List<SysUser> list = userService.selectUserList(user);
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
+        // 在文件名中添加人类可读时间戳
+        String fileName = DateUtils.dateTimeNow("yyyyMMdd_HHmmss") + "_班级用户表.xlsx";
+        response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
         util.exportExcel(response, list, "用户数据");
     }
 
