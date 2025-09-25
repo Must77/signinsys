@@ -19,7 +19,7 @@
           <el-button size="mini" type="text" @click="handleView(scope.row)">查看详情</el-button>
           <el-button 
             size="mini" 
-            type="text" 
+            :class="['apply-button', { 'apply-disabled': scope.row.status !== '0' || scope.row.size >= scope.row.cap }]"
             :disabled="scope.row.status !== '0' || scope.row.size >= scope.row.cap"
             @click="handleApply(scope.row)"
           >
@@ -70,7 +70,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="detailOpen = false">关闭</el-button>
         <el-button 
-          type="primary" 
+          :class="['apply-button', 'apply-dialog-button', { 'apply-disabled': detailInfo.status !== '0' || detailInfo.size >= detailInfo.cap }]"
           :disabled="detailInfo.status !== '0' || detailInfo.size >= detailInfo.cap"
           @click="handleApply(detailInfo)"
         >
@@ -124,8 +124,16 @@ export default {
       this.loading = true
       listDept({ status: '0' }).then(response => {
         // 只显示班级（部门类型）
-        this.classList = response.data.filter(item => item.deptId !== 100 && item.deptId !== 101)
+        if (response.data) {
+          this.classList = response.data.filter(item => item.deptId !== 100 && item.deptId !== 101)
+        } else if (response.rows) {
+          this.classList = response.rows.filter(item => item.deptId !== 100 && item.deptId !== 101)
+        }
         this.loading = false
+      }).catch(error => {
+        console.error('获取班级列表失败:', error)
+        this.loading = false
+        this.$message.error('获取班级列表失败，请联系管理员')
       })
     },
     
@@ -167,5 +175,40 @@ export default {
 <style scoped>
 .app-container {
   padding: 20px;
+}
+
+.apply-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 10px;
+}
+
+.apply-button:hover:not(.apply-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.apply-button:active:not(.apply-disabled) {
+  transform: translateY(0);
+}
+
+.apply-disabled {
+  background: #cccccc !important;
+  color: #999999 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.apply-dialog-button {
+  padding: 8px 24px;
+  font-size: 14px;
 }
 </style>
