@@ -49,19 +49,26 @@ export const constantRoutes = [
   hidden: true,
   meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
 },
-{
-  path: '/myLeave',
-  component: Layout,
-  hidden: false,
-  children: [
-    {
-      path: '/myLeave',
-      component: () => import('@/views/system/myLeave/index.vue'),
-      name: 'MyLeave',
-      meta: { title: '我的请假', icon: 'form' }
-    }
-  ]
-},
+  {
+    path: '/system/questionnaire',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'userList',
+        component: () => import('@/views/system/questionnaire/userList.vue'),
+        name: 'UserQuestionnaireList',
+        meta: { title: '问卷列表', icon: 'form' }
+      },
+      {
+        path: 'userSubmit/:questionnaireMetaId(\\d+)',
+        component: () => import('@/views/system/questionnaire/userSubmit.vue'),
+        name: 'UserQuestionnaireSubmit',
+        meta: { title: '填写问卷', icon: 'form' },
+        hidden: true
+      }
+    ]
+  },
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -92,6 +99,20 @@ export const constantRoutes = [
         component: () => import('@/views/index'),
         name: 'Index',
         meta: { title: '首页', icon: 'dashboard', noCache: true, affix: true }
+      }
+    ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'profile',
+        component: () => import('@/views/system/user/profile/index'),
+        name: 'Profile',
+        meta: { title: '个人中心', icon: 'user' }
       }
     ]
   },
@@ -214,6 +235,33 @@ export const dynamicRoutes = [
     name: 'CourseResource',
     hidden: true,
     meta: { title: '课程资源管理', icon: 'folder', activeMenu: '/system/deptCourse' }
+  },
+
+  {
+    path: '/system/myCourse/resource/:courseId',
+    component: () => import('@/views/system/myCourse/resource.vue'),
+    name: 'MyCourseResource',
+    meta: { title: '我的课程资源', icon: '' }
+  },
+  {
+    path: '/system/questionnaire',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/system/questionnaire/userList',
+        component: () => import('@/views/system/questionnaire/userList'),
+        name: 'QuestionnaireUserList',
+        meta: { title: '问卷提交记录', icon: '' }
+      },
+      
+{
+  path: '/system/myCourse/resource/:courseId',
+  component: () => import('@/views/system/myCourse/resource.vue'),
+  name: 'MyCourseResource',
+  meta: { title: '我的课程资源', icon: '' }
+}
+    ]
   }
 ]
 

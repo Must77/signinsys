@@ -5,7 +5,7 @@ export function listCourseResource(query) {
   return request({
     url: '/system/deptCourse/resource/list',
     method: 'get',
-    data: query
+    params: query
   })
 }
 

@@ -110,24 +110,42 @@ export default {
       }
       if (this.activeTab === 'pending') {
         listMyPendingSignin().then(res => {
-            console.log('myPending row:', res.rows?.[0])   // ← 加这里
+            console.log('myPending row:', res.rows?.[0])
 
           const rows = (res.rows || []).map(r => ({
             ...r,
             mySigninStatus: '0', // 接口只返未签到
             status: '1'          // 接口只返进行中
           }))
-          done(rows, rows.length)
+          done(rows, res.total || rows.length)
         }).catch(() => done([], 0))
       } else {
         listSigninRecord(this.queryParams).then(res => {
             console.log('list row:', res.rows?.[0])
 
-          const rows = (res.rows || []).map(r => ({
+          // 修复数据格式问题，兼容TableDataInfo和AjaxResult格式
+          let rows = [];
+          let total = 0;
+          
+          if (res.rows && Array.isArray(res.rows)) {
+            // TableDataInfo格式
+            rows = res.rows || [];
+            total = res.total || rows.length;
+          } else if (Array.isArray(res.data)) {
+            // AjaxResult格式，数据在data中
+            rows = res.data || [];
+            total = rows.length;
+          } else if (res.data && res.data.rows && Array.isArray(res.data.rows)) {
+            // data中包含rows的嵌套格式
+            rows = res.data.rows || [];
+            total = res.data.total || rows.length;
+          }
+          
+          rows = rows.map(r => ({
             ...r,
             mySigninStatus: r.signStatus === '1' ? '1' : '0'
           }))
-          done(rows, res.total || 0)
+          done(rows, total)
         }).catch(() => done([], 0))
       }
     },
