@@ -44,15 +44,11 @@ export function delQuestionnaire(metaId) {
 }
 
 // 查看问卷提交记录
-export function listSubmissions(metaId, params) {
+export function listSubmissions(metaId) {
   return request({
-    url: '/system/questionnaire/submissions',
-    method: 'get',
-    params: {
-      metaId: metaId,
-      ...params
-    }
-  });
+    url: '/system/questionnaire/' + metaId + '/submissions',
+    method: 'get'
+  })
 }
 
 // 查看提交的回答

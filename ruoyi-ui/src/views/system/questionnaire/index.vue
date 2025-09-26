@@ -116,7 +116,8 @@
                   <template slot-scope="scope">
                     <!-- 固定选项显示，不可编辑 -->
                     <div class="fixed-options">
-                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" class="fixed-option-item">
+                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" 
+                           class="fixed-option-item">
                         <span class="option-label">{{ String.fromCharCode(65 + optIndex) }}.</span>
                         <span class="option-text">{{ option }}</span>
                       </div>
@@ -147,21 +148,14 @@
 
     <!-- 问卷提交记录对话框 -->
     <el-dialog title="提交记录" :visible.sync="submissionsOpen" width="1000px" append-to-body>
-      <el-table :data="submissions" border v-loading="submissionsLoading">
-        <el-table-column label="提交ID" prop="submissionId" width="80" align="center" />
-        <el-table-column label="问卷ID" prop="metaId" width="80" align="center" />
-        <el-table-column label="用户ID" prop="userId" width="80" align="center" />
-        <el-table-column label="提交时间" prop="submitTime" width="180" align="center">
-          <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.submitTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="创建时间" prop="createTime" width="180" align="center">
+      <el-table :data="submissions" border>
+        <el-table-column label="提交ID" prop="submissionId" width="80" />
+        <el-table-column label="提交人" prop="userName" width="120" />
+        <el-table-column label="提交时间" prop="createTime" width="180">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="IP地址" prop="ipAddr" width="120" align="center" />
         <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view"
@@ -205,23 +199,8 @@ export default {
   data() {
     // 定义固定选项
     const defaultOptions = ["非常满意", "满意", "一般", "不满意", "非常不满意"];
-
+    
     return {
-      // 提交记录加载状态
-      submissionsLoading: false,
-
-      // 提交记录数据
-      submissions: [],
-      // 提交记录总数
-      submissionsTotal: 0,
-      // 提交记录查询参数
-      submissionsQueryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        metaId: undefined
-      },
-      // 回答数据
-      answers: [],
       // 遮罩层
       loading: true,
       // 选中数组
@@ -312,38 +291,15 @@ export default {
     },
     /** 查询提交记录 */
     getSubmissions() {
-      this.submissionsLoading = true;
-      // 确保使用正确的API方法，根据您的API调整参数
-      listSubmissions(this.submissionsQueryParams).then(response => {
-        // 根据实际API响应结构调整
-        if (response.code === 200) {
-          // 如果API返回的数据在data字段中
-          this.submissions = response.data || response.rows || [];
-          this.submissionsTotal = response.total || this.submissions.length;
-        } else {
-          this.submissions = [];
-          this.submissionsTotal = 0;
-          this.$modal.msgError("获取提交记录失败");
-        }
-        this.submissionsLoading = false;
-      }).catch(error => {
-        console.error("获取提交记录失败:", error);
-        this.submissionsLoading = false;
-        this.$modal.msgError("获取提交记录失败");
+      listSubmissions(this.submissionsQueryParams.metaId, this.submissionsQueryParams).then(response => {
+        this.submissions = response.rows;
+        this.submissionsTotal = response.total;
       });
     },
     /** 查询回答详情 */
     getAnswers(submissionId) {
       getSubmissionAnswers(submissionId).then(response => {
-        if (response.code === 200) {
-          this.answers = response.data || [];
-        } else {
-          this.answers = [];
-          this.$modal.msgError("获取回答详情失败");
-        }
-      }).catch(error => {
-        console.error("获取回答详情失败:", error);
-        this.$modal.msgError("获取回答详情失败");
+        this.answers = response.data;
       });
     },
     /** 查询题目信息 */
@@ -381,27 +337,27 @@ export default {
       const metaId = row.metaId || this.ids
       getQuestionnaire(metaId).then(response => {
         this.form = response.data;
-
+        
         // 转换题目列表结构以适配前端表单
         if (this.form.items && Array.isArray(this.form.items)) {
           this.form.items = this.form.items.map(item => {
             // 所有题目都是单选题
             let questionType = "R";
-
+            
             // 处理选项结构
             let options = [];
             if (item.options && Array.isArray(item.options)) {
               // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-              options = item.options.map(opt =>
+              options = item.options.map(opt => 
                 typeof opt === 'object' && opt !== null ? opt.optionText : opt
               );
             }
-
+            
             // 如果没有选项，使用默认选项
             if (options.length === 0) {
               options = [...this.defaultOptions];
             }
-
+            
             return {
               questionType: questionType,
               questionText: item.questionText,
@@ -409,7 +365,7 @@ export default {
             };
           });
         }
-
+        
         this.open = true;
         this.title = "修改问卷";
       });
@@ -417,7 +373,6 @@ export default {
     /** 提交记录按钮操作 */
     handleSubmissions(row) {
       this.submissionsQueryParams.metaId = row.metaId;
-      this.submissionsQueryParams.pageNum = 1; // 重置页码
       this.getSubmissions();
       this.submissionsOpen = true;
     },
@@ -472,11 +427,11 @@ export default {
           let options = [];
           if (q.options && Array.isArray(q.options)) {
             // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-            options = q.options.map(opt =>
+            options = q.options.map(opt => 
               typeof opt === 'object' && opt !== null ? opt.optionText : opt
             );
           }
-
+          
           return {
             itemType: "R",  // 固定为单选题
             questionText: q.questionText,
