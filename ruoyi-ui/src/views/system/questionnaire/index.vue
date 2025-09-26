@@ -102,11 +102,9 @@
                 <el-table-column label="序号" type="index" width="50" align="center"></el-table-column>
                 <el-table-column label="题目类型" width="100">
                   <template slot-scope="scope">
-                    <el-select v-model="scope.row.questionType" placeholder="请选择问题类型"
-                      @change="changeQuestionType(scope.row)">
-                      <el-option label="单选题" value="R" />
-                      <el-option label="文本题" value="T" />
-                    </el-select>
+                    <!-- 只显示单选题，移除文本题选项 -->
+                    <el-tag type="primary">单选题</el-tag>
+                    <input type="hidden" v-model="scope.row.questionType" value="R" />
                   </template>
                 </el-table-column>
                 <el-table-column label="题目内容" prop="questionText">
@@ -114,20 +112,16 @@
                     <el-input v-model="scope.row.questionText" placeholder="请输入题目内容" size="mini"></el-input>
                   </template>
                 </el-table-column>
-                <el-table-column label="选项" width="200">
+                <el-table-column label="选项" width="300">
                   <template slot-scope="scope">
-                    <div
-                      v-if="scope.row.questionType === 'R' && scope.row.options && scope.row.options.length > 0">
-                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" style="margin-bottom: 5px;">
-                        <el-input v-model="scope.row.options[optIndex]" size="mini"
-                          style="width: calc(100% - 30px);"></el-input>
-                        <el-button @click="removeOption(scope.$index, optIndex)" type="danger" size="mini"
-                          icon="el-icon-delete" circle style="margin-left: 5px;"></el-button>
+                    <!-- 固定选项显示，不可编辑 -->
+                    <div class="fixed-options">
+                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" class="fixed-option-item">
+                        <span class="option-label">{{ String.fromCharCode(65 + optIndex) }}.</span>
+                        <span class="option-text">{{ option }}</span>
                       </div>
-                      <el-button @click="addOption(scope.$index)" type="primary" size="mini"
-                        icon="el-icon-plus">添加选项</el-button>
+                      <div class="fixed-options-tip">此为固定选项，不可修改</div>
                     </div>
-                    <div v-else>-</div>
                   </template>
                 </el-table-column>
                 <el-table-column label="操作" width="100">
@@ -153,14 +147,21 @@
 
     <!-- 问卷提交记录对话框 -->
     <el-dialog title="提交记录" :visible.sync="submissionsOpen" width="1000px" append-to-body>
-      <el-table :data="submissions" border>
-        <el-table-column label="提交ID" prop="submissionId" width="80" />
-        <el-table-column label="提交人" prop="userName" width="120" />
-        <el-table-column label="提交时间" prop="createTime" width="180">
+      <el-table :data="submissions" border v-loading="submissionsLoading">
+        <el-table-column label="提交ID" prop="submissionId" width="80" align="center" />
+        <el-table-column label="问卷ID" prop="metaId" width="80" align="center" />
+        <el-table-column label="用户ID" prop="userId" width="80" align="center" />
+        <el-table-column label="提交时间" prop="submitTime" width="180" align="center">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.submitTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" prop="createTime" width="180" align="center">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="IP地址" prop="ipAddr" width="120" align="center" />
         <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view"
@@ -176,8 +177,7 @@
     <el-dialog title="回答详情" :visible.sync="answersOpen" width="800px" append-to-body>
       <el-descriptions :column="1" border>
         <el-descriptions-item v-for="(answer, index) in answers" :key="index" :label="answer.questionText">
-          <span v-if="answer.questionType === 'text'">{{ answer.answerText }}</span>
-          <span v-else>{{ formatAnswer(answer) }}</span>
+          <span>{{ formatAnswer(answer) }}</span>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -188,39 +188,40 @@
         <el-table-column label="序号" type="index" width="50" align="center" />
         <el-table-column label="题目类型" prop="itemType" width="80" align="center">
           <template slot-scope="scope">
-            <el-tag v-if="scope.row.itemType === 'R'">单选</el-tag>
-            <el-tag v-else-if="scope.row.itemType === 'C'">多选</el-tag>
-            <el-tag v-else>文本</el-tag>
+            <el-tag>单选</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="题目内容" prop="questionText" />
-        <!-- <el-table-column label="选项" prop="options">
-          <template slot-scope="scope">
-            <div v-if="scope.row.options && scope.row.options.length > 0">
-              <div v-for="(option, index) in scope.row.options" :key="index">
-                {{ index + 1 }}. {{ option }}
-              </div>
-            </div>
-            <span v-else>-</span>
-          </template>
-        </el-table-column> -->
       </el-table>
     </el-dialog>
   </div>
 </template>
 
-
 <script>
 import { addQuestionnaire, getQuestionnaire, listQuestionnaire, updateQuestionnaire, delQuestionnaire, listSubmissions, getSubmissionAnswers, listSubmission, getQuestionnaireItems } from "@/api/system/questionnaire";
-import draggable from 'vuedraggable'
 
 export default {
   name: "Questionnaire",
-  components: {
-    draggable
-  },
   data() {
+    // 定义固定选项
+    const defaultOptions = ["非常满意", "满意", "一般", "不满意", "非常不满意"];
+
     return {
+      // 提交记录加载状态
+      submissionsLoading: false,
+
+      // 提交记录数据
+      submissions: [],
+      // 提交记录总数
+      submissionsTotal: 0,
+      // 提交记录查询参数
+      submissionsQueryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        metaId: undefined
+      },
+      // 回答数据
+      answers: [],
       // 遮罩层
       loading: true,
       // 选中数组
@@ -266,6 +267,8 @@ export default {
         deptId: 16,
         items: []
       },
+      // 固定选项
+      defaultOptions: defaultOptions,
       // 表单校验
       rules: {
         title: [
@@ -309,15 +312,38 @@ export default {
     },
     /** 查询提交记录 */
     getSubmissions() {
-      listSubmissions(this.submissionsQueryParams.metaId, this.submissionsQueryParams).then(response => {
-        this.submissions = response.rows;
-        this.submissionsTotal = response.total;
+      this.submissionsLoading = true;
+      // 确保使用正确的API方法，根据您的API调整参数
+      listSubmissions(this.submissionsQueryParams).then(response => {
+        // 根据实际API响应结构调整
+        if (response.code === 200) {
+          // 如果API返回的数据在data字段中
+          this.submissions = response.data || response.rows || [];
+          this.submissionsTotal = response.total || this.submissions.length;
+        } else {
+          this.submissions = [];
+          this.submissionsTotal = 0;
+          this.$modal.msgError("获取提交记录失败");
+        }
+        this.submissionsLoading = false;
+      }).catch(error => {
+        console.error("获取提交记录失败:", error);
+        this.submissionsLoading = false;
+        this.$modal.msgError("获取提交记录失败");
       });
     },
     /** 查询回答详情 */
     getAnswers(submissionId) {
       getSubmissionAnswers(submissionId).then(response => {
-        this.answers = response.data;
+        if (response.code === 200) {
+          this.answers = response.data || [];
+        } else {
+          this.answers = [];
+          this.$modal.msgError("获取回答详情失败");
+        }
+      }).catch(error => {
+        console.error("获取回答详情失败:", error);
+        this.$modal.msgError("获取回答详情失败");
       });
     },
     /** 查询题目信息 */
@@ -355,30 +381,27 @@ export default {
       const metaId = row.metaId || this.ids
       getQuestionnaire(metaId).then(response => {
         this.form = response.data;
-        
+
         // 转换题目列表结构以适配前端表单
         if (this.form.items && Array.isArray(this.form.items)) {
           this.form.items = this.form.items.map(item => {
-            // 根据 itemType 设置 questionType
-            let questionType = "T"; // 默认为文本题
-            if (item.itemType === "R") {
-              questionType = "R";
-            }
-            
+            // 所有题目都是单选题
+            let questionType = "R";
+
             // 处理选项结构
             let options = [];
             if (item.options && Array.isArray(item.options)) {
               // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-              options = item.options.map(opt => 
+              options = item.options.map(opt =>
                 typeof opt === 'object' && opt !== null ? opt.optionText : opt
               );
             }
-            
-            // 单选题确保有默认选项（修改为五个标准选项）
-            if (questionType === "R" && options.length === 0) {
-              options = ["非常满意", "满意", "一般", "不满意", "非常不满意"];
+
+            // 如果没有选项，使用默认选项
+            if (options.length === 0) {
+              options = [...this.defaultOptions];
             }
-            
+
             return {
               questionType: questionType,
               questionText: item.questionText,
@@ -386,7 +409,7 @@ export default {
             };
           });
         }
-        
+
         this.open = true;
         this.title = "修改问卷";
       });
@@ -394,6 +417,7 @@ export default {
     /** 提交记录按钮操作 */
     handleSubmissions(row) {
       this.submissionsQueryParams.metaId = row.metaId;
+      this.submissionsQueryParams.pageNum = 1; // 重置页码
       this.getSubmissions();
       this.submissionsOpen = true;
     },
@@ -448,16 +472,16 @@ export default {
           let options = [];
           if (q.options && Array.isArray(q.options)) {
             // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-            options = q.options.map(opt => 
+            options = q.options.map(opt =>
               typeof opt === 'object' && opt !== null ? opt.optionText : opt
             );
           }
-          
+
           return {
-            itemType: q.questionType || "T",  // 默认为文本题
+            itemType: "R",  // 固定为单选题
             questionText: q.questionText,
             orderNum: idx + 1,
-            required: q.questionType === "R",  // 只有单选题必填
+            required: true,  // 所有题目都必填
             options: options
           };
         });
@@ -494,20 +518,12 @@ export default {
       this.form.items.push({
         questionType: "R",
         questionText: "",
-        options: ["非常满意", "满意", "一般", "不满意", "非常不满意"] // 五个标准默认选项
+        options: [...this.defaultOptions] // 使用固定选项的副本
       });
     },
     /** 删除问题 */
     removeQuestion(index) {
       this.form.items.splice(index, 1);
-    },
-    /** 添加选项 */
-    addOption(questionIndex) {
-      this.form.items[questionIndex].options.push("");
-    },
-    /** 删除选项 */
-    removeOption(questionIndex, optionIndex) {
-      this.form.items[questionIndex].options.splice(optionIndex, 1);
     },
     /** 上移题目 */
     moveUp(index) {
@@ -523,18 +539,6 @@ export default {
         const temp = this.form.items[index];
         this.$set(this.form.items, index, this.form.items[index + 1]);
         this.$set(this.form.items, index + 1, temp);
-      }
-    },
-    /** 改变问题类型 */
-    changeQuestionType(question) {
-      if (question.questionType === "R") {
-        // 如果是单选题，确保有五个默认选项
-        if (!question.options || question.options.length === 0) {
-          this.$set(question, "options", ["非常满意", "满意", "一般", "不满意", "非常不满意"]);
-        }
-      } else {
-        // 如果是文本题，清空选项
-        this.$set(question, "options", []);
       }
     },
     /** 格式化回答 */
@@ -560,5 +564,43 @@ export default {
 
 .question-card {
   border-radius: 4px;
+}
+
+/* 固定选项样式 */
+.fixed-options {
+  padding: 8px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.fixed-option-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 4px 0;
+}
+
+.option-label {
+  font-weight: bold;
+  margin-right: 8px;
+  min-width: 20px;
+}
+
+.option-text {
+  color: #666;
+}
+
+.fixed-options-tip {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #ddd;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+.no-options-hint {
+  margin-top: 10px;
 }
 </style>

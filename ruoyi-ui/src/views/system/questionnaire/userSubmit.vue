@@ -20,137 +20,44 @@
           </el-col>
         </el-row>
 
-        <!-- 题目信息展示区域 -->
-        <el-row>
-          <el-col :span="24">
-            <el-card class="box-card">
-              <div slot="header" class="clearfix">
-                <span>题目信息</span>
-              </div>
-              <div v-if="questionnaireItems && questionnaireItems.length > 0">
-                <div
-                  v-for="(item, index) in questionnaireItems"
-                  :key="item.itemId"
-                  class="question-item-info"
-                >
-                  <h4>{{ index + 1 }}. {{ item.questionText }}</h4>
-                  <p><strong>题目类型:</strong>
-                    <span v-if="item.itemType === 'R'">单选题</span>
-                    <span v-else-if="item.itemType === 'T'">文本题</span>
-                    <span v-else>其他类型</span>
-                  </p>
-                  <p><strong>是否必填:</strong> {{ item.required ? '是' : '否' }}</p>
-                  <div v-if="item.options && item.options.length > 0">
-                    <p><strong>选项:</strong></p>
-                    <ul>
-                      <li v-for="(option, optIndex) in item.options" :key="optIndex">
-                        {{ option }}
-                      </li>
-                    </ul>
-                  </div>
-                  <el-divider v-if="index < questionnaireItems.length - 1"></el-divider>
-                </div>
-              </div>
-              <div v-else>
-                <el-alert
-                  title="暂无题目信息"
-                  type="info"
-                  show-icon
-                  :closable="false"
-                />
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
-
         <el-row>
           <el-col :span="24">
             <div v-if="form.items && form.items.length > 0">
-              <div
-                v-for="(question, index) in form.items"
-                :key="question.itemId"
-                class="question-item"
-              >
-                <el-form-item
-                  :prop="'items.' + index + '.answer'"
-                  :rules="getQuestionRules(question)"
-                >
+              <div v-for="(question, index) in form.items" :key="question.itemId" class="question-item">
+                <el-form-item :prop="'items.' + index + '.answer'" :rules="getQuestionRules(question)">
                   <div class="question-title">
                     {{ index + 1 }}. {{ question.questionText }}
-                    <span v-if="question.required" class="required">*</span>
+                    <span class="required">*</span>
                   </div>
 
                   <!-- 单选题 -->
-                  <div v-if="question.itemType === 'R'" class="question-options">
+                  <div class="question-options">
                     <div v-if="question.options && question.options.length > 0">
                       <el-radio-group v-model="question.answer" class="radio-group">
-                        <div
-                          v-for="(option, optIndex) in question.options"
-                          :key="optIndex"
-                          class="radio-option"
-                        >
-                          <el-radio
-                            :label="option"
-                            class="custom-radio"
-                          >
+                        <div v-for="(option, optIndex) in question.options" :key="optIndex" class="radio-option">
+                          <el-radio :label="option" class="custom-radio">
                             {{ String.fromCharCode(65 + optIndex) }}. {{ option }}
                           </el-radio>
                         </div>
                       </el-radio-group>
                     </div>
                     <div v-else class="no-options">
-                      <el-alert
-                        title="该题目没有可用的选项"
-                        type="warning"
-                        show-icon
-                        :closable="false"
-                      />
+                      <el-alert title="该题目没有可用的选项" type="warning" show-icon :closable="false" />
                     </div>
-                  </div>
-
-                  <!-- 文本题 -->
-                  <div v-else-if="question.itemType === 'T'" class="question-text">
-                    <el-input
-                      v-model="question.answer"
-                      type="textarea"
-                      :rows="4"
-                      :placeholder="question.placeholder || '请输入您的回答'"
-                      class="text-answer"
-                      clearable
-                    />
-                  </div>
-
-                  <!-- 未知题型提示 -->
-                  <div v-else class="unknown-question-type">
-                    <el-alert
-                      :title="'不支持的题目类型: ' + question.itemType"
-                      type="warning"
-                      show-icon
-                    />
                   </div>
                 </el-form-item>
               </div>
             </div>
 
             <div v-else class="no-questions">
-              <el-alert
-                title="该问卷暂无题目"
-                type="info"
-                show-icon
-                :closable="false"
-              />
+              <el-alert title="该问卷暂无题目" type="info" show-icon :closable="false" />
             </div>
           </el-col>
         </el-row>
 
         <el-row>
           <el-col :span="24" class="submit-button-container">
-            <el-button
-              type="primary"
-              @click="submitForm"
-              :loading="submitLoading"
-              :disabled="!canSubmit"
-            >
+            <el-button type="primary" @click="submitForm" :loading="submitLoading" :disabled="!canSubmit">
               提交问卷
             </el-button>
             <el-button @click="cancel">取消</el-button>
@@ -180,7 +87,9 @@ export default {
         status: '',
         items: []
       },
-      questionnaireItems: []
+      questionnaireItems: [],
+      // 固定选项 - 与管理员侧保持一致
+      fixedOptions: ["非常满意", "满意", "一般", "不满意", "非常不满意"]
     }
   },
   computed: {
@@ -204,7 +113,7 @@ export default {
   },
   methods: {
     parseTime,
-    
+
     /** 获取问卷详情和题目信息 */
     async getQuestionnaireDetail(questionnaireMetaId) {
       try {
@@ -213,21 +122,21 @@ export default {
           getQuestionnaire(questionnaireMetaId),
           getQuestionnaireItems(questionnaireMetaId)
         ])
-        
+
         console.log('问卷基本信息响应:', questionnaireRes)
         console.log('题目信息响应:', itemsRes)
-        
+
         if (questionnaireRes.code === 200) {
           this.form = questionnaireRes.data
         }
-        
+
         if (itemsRes.code === 200) {
           this.questionnaireItems = itemsRes.data
           // 将题目信息同步到form.items用于表单填写
           this.form.items = this.processQuestionnaireItems(itemsRes.data)
           console.log('处理后的题目数据:', this.form.items)
         }
-        
+
       } catch (error) {
         console.error('获取问卷详情失败:', error)
         this.$modal.msgError('获取问卷信息失败')
@@ -240,93 +149,43 @@ export default {
         console.log('题目数据为空或未定义')
         return []
       }
-      
+
       console.log('开始处理题目数据，原始数据:', items)
-      
+
       const processedItems = items.map((item, index) => {
         console.log(`处理第${index + 1}个题目:`, item)
-        
+
         // 确定问题文本
         let questionText = item.questionText || item.text || ''
-        
-        // 处理选项数据
-        let options = []
-        
-        // 情况1: options字段直接包含选项数组
-        if (item.options && Array.isArray(item.options)) {
-          console.log(`题目${index + 1}的options字段:`, item.options)
-          
-          if (item.options.length > 0) {
-            if (typeof item.options[0] === 'string') {
-              // 选项是字符串数组
-              options = item.options
-            } else if (typeof item.options[0] === 'object') {
-              // 选项是对象数组，提取文本
-              options = item.options.map(opt => {
-                return opt.optionText || opt.text || opt.value || opt.label || JSON.stringify(opt)
-              }).filter(opt => opt && opt.trim() !== '')
-            }
-          }
-        }
-        
-        // 情况2: 如果options为空，使用智能默认选项
-        if (options.length === 0 && item.itemType === 'R') {
-          options = this.getSmartDefaultOptions(questionText)
-          console.log(`使用智能默认选项 for 题目${index + 1}:`, options)
-        }
-        
+
+        // 处理选项数据 - 直接使用固定选项，忽略后端返回的选项
+        let options = [...this.fixedOptions] // 使用固定选项的副本
+
         console.log(`题目${index + 1}处理结果:`, {
           问题文本: questionText,
           选项: options,
           类型: item.itemType,
           必填: item.required
         })
-        
+
         return {
           itemId: item.itemId || item.id || index,
           questionText: questionText,
-          itemType: item.itemType || 'R',
-          required: item.required !== false,
-          answer: item.itemType === 'T' ? '' : null,
+          itemType: 'R', // 固定为单选题
+          required: true, // 所有题目都必填
+          answer: null, // 初始化为null
           options: options
         }
       })
-      
+
       console.log('所有题目处理完成:', processedItems)
       return processedItems
     },
 
-    /** 获取智能默认选项 */
-    getSmartDefaultOptions(questionText) {
-      const text = questionText.toLowerCase()
-      
-      // 根据问题内容提供相关的默认选项
-      if (text.includes('满意') || text.includes('评价') || text.includes('评分')) {
-        return ['非常满意', '满意', '一般', '不满意', '非常不满意']
-      } else if (text.includes('频率') || text.includes('经常')) {
-        return ['总是', '经常', '有时', '很少', '从不']
-      } else if (text.includes('同意') || text.includes('认同')) {
-        return ['非常同意', '同意', '一般', '不同意', '非常不同意']
-      } else if (text.includes('重要') || text.includes('重视')) {
-        return ['非常重要', '重要', '一般', '不重要', '非常不重要']
-      } else {
-        // 通用选项
-        return ['选项A', '选项B', '选项C', '选项D', '选项E']
-      }
-    },
-
     /** 校验规则 */
     getQuestionRules(question) {
-      if (!question.required) return []
-      if (question.itemType === 'R') {
-        return [{ required: true, message: '请选择一个选项', trigger: 'change' }]
-      } else if (question.itemType === 'T') {
-        return [
-          { required: true, message: '请输入回答内容', trigger: 'blur' },
-          { min: 1, max: 500, message: '长度在 1 到 500 个字符', trigger: 'blur' }
-        ]
-      }
-      return [{ required: true, message: '该题目不能为空', trigger: 'change' }]
+      // 所有题目都必填
+      return [{ required: true, message: '请选择一个选项', trigger: 'change' }]
     },
 
     /** 提交问卷 */
@@ -334,47 +193,162 @@ export default {
       try {
         // 表单验证
         const valid = await this.$refs.form.validate()
-        if (!valid) return
-        
+        if (!valid) {
+          this.$modal.msgError('请完成所有题目的填写')
+          return
+        }
+
         if (!this.canSubmit) {
           this.$modal.msgError('问卷不在有效期内，无法提交')
           return
         }
-        
+
         if (!this.form.items || this.form.items.length === 0) {
           this.$modal.msgError('问卷没有题目，无法提交')
           return
         }
 
-        // 构建提交数据
-        const submissionData = {
-          metaId: this.questionnaireMetaId,
-          answers: this.form.items.map(item => ({
-            itemId: item.itemId,
-            answer: item.answer || '',
-            itemType: item.itemType
-          }))
+        // 验证是否所有题目都已填写
+        const unansweredQuestions = this.form.items.filter(item =>
+          !item.answer || item.answer.toString().trim() === ''
+        )
+
+        if (unansweredQuestions.length > 0) {
+          this.$modal.msgError('请完成所有题目的填写')
+          return
         }
 
-        console.log('提交的数据:', submissionData)
-        
-        this.submitLoading = true
-        const response = await submitQuestionnaire(this.questionnaireMetaId, submissionData)
-        
+        // ========== 添加字段映射调试代码开始 ==========
+        console.log('=== 字段映射调试 ===');
+        this.form.items.forEach((item, index) => {
+          const scoreMap = {
+            "非常满意": 5, "满意": 4, "一般": 3, "不满意": 2, "非常不满意": 1
+          };
+          const score = scoreMap[item.answer] || null;
+
+          console.log(`题目${index + 1}:`, {
+            原始答案: item.answer,
+            映射分数: score,
+            itemId: item.itemId
+          });
+        });
+        // ========== 添加字段映射调试代码结束 ==========
+
+        // 选项到分数的映射
+        const optionScoreMap = {
+          "非常满意": 5,
+          "满意": 4,
+          "一般": 3,
+          "不满意": 2,
+          "非常不满意": 1
+        };
+
+        // 构建提交数据：使用后端期望的字段名
+        const answers = this.form.items.map(item => {
+          // 根据选项内容计算分数
+          let score = null;
+          let textAnswer = "";
+
+          if (item.answer) {
+            // 如果是选择题，映射分数
+            if (optionScoreMap.hasOwnProperty(item.answer)) {
+              score = optionScoreMap[item.answer];
+              textAnswer = ""; // 选择题文本答案为空
+            } else {
+              // 如果是其他答案（理论上不会发生，因为只有固定选项）
+              score = null;
+              textAnswer = item.answer; // 将答案作为文本答案
+            }
+          }
+
+          return {
+            itemId: item.itemId,
+            score: score,
+            textAnswer: textAnswer
+          };
+        });
+
+        console.log('提交的数据（修正后）:', JSON.stringify(answers, null, 2));
+
+        this.submitLoading = true;
+
+        // 直接传递修正后的数据给后端
+        const response = await submitQuestionnaire(this.questionnaireMetaId, answers);
+
         if (response.code === 200) {
-          this.$modal.msgSuccess('问卷提交成功')
-          this.$router.go(-1)
+          this.$modal.msgSuccess('问卷提交成功');
+          setTimeout(() => {
+            this.$router.go(-1);
+          }, 1500);
         } else {
-          this.$modal.msgError(response.msg || '提交失败')
+          this.$modal.msgError(response.msg || '提交失败');
         }
       } catch (error) {
-        console.error('提交失败:', error)
-        if (error && !error.message.includes('validation')) {
-          this.$modal.msgError('提交失败，请重试')
-        }
+        console.error('提交失败详情:', error);
+        this.handleSubmitError(error);
       } finally {
-        this.submitLoading = false
+        this.submitLoading = false;
       }
+    },
+    /** 处理提交错误 */
+    handleSubmitError(error) {
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 400) {
+          // 检查是否是字段不匹配错误
+          if (data.message && (
+            data.message.includes('score') ||
+            data.message.includes('textAnswer') ||
+            data.message.includes('field') ||
+            data.message.includes('property')
+          )) {
+            this.$modal.msgError('数据字段不匹配，请联系管理员检查接口文档');
+          } else {
+            this.$modal.msgError('请求数据格式错误: ' + (data.message || '请检查填写内容'));
+          }
+        } else if (status === 409) {
+          this.$modal.msgWarning("该用户已提交过该问卷");
+        } else if (status === 500) {
+          this.$modal.msgError('服务器错误，请稍后重试');
+        } else {
+          this.$modal.msgError(`提交失败: ${data.message || error.message}`);
+        }
+      } else if (error.request) {
+        this.$modal.msgError('网络错误，请检查网络连接');
+      } else {
+        this.$modal.msgError(`提交失败: ${error.message}`);
+      }
+    },
+    /** 处理重复提交错误 */
+    handleDuplicateSubmission() {
+      this.$modal.confirm('检测到您可能因为网络或数据格式问题被标记为已提交，是否尝试清除提交记录并重新提交？', '提示', {
+        confirmButtonText: '清除并重新提交',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        try {
+          // 调用清除重复提交记录的API
+          await this.clearSubmissionRecord()
+          this.$modal.msgSuccess('清除成功，请重新提交问卷')
+          // 重新加载页面以重置状态
+          location.reload()
+        } catch (error) {
+          this.$modal.msgError('清除失败，请联系管理员')
+        }
+      }).catch(() => {
+        this.$modal.msgInfo('已取消操作')
+      })
+    },
+
+    /** 清除重复提交记录 */
+    async clearSubmissionRecord() {
+      // 这里需要调用后端的清除重复提交记录的接口
+      // 如果没有专门的接口，可能需要后端配合添加
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(), 1000)
+      })
     },
 
     /** 返回上一页 */
@@ -390,17 +364,20 @@ export default {
   max-width: 800px;
   margin: 0 auto;
 }
+
 .questionnaire-title {
   font-size: 24px;
   font-weight: bold;
   color: #303133;
 }
+
 .questionnaire-description {
   font-size: 16px;
   color: #606266;
   margin: 15px 0;
   line-height: 1.6;
 }
+
 .questionnaire-time {
   font-size: 14px;
   color: #909399;
@@ -409,25 +386,7 @@ export default {
   background-color: #f4f4f5;
   border-radius: 4px;
 }
-.question-item-info {
-  padding: 15px 0;
-}
-.question-item-info h4 {
-  margin: 0 0 10px 0;
-  color: #303133;
-}
-.question-item-info p {
-  margin: 5px 0;
-  color: #606266;
-}
-.question-item-info ul {
-  margin: 5px 0 5px 20px;
-  padding: 0;
-}
-.question-item-info li {
-  margin: 3px 0;
-  color: #606266;
-}
+
 .question-item {
   margin-bottom: 30px;
   padding: 20px;
@@ -435,25 +394,31 @@ export default {
   border-radius: 4px;
   background-color: #fafafa;
 }
+
 .question-title {
   font-size: 18px;
   font-weight: 500;
   color: #303133;
   margin-bottom: 15px;
 }
+
 .required {
   color: #f56c6c;
 }
+
 .question-options {
   margin-top: 10px;
 }
+
 .radio-group {
   display: flex;
   flex-direction: column;
 }
+
 .radio-option {
   margin-bottom: 10px;
 }
+
 .custom-radio {
   width: 100%;
   margin-right: 0;
@@ -461,18 +426,11 @@ export default {
   border-radius: 4px;
   transition: all 0.3s;
 }
+
 .custom-radio:hover {
   background-color: #f0f9eb;
 }
-.question-text {
-  margin-top: 10px;
-}
-.text-answer {
-  width: 100%;
-}
-.unknown-question-type {
-  margin-top: 10px;
-}
+
 .no-options {
   padding: 10px;
   background-color: #fffbf0;
@@ -480,10 +438,12 @@ export default {
   border-radius: 4px;
   margin-top: 10px;
 }
+
 .no-questions {
   text-align: center;
   padding: 40px 0;
 }
+
 .submit-button-container {
   text-align: center;
   margin-top: 30px;

@@ -44,11 +44,15 @@ export function delQuestionnaire(metaId) {
 }
 
 // 查看问卷提交记录
-export function listSubmissions(metaId) {
+export function listSubmissions(metaId, params) {
   return request({
-    url: '/system/questionnaire/' + metaId + '/submissions',
-    method: 'get'
-  })
+    url: '/system/questionnaire/submissions',
+    method: 'get',
+    params: {
+      metaId: metaId,
+      ...params
+    }
+  });
 }
 
 // 查看提交的回答
@@ -68,12 +72,35 @@ export function listSubmission(query) {
   })
 }
 
-// 提交问卷
+// // 提交问卷
+// export function submitQuestionnaire(metaId, data) {
+//   return request({
+//     url: '/system/questionnaire/' + metaId + '/submit',
+//     method: 'post',
+//     data: data
+//   })
+// }
 export function submitQuestionnaire(metaId, data) {
+  // 确保数据是纯数组格式
+  let requestData = data
+  if (Array.isArray(data)) {
+    requestData = data
+  } else if (data.answers && Array.isArray(data.answers)) {
+    // 如果传入的是包装对象，提取answers数组
+    requestData = data.answers
+  }
+  
   return request({
     url: '/system/questionnaire/' + metaId + '/submit',
     method: 'post',
-    data: data
+    data: requestData,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    transformRequest: [function (data) {
+      // 确保数据被正确序列化
+      return JSON.stringify(data)
+    }]
   })
 }
 
