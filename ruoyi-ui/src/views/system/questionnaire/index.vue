@@ -116,8 +116,7 @@
                   <template slot-scope="scope">
                     <!-- 固定选项显示，不可编辑 -->
                     <div class="fixed-options">
-                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" 
-                           class="fixed-option-item">
+                      <div v-for="(option, optIndex) in scope.row.options" :key="optIndex" class="fixed-option-item">
                         <span class="option-label">{{ String.fromCharCode(65 + optIndex) }}.</span>
                         <span class="option-text">{{ option }}</span>
                       </div>
@@ -148,7 +147,7 @@
 
     <!-- 问卷提交记录对话框 -->
     <el-dialog title="提交记录" :visible.sync="submissionsOpen" width="1000px" append-to-body>
-      <el-table :data="submissions" border>
+      <!-- <el-table :data="submissions" border>
         <el-table-column label="提交ID" prop="submissionId" width="80" />
         <el-table-column label="提交人" prop="userName" width="120" />
         <el-table-column label="提交时间" prop="createTime" width="180">
@@ -157,6 +156,17 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
+          <template slot-scope="scope">
+            <el-button size="mini" type="text" icon="el-icon-view"
+              @click="handleViewAnswers(scope.row)">查看回答</el-button>
+          </template>
+        </el-table-column>
+      </el-table> -->
+      <el-table :data="submissions" border>
+        <el-table-column prop="submissionId" label="提交ID" width="80" />
+        <el-table-column prop="userName" label="提交人" width="120" />
+        <el-table-column prop="createTime" label="提交时间" width="180" />
+        <el-table-column label="操作" width="150">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view"
               @click="handleViewAnswers(scope.row)">查看回答</el-button>
@@ -199,7 +209,7 @@ export default {
   data() {
     // 定义固定选项
     const defaultOptions = ["非常满意", "满意", "一般", "不满意", "非常不满意"];
-    
+
     return {
       // 遮罩层
       loading: true,
@@ -292,9 +302,16 @@ export default {
     /** 查询提交记录 */
     getSubmissions() {
       listSubmissions(this.submissionsQueryParams.metaId, this.submissionsQueryParams).then(response => {
-        this.submissions = response.rows;
-        this.submissionsTotal = response.total;
-      });
+        console.log('【调试】提交记录原始返回', response)
+        // 接口返回的是 data 数组，不是 rows
+        this.submissions = Array.isArray(response.data) ? response.data : []
+        this.submissionsTotal = this.submissions.length
+        console.log('【调试】this.submissions', this.submissions)
+      }).catch(err => {
+        console.error('【调试】接口异常', err)
+        this.submissions = []
+        this.submissionsTotal = 0
+      })
     },
     /** 查询回答详情 */
     getAnswers(submissionId) {
@@ -337,27 +354,27 @@ export default {
       const metaId = row.metaId || this.ids
       getQuestionnaire(metaId).then(response => {
         this.form = response.data;
-        
+
         // 转换题目列表结构以适配前端表单
         if (this.form.items && Array.isArray(this.form.items)) {
           this.form.items = this.form.items.map(item => {
             // 所有题目都是单选题
             let questionType = "R";
-            
+
             // 处理选项结构
             let options = [];
             if (item.options && Array.isArray(item.options)) {
               // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-              options = item.options.map(opt => 
+              options = item.options.map(opt =>
                 typeof opt === 'object' && opt !== null ? opt.optionText : opt
               );
             }
-            
+
             // 如果没有选项，使用默认选项
             if (options.length === 0) {
               options = [...this.defaultOptions];
             }
-            
+
             return {
               questionType: questionType,
               questionText: item.questionText,
@@ -365,7 +382,7 @@ export default {
             };
           });
         }
-        
+
         this.open = true;
         this.title = "修改问卷";
       });
@@ -427,11 +444,11 @@ export default {
           let options = [];
           if (q.options && Array.isArray(q.options)) {
             // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-            options = q.options.map(opt => 
+            options = q.options.map(opt =>
               typeof opt === 'object' && opt !== null ? opt.optionText : opt
             );
           }
-          
+
           return {
             itemType: "R",  // 固定为单选题
             questionText: q.questionText,
