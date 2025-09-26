@@ -147,24 +147,10 @@
 
     <!-- 问卷提交记录对话框 -->
     <el-dialog title="提交记录" :visible.sync="submissionsOpen" width="1000px" append-to-body>
-      <!-- <el-table :data="submissions" border>
-        <el-table-column label="提交ID" prop="submissionId" width="80" />
-        <el-table-column label="提交人" prop="userName" width="120" />
-        <el-table-column label="提交时间" prop="createTime" width="180">
-          <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.createTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
-          <template slot-scope="scope">
-            <el-button size="mini" type="text" icon="el-icon-view"
-              @click="handleViewAnswers(scope.row)">查看回答</el-button>
-          </template>
-        </el-table-column>
-      </el-table> -->
+
       <el-table :data="submissions" border>
         <el-table-column prop="submissionId" label="提交ID" width="80" />
-        <el-table-column prop="userName" label="提交人" width="120" />
+        <!-- <el-table-column prop="userName" label="提交人" width="120" /> -->
         <el-table-column prop="createTime" label="提交时间" width="180" />
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
@@ -179,11 +165,14 @@
 
     <!-- 回答详情对话框 -->
     <el-dialog title="回答详情" :visible.sync="answersOpen" width="800px" append-to-body>
-      <el-descriptions :column="1" border>
-        <el-descriptions-item v-for="(answer, index) in answers" :key="index" :label="answer.questionText">
-          <span>{{ formatAnswer(answer) }}</span>
-        </el-descriptions-item>
-      </el-descriptions>
+      <el-table :data="answers" border>
+        <!-- 与对象完全一致 -->
+        <el-table-column prop="answerId" label="回答ID" width="80" />
+        <el-table-column prop="itemId" label="题目ID" width="80" />
+        <el-table-column prop="score" label="得分" width="80" />
+        <!-- <el-table-column prop="textAnswer" label="文本回答" /> -->
+        <el-table-column prop="createTime" label="回答时间" width="180" />
+      </el-table>
     </el-dialog>
 
     <!-- 题目信息对话框 -->
@@ -314,10 +303,21 @@ export default {
       })
     },
     /** 查询回答详情 */
+    // getAnswers(submissionId) {
+    //   getSubmissionAnswers(submissionId).then(response => {
+    //     this.answers = response.data;
+    //   });
+    // },
     getAnswers(submissionId) {
       getSubmissionAnswers(submissionId).then(response => {
-        this.answers = response.data;
-      });
+        console.log('【调试】回答详情原始返回', response)
+        // 接口返回的是 data 数组，不是 rows
+        this.answers = Array.isArray(response.data) ? response.data : []
+        console.log('【调试】this.answers', this.answers)
+      }).catch(err => {
+        console.error('【调试】接口异常', err)
+        this.answers = []
+      })
     },
     /** 查询题目信息 */
     getQuestionItems(metaId) {
