@@ -7,6 +7,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.*;
 import com.ruoyi.system.service.ISysQuestionnaireService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param query 查询条件
      * @return 问卷列表
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:list')")
     @GetMapping("/list")
     public AjaxResult list(SysQuestionnaireMeta query) {
         List<SysQuestionnaireMeta> list = questionnaireService.selectMetaList(query);
@@ -37,6 +39,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param quesMetaId 问卷ID
      * @return 问卷及其题目列表
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:query')")
     @GetMapping("/{questionnaireMetaId}")
     public AjaxResult getInfo(@PathVariable Long questionnaireMetaId) {
         return success(questionnaireService.selectMetaById(questionnaireMetaId));
@@ -47,6 +50,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param questionnaireMeta 问卷meta+item
      * @return 影响的表行数
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:add')")
     @Log(title = "问卷管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysQuestionnaireMeta questionnaireMeta) {
@@ -58,6 +62,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param questionnaireMeta 问卷meta+item
      * @return 影响的表行数
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:edit')")
     @Log(title = "问卷管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody SysQuestionnaireMeta questionnaireMeta) {
@@ -69,6 +74,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param questionnaireMetaIds 问卷ID数组
      * @return 影响的表行数
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:remove')")
     @Log(title = "问卷管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{questionnaireMetaIds}")
     public AjaxResult remove(@PathVariable Long[] questionnaireMetaIds) {
@@ -81,6 +87,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param answers 答案列表
      * @return 影响的表行数
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:submit')")
     @PostMapping("/{questionnaireMetaId}/submit")
     public AjaxResult submit(@PathVariable Long questionnaireMetaId, @RequestBody List<SysQuestionnaireAnswer> answers) {
         Long userId = getUserId();
@@ -98,6 +105,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param questionnaireMetaId 问卷ID
      * @return 提交记录列表
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:submission:list')")
     @GetMapping("/{questionnaireMetaId}/submissions")
     public AjaxResult listSubmissions(@PathVariable Long questionnaireMetaId) {
         SysQuestionnaireSubmission query = new SysQuestionnaireSubmission();
@@ -111,6 +119,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param submissionId 提交记录ID
      * @return 答案列表
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:submission:answers')")
     @GetMapping("/answers/{submissionId}")
     public AjaxResult listAnswers(@PathVariable Long submissionId) {
         return success(questionnaireService.selectAnswers(submissionId));
@@ -121,6 +130,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param query 查询条件
      * @return submission列表
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:submission:list')")
     @GetMapping("/submission/list")
     public AjaxResult listSubmissions(SysQuestionnaireSubmission query) {
         List<SysQuestionnaireSubmission> list = questionnaireService.selectSubmissionList(query);
@@ -132,6 +142,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param submissionId submission的Id
      * @return submission
      */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:submission:query')")
     @GetMapping("/submission/{submissionId}")
     public AjaxResult getSubmission(@PathVariable Long submissionId) {
         return success(questionnaireService.selectSubmissionById(submissionId));
@@ -142,6 +153,7 @@ public class SysQuestionnaireController extends BaseController {
      * @param metaId
      * @return 题目列表
     */
+    @PreAuthorize("@ss.hasPermi('system:questionnaire:query')")
     @GetMapping("/{metaId}/items")
     public AjaxResult listItems(@PathVariable Long metaId) {
         return success(questionnaireService.selectItems(metaId));
