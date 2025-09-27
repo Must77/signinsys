@@ -57,10 +57,13 @@ public class SysCourseSigninRecordController extends BaseController {
      * @return 成功与否
     */
     @GetMapping("/list")
-    public AjaxResult list(SysCourseSigninRecord query)
+    public TableDataInfo list(SysCourseSigninRecord query)
     {
+        // 添加用户ID条件，确保只能查询自己的记录
+        query.setUserId(getUserId());
+        startPage();
         List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
-        return AjaxResult.success(list);
+        return getDataTable(list);
     }
 
     /**
@@ -82,3 +85,4 @@ public class SysCourseSigninRecordController extends BaseController {
         util.exportExcel(response, list, "签到记录数据");
     }
 }
+

@@ -106,6 +106,13 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-view"
+            @click="handleView(scope.row)"
+            v-hasPermi="['system:notice:query']"
+          >详情</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:notice:remove']"
@@ -166,6 +173,41 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 公告详情对话框 -->
+    <el-dialog title="公告详情" :visible.sync="openView" width="780px" append-to-body>
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="公告标题">{{ form.noticeTitle }}</el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告类型">
+              <dict-tag :options="dict.type.sys_notice_type" :value="form.noticeType"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <dict-tag :options="dict.type.sys_notice_status" :value="form.status"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="创建者">{{ form.createBy }}</el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="创建时间">{{ parseTime(form.createTime) }}</el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="内容">
+              <div class="editor-content" v-html="form.noticeContent"></div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="openView = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -195,6 +237,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否显示详情弹出层
+      openView: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -306,6 +350,13 @@ export default {
         this.getList()
         this.$modal.msgSuccess("删除成功")
       }).catch(() => {})
+    },
+    /** 查看详情按钮操作 */
+    handleView(row) {
+      getNotice(row.noticeId).then(response => {
+        this.form = response.data;
+        this.openView = true;
+      });
     }
   }
 }
