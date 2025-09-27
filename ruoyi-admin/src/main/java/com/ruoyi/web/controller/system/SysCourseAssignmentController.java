@@ -16,8 +16,9 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysCourseAssignment;
+import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
 import com.ruoyi.system.service.ISysCourseAssignmentService;
-import com.ruoyi.system.service.ISysCourseAssignmentSubmission;
+import com.ruoyi.system.service.ISysCourseAssignmentSubmissionService;
 
 @RestController
 @RequestMapping("/system/deptCourse/assignment")
@@ -26,7 +27,7 @@ public class SysCourseAssignmentController extends BaseController {
     private ISysCourseAssignmentService assignmentService;
 
     @Autowired
-    private ISysCourseAssignmentSubmission submissionService;
+    private ISysCourseAssignmentSubmissionService submissionService;
 
     /**
      * 创建作业活动, 同样是对班级中的每个人都预生成一条待提交记录
@@ -36,6 +37,7 @@ public class SysCourseAssignmentController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:add')")
     @PostMapping
     public AjaxResult add(@RequestBody SysCourseAssignment assignment) {
+        // 创建作业活动
         int row = assignmentService.insertSysCourseAssignment(assignment);
         Long assignmentId = assignment.getAssignmentId();
         if (assignmentId == null) {
@@ -100,6 +102,8 @@ public class SysCourseAssignmentController extends BaseController {
     @GetMapping("/{assignmentId}/submissions")
     public AjaxResult getSubmissions(@PathVariable Long assignmentId) {
 
-        return AjaxResult.success(submissionService.selectSysCourseAssignmentSubmissionList());
+        SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();
+        query.setAssignmentId(assignmentId);
+        return AjaxResult.success(submissionService.selectAssignmentSubmissionList(query));
     }
 }

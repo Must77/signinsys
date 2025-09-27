@@ -13,11 +13,11 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
-import com.ruoyi.system.service.ISysCourseAssignmentSubmission;
+import com.ruoyi.system.service.ISysCourseAssignmentSubmissionService;
 
 public class SysCourseAssignmentSubmissionController extends BaseController {
     @Autowired
-    private ISysCourseAssignmentSubmission submissionService;
+    private ISysCourseAssignmentSubmissionService submissionService;
 
     /**
      * 提交课程作业
@@ -25,7 +25,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:submit')")
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody SysCourseAssignmentSubmission submission) {
-        return toAjax(submissionService.submitAssignment(submission));
+        return toAjax(submissionService.updateAssignmentSubmission(submission));
     }
 
     /**
@@ -35,7 +35,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @GetMapping("/pending")
     public TableDataInfo myPendingAssignments() {
         startPage();
-        List<SysCourseAssignmentSubmission> list = submissionService.getPending(getUserId());
+        List<SysCourseAssignmentSubmission> list = submissionService.selectAssignmentSubmissionPending(getUserId());
         return getDataTable(list);
     }
 
@@ -46,8 +46,11 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
     @GetMapping("/{assignmentId}/submissions")
     public AjaxResult mySubmittedFileNames(@PathVariable Long assignmentId) {
-        List<String> fileNames = submissionService.getSubmitted(getUserId(), assignmentId);
-        return AjaxResult.success(fileNames);
+        SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();
+        query.setAssignmentId(assignmentId);
+        query.setUserId(getUserId());
+
+        List<SysCourseAssignmentSubmission> files = submissionService.selectAssignmentSubmissionList(query);
+        return AjaxResult.success(files);
     }
-    
 }
