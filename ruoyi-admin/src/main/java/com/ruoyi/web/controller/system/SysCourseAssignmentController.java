@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +17,9 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysCourseAssignment;
+import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
 import com.ruoyi.system.service.ISysCourseAssignmentService;
-import com.ruoyi.system.service.ISysCourseAssignmentSubmission;
+import com.ruoyi.system.service.ISysCourseAssignmentSubmissionService;
 
 @RestController
 @RequestMapping("/system/deptCourse/assignment")
@@ -26,7 +28,7 @@ public class SysCourseAssignmentController extends BaseController {
     private ISysCourseAssignmentService assignmentService;
 
     @Autowired
-    private ISysCourseAssignmentSubmission submissionService;
+    private ISysCourseAssignmentSubmissionService submissionService;
 
     /**
      * 创建作业活动, 同样是对班级中的每个人都预生成一条待提交记录
@@ -36,13 +38,13 @@ public class SysCourseAssignmentController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:add')")
     @PostMapping
     public AjaxResult add(@RequestBody SysCourseAssignment assignment) {
+        // 创建作业活动
         int row = assignmentService.insertSysCourseAssignment(assignment);
-        Long assignmentId = assignment.getAssignmentId();
-        if (assignmentId == null) {
+        if (assignment.getAssignmentId() == null) {
             return error("未获取到主键ID，请检查 Mapper 的 useGeneratedKeys 配置");
         }
         // 预生成待提交记录
-        submissionService.generateSubmissionRecords(assignmentId);
+        submissionService.generateAssignmentSubmissions(assignment);
 
         return toAjax(row);
     }
@@ -53,7 +55,7 @@ public class SysCourseAssignmentController extends BaseController {
      * @return
      */
     @PreAuthorize("@ss.hasPermi('system:assignment:remove')")
-    @GetMapping("/{assignmentId}")
+    @DeleteMapping("/{assignmentId}")
     public AjaxResult remove(@PathVariable Long assignmentId) {
         return toAjax(assignmentService.deleteSysCourseAssignmentById(assignmentId));
     }
@@ -100,6 +102,8 @@ public class SysCourseAssignmentController extends BaseController {
     @GetMapping("/{assignmentId}/submissions")
     public AjaxResult getSubmissions(@PathVariable Long assignmentId) {
 
-        return AjaxResult.success(submissionService.selectSysCourseAssignmentSubmissionList());
+        SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();
+        query.setAssignmentId(assignmentId);
+        return AjaxResult.success(submissionService.selectAssignmentSubmissionList(query));
     }
 }

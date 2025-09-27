@@ -8,16 +8,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
-import com.ruoyi.system.service.ISysCourseAssignmentSubmission;
+import com.ruoyi.system.service.ISysCourseAssignmentSubmissionService;
 
+@RestController
+@RequestMapping("/system/deptCourse/assignment")
 public class SysCourseAssignmentSubmissionController extends BaseController {
     @Autowired
-    private ISysCourseAssignmentSubmission submissionService;
+    private ISysCourseAssignmentSubmissionService submissionService;
 
     /**
      * 提交课程作业
@@ -25,7 +29,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:submit')")
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody SysCourseAssignmentSubmission submission) {
-        return toAjax(submissionService.submitAssignment(submission));
+        return toAjax(submissionService.updateAssignmentSubmission(submission));
     }
 
     /**
@@ -35,19 +39,21 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @GetMapping("/pending")
     public TableDataInfo myPendingAssignments() {
         startPage();
-        List<SysCourseAssignmentSubmission> list = submissionService.getPending(getUserId());
+        List<SysCourseAssignmentSubmission> list = submissionService.selectAssignmentSubmissionPending(getUserId());
         return getDataTable(list);
     }
-
 
     /**
      * 查看自己某个作业活动的提交过的作业
      */
     @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
-    @GetMapping("/{assignmentId}/submissions")
+    @GetMapping("/{assignmentId}/mySubmission")
     public AjaxResult mySubmittedFileNames(@PathVariable Long assignmentId) {
-        List<String> fileNames = submissionService.getSubmitted(getUserId(), assignmentId);
-        return AjaxResult.success(fileNames);
+        SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();
+        query.setAssignmentId(assignmentId);
+        query.setUserId(getUserId());
+
+        List<SysCourseAssignmentSubmission> files = submissionService.selectAssignmentSubmissionList(query);
+        return AjaxResult.success(files);
     }
-    
 }

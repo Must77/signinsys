@@ -22,6 +22,10 @@ public class SysCourseAssignment extends BaseEntity {
     @Excel(name = "课程ID")
     private Long courseId;
 
+    /** 班级ID **/
+    @Excel(name = "班级ID")
+    private Long deptId;
+
     /** 作业标题 */
     @Excel(name = "作业标题")
     private String assignmentTitle;
@@ -206,6 +210,16 @@ public class SysCourseAssignment extends BaseEntity {
 
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+
+    public Long getDeptId() {
+        return deptId;
+    }
+
+
+    public void setDeptId(Long deptId) {
+        this.deptId = deptId;
     }
 
     

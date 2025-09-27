@@ -41,12 +41,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="deadline != null">
             AND deadline = #{deadline}
         </if>
-        <if test="startTime != null">
-            AND start_time = #{startTime}
-        </if>
-        <if test="endTime != null">
-            AND end_time = #{endTime}
-        </if>
         ORDER BY a.create_time DESC
     </select>
 

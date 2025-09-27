@@ -2,26 +2,20 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 
-import com.ruoyi.system.domain.SysCourseAssignment;
 import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
-import com.ruoyi.system.domain.SysQuestionnaireSubmission;
-import com.ruoyi.system.mapper.SysCourseAssignmentMapper;
 
 public interface ISysCourseAssignmentSubmissionService {
     /** 根据Id查询 **/
     public SysCourseAssignmentSubmission selectAssignmentSubmissionById(Long submissionId);
 
     /** 条件查询 **/
-    public SysCourseAssignmentSubmission selectAssignmentSubmissionList(SysQuestionnaireSubmission query);
+    public List<SysCourseAssignmentSubmission> selectAssignmentSubmissionList(SysCourseAssignmentSubmission query);
 
     /** 查看某个用户的待提交作业 **/
     public List<SysCourseAssignmentSubmission> selectAssignmentSubmissionPending(Long userId);
 
     /** 预生成待提交记录 **/
-    public void generateSubmissionRecords(Long assignmentId);
-
-    /** 批量新增待提交记录 **/
-    public void batchInsertSubmissionRecords(List<SysCourseAssignmentSubmission> submissions);
+    public void generateAssignmentSubmissions(SysCourseAssignment assignment);
 
     /** 提交作业 **/
     public int updateAssignmentSubmission(SysCourseAssignmentSubmission submission);
