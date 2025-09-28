@@ -8,6 +8,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 
+/**
+ * 课程作业提交对象 sys_course_assignment_submission
+ * @author must77
+ */
 public class SysCourseAssignmentSubmission extends BaseEntity {
     /** 提交ID */
     @Excel(name = "提交ID")

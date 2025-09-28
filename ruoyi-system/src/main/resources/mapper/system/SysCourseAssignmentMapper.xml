@@ -6,6 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="SysCourseAssignment" id="SysCourseAssignmentResult">
         <id     property="assignmentId"     column="assignment_id"        />
         <result property="courseId"         column="course_id" />
+        <result property="deptId"          column="dept_id"          />
         <result property="assignmentTitle"      column="assignment_title"       />
         <result property="assignmentDescribe"   column="assignment_describe"    />
         <result property="deadline"              column="deadline"               />
@@ -21,7 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectAssignmentVo">
-        select a.assignment_id, a.course_id, a.assignment_title, a.assignment_describe, a.deadline, a.start_time, a.end_time, a.del_flag, a.create_by, a.create_time, a.update_by, a.update_time, a.remark,
+        select a.assignment_id, a.course_id, a.assignment_title, a.assignment_describe, a.deadline, a.start_time, a.end_time, a.del_flag, a.create_by, a.create_time, a.update_by, a.update_time, a.remark, a.dept_id
             (select course_name from sys_dept_course where course_id = a.course_id) course_name
         from sys_course_assignment a
     </sql>
@@ -49,9 +50,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where a.assignment_id = #{id}
     </select>
 
-    <insert id="insertSysCourseAssignment" parameterType="SysCourseAssignment">
+    <insert id="insertSysCourseAssignment" parameterType="SysCourseAssignment" useGeneratedKeys="true" keyProperty="assignmentId">
         insert into sys_course_assignment(
             <if test="courseId != null and courseId != 0">course_id,</if>
+            <if test="deptId != null and deptId != 0">dept_id,</if>
             <if test="assignmentTitle != null">assignment_title,</if>
             <if test="assignmentDescribe != null">assignment_describe,</if>
             <if test="deadline != null">deadline,</if>
@@ -65,6 +67,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             create_time
         )values(
             <if test="courseId != null and courseId != 0">#{courseId},</if>
+            <if test="deptId != null and deptId != 0">#{deptId},</if>
             <if test="assignmentTitle != null">#{assignmentTitle},</if>
             <if test="assignmentDescribe != null">#{assignmentDescribe},</if>
             <if test="deadline != null">#{deadline},</if>
@@ -83,6 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update sys_course_assignment
         <set>
             <if test="courseId != null and courseId != 0">course_id = #{courseId},</if>
+            <if test="deptId != null and deptId != 0">dept_id = #{deptId},</if>
             <if test="assignmentTitle != null">assignment_title = #{assignmentTitle},</if>
             <if test="assignmentDescribe != null">assignment_describe = #{assignmentDescribe},</if>
             <if test="deadline != null">deadline = #{deadline},</if>
@@ -99,7 +103,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteSysCourseAssignmentById" parameterType="Long">
-        delete from sys_course_assignment where assignment_id = #{id}
+        update sys_course_assignment
+        set del_flag = '2'
+        where assignment_id = #{id}
     </delete>
 
 </mapper> 

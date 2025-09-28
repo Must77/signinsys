@@ -92,11 +92,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by submission_id desc
     </select>
     
-    <insert id="batchInsertSubmissionRecords" parameterType="list">
-    	insert into sys_course_assignment_submission (assignment_id, user_id, status)
+    <insert id="batchInsertAssignmentSubmissions" parameterType="list">
+    	insert into sys_course_assignment_submission (assignment_id, user_id, course_id, dept_id)
     	values
     	<foreach collection="list" item="item" separator=",">
-    		(#{item.assignmentId}, #{item.userId}, #{item.status})
+    		(#{item.assignmentId}, #{item.userId}, #{item.courseId}, #{item.deptId})
     	</foreach>
     </insert>
 </mapper>
