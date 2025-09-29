@@ -28,6 +28,7 @@ public class SysCourseSigninRecordController extends BaseController {
      * 用户签到
      */
     @PutMapping("/doSignin/{recordId}")
+    @PreAuthorize("@ss.hasPermi('system:signinRecord:doSignin')")
     public AjaxResult doSignin(@PathVariable Long recordId) {
         SysCourseSigninRecord record = new SysCourseSigninRecord();
         record.setUserId(getUserId());
@@ -44,6 +45,7 @@ public class SysCourseSigninRecordController extends BaseController {
      * @return 表格分页数据对象
      */
     @GetMapping("/myPending")
+    @PreAuthorize("@ss.hasPermi('system:signinRecord:myPending')")
     public TableDataInfo listMyPending()
     {
         startPage();
@@ -57,7 +59,8 @@ public class SysCourseSigninRecordController extends BaseController {
      * @return 成功与否
     */
     @GetMapping("/list")
-    public TableDataInfo list(SysCourseSigninRecord query)
+    @PreAuthorize("@ss.hasPermi('system:signinRecord:list')")
+    public AjaxResult list(SysCourseSigninRecord query)
     {
         // 添加用户ID条件，确保只能查询自己的记录
         query.setUserId(getUserId());

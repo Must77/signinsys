@@ -60,7 +60,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 提交请假（普通用户）
      */
-    //@PreAuthorize("@ss.hasPermi('system:leave:add')")
+    @PreAuthorize("@ss.hasPermi('system:leave:add')")
     @Log(title = "请假申请", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysLeaveRequest leave)
@@ -121,7 +121,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 我的请假
      */
-    //@PreAuthorize("@ss.hasPermi('system:leave:myleave')")
+    @PreAuthorize("@ss.hasPermi('system:leave:myleave')")
     @GetMapping("/myleave")
     public AjaxResult myleave()
     {
