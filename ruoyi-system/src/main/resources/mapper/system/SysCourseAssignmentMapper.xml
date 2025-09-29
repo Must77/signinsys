@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysCourseAssignmentMapper">
+    <resultMap type="SysCourseAssignment" id="SysCourseAssignmentResult">
+        <id     property="assignmentId"     column="assignment_id"        />
+        <result property="courseId"         column="course_id" />
+        <result property="deptId"          column="dept_id"          />
+        <result property="assignmentTitle"      column="assignment_title"       />
+        <result property="assignmentDescribe"   column="assignment_describe"    />
+        <result property="deadline"              column="deadline"               />
+        <result property="startTime"            column="start_time"             />
+        <result property="endTime"              column="end_time"               />
+        <result property="delFlag"              column="del_flag"               />
+        <result property="createBy"            column="create_by"              />
+        <result property="createTime"          column="create_time"            />
+        <result property="updateBy"            column="update_by"              />
+        <result property="updateTime"          column="update_time"            />
+        <result property="remark"              column="remark"                 />
+        <result property="courseName"          column="course_name"            />
+    </resultMap>
+
+    <sql id="selectAssignmentVo">
+        select a.assignment_id, a.course_id, a.assignment_title, a.assignment_describe, a.deadline, a.start_time, a.end_time, a.create_by, a.create_time, a.update_by, a.update_time, a.remark, a.dept_id, 
+            (select course_name from sys_dept_course where course_id = a.course_id) course_name
+        from sys_course_assignment a
+    </sql>
+
+    <select id="selectSysCourseAssignmentList" parameterType="SysCourseAssignment" resultMap="SysCourseAssignmentResult">
+        <include refid="selectAssignmentVo"/>
+        where a.del_flag = '0'
+        <if test="assignmentId != null and assignmentId != 0">
+            AND assignment_id = #{assignmentId}
+        </if>
+        <if test="courseId != null and courseId != 0">
+            AND course_id = #{courseId}
+        </if>
+        <if test="assignmentTitle != null and assignmentTitle != ''">
+            AND assignment_title like concat('%', #{assignmentTitle}, '%')
+        </if>
+        <if test="deadline != null">
+            AND deadline = #{deadline}
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectSysCourseAssignmentById" parameterType="Long" resultMap="SysCourseAssignmentResult">
+        <include refid="selectAssignmentVo"/>
+        where a.assignment_id = #{id}
+    </select>
+
+    <insert id="insertSysCourseAssignment" parameterType="SysCourseAssignment" useGeneratedKeys="true" keyProperty="assignmentId">
+        insert into sys_course_assignment(
+            <if test="courseId != null and courseId != 0">course_id,</if>
+            <if test="deptId != null and deptId != 0">dept_id,</if>
+            <if test="assignmentTitle != null">assignment_title,</if>
+            <if test="assignmentDescribe != null">assignment_describe,</if>
+            <if test="deadline != null">deadline,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        )values(
+            <if test="courseId != null and courseId != 0">#{courseId},</if>
+            <if test="deptId != null and deptId != 0">#{deptId},</if>
+            <if test="assignmentTitle != null">#{assignmentTitle},</if>
+            <if test="assignmentDescribe != null">#{assignmentDescribe},</if>
+            <if test="deadline != null">#{deadline},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="delFlag != null">'0',</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        )
+    </insert>
+
+    <update id="updateSysCourseAssignment" parameterType="SysCourseAssignment">
+        update sys_course_assignment
+        <set>
+            <if test="courseId != null and courseId != 0">course_id = #{courseId},</if>
+            <if test="deptId != null and deptId != 0">dept_id = #{deptId},</if>
+            <if test="assignmentTitle != null">assignment_title = #{assignmentTitle},</if>
+            <if test="assignmentDescribe != null">assignment_describe = #{assignmentDescribe},</if>
+            <if test="deadline != null">deadline = #{deadline},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate(),
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        where assignment_id = #{assignmentId}
+    </update>
+
+    <delete id="deleteSysCourseAssignmentById" parameterType="Long">
+        update sys_course_assignment
+        set del_flag = '2'
+        where assignment_id = #{id}
+    </delete>
+
+</mapper> 

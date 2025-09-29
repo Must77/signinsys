@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysCourseAssignmentSubmissionMapper">
+    <resultMap type="SysCourseAssignmentSubmission" id="SysCourseAssignmentSubmissionResult">
+        <id     property="submissionId"    column="submission_id"    />
+        <result property="assignmentId"    column="assignment_id"    />
+        <result property="userId"          column="user_id"          />
+        <result property="courseId"        column="course_id"        />
+        <result property="deptId"          column="dept_id"          />
+        <result property="courseName"      column="course_name"      />
+        <result property="userName"        column="user_name"        />
+        <result property="assignmentTitle" column="assignment_title" />
+        <result property="fileName"        column="file_name"        />
+        <result property="filePath"        column="file_path"        />
+        <result property="fileType"        column="file_type"        />
+        <result property="fileSize"        column="file_size"        />
+        <result property="remark"          column="remark"           />
+        <result property="createBy"       column="create_by"       />
+        <result property="createTime"     column="create_time"     />
+        <result property="updateBy"       column="update_by"       />
+        <result property="updateTime"     column="update_time"     />
+    </resultMap>
+    
+    <sql id="selectAssignmentSubmissionVo">
+        select cas.submission_id, cas.assignment_id, cas.user_id, cas.course_id, cas.dept_id, cas.file_name, cas.file_path, cas.file_type, cas.file_size, cas.remark, cas.create_by, cas.create_time, cas.update_by, cas.update_time,
+            (select course_name from sys_dept_course where course_id = cas.course_id) as course_name,
+            (select user_name from sys_user where user_id = cas.user_id) as user_name,
+            (select assignment_title from sys_course_assignment where assignment_id = cas.assignment_id) as assignment_title
+        from sys_course_assignment_submission cas
+    </sql>
+
+    <select id ="selectAssignmentSubmissionById" parameterType="long" resultMap="SysCourseAssignmentSubmissionResult">
+        <include refid="selectAssignmentSubmissionVo" />
+        where submission_id = #{submissionId}
+    </select>
+
+    <select id="selectAssignmentSubmissionList" parameterType="SysCourseAssignmentSubmission" resultMap="SysCourseAssignmentSubmissionResult">
+        <include refid="selectAssignmentSubmissionVo" />
+        <where> cas.del_flag = '0'
+            <if test="submissionId != null">
+                AND submission_id = #{submissionId}
+            </if>
+            <if test="assignmentId != null">
+                AND assignment_id = #{assignmentId}
+            </if>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="courseId != null">
+                AND course_id = #{courseId}
+            </if>
+        </where>
+        order by submission_id desc
+    </select>
+
+    <select id="selectSubmittedUsers" resultMap="SysCourseAssignmentSubmissionResult">
+        <include refid="selectAssignmentSubmissionVo" />
+        where cas.del_flag = '0'
+        AND assignment_id = #{assignmentId}
+        AND (file_name IS NOT NULL and file_name != '')
+        order by submission_id desc
+    </select>
+
+    <select id="selectUnsubmittedUsers" resultMap="SysCourseAssignmentSubmissionResult">
+        <include refid="selectAssignmentSubmissionVo" />
+        where cas.del_flag = '0'
+        AND assignment_id = #{assignmentId}
+        AND (file_name IS NULL or file_name = '')
+        order by submission_id desc
+    </select>
+
+    <update id="updateAssignmentSubmission">
+        update sys_course_assignment_submission
+        <set>
+            <if test="fileName != null">        file_name = #{fileName},        </if>
+            <if test="filePath != null">        file_path = #{filePath},        </if>
+            <if test="fileType != null">        file_type = #{fileType},        </if>
+            <if test="fileSize != null">        file_size = #{fileSize},        </if>
+            <if test="remark != null">          remark = #{remark},            </if>
+            <if test="updateBy != null">       update_by = #{updateBy},       </if>
+            <if test="updateTime != null">     update_time = #{updateTime}    </if>
+        </set>
+        where submission_id = #{submissionId}
+    </update>
+    
+    <select id="selectAssignmentSubmissionPending" parameterType="long" resultMap="SysCourseAssignmentSubmissionResult">
+        <include refid="selectAssignmentSubmissionVo" />
+        where cas.del_flag = '0'
+        AND user_id = #{userId}
+        AND (file_name IS NULL or file_name = '')
+        order by submission_id desc
+    </select>
+    
+    <insert id="batchInsertAssignmentSubmissions" parameterType="list">
+    	insert into sys_course_assignment_submission (assignment_id, user_id, course_id, dept_id)
+    	values
+    	<foreach collection="list" item="item" separator=",">
+    		(#{item.assignmentId}, #{item.userId}, #{item.courseId}, #{item.deptId})
+    	</foreach>
+    </insert>
+</mapper>
