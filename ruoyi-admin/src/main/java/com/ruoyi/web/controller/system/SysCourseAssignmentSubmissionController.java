@@ -15,6 +15,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysCourseAssignmentSubmission;
+import com.ruoyi.system.domain.SysQuestionnaireSubmission;
 import com.ruoyi.system.service.ISysCourseAssignmentSubmissionService;
 
 @RestController
@@ -29,13 +30,14 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:assignment:submit')")
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody SysCourseAssignmentSubmission submission) {
-        return toAjax(submissionService.updateAssignmentSubmission(submission));
+        int rows = submissionService.updateAssignmentSubmission(submission);
+        return rows > 0 ? AjaxResult.success("提交成功") : AjaxResult.error("提交失败");
     }
 
     /**
      * 查看自己待提交的作业
      */
-    @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
+    //@PreAuthorize("@ss.hasPermi('system:assignment:pending')")
     @GetMapping("/pending")
     public TableDataInfo myPendingAssignments() {
         startPage();
@@ -46,7 +48,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     /**
      * 查看自己某个作业活动的提交过的作业
      */
-    @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
+    //@PreAuthorize("@ss.hasPermi('system:assignment:pending')")
     @GetMapping("/{assignmentId}/mySubmission")
     public AjaxResult mySubmittedFileNames(@PathVariable Long assignmentId) {
         SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();

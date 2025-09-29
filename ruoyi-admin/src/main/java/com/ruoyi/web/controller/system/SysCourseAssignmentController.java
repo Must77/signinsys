@@ -1,6 +1,8 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -100,10 +102,15 @@ public class SysCourseAssignmentController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('system:assignment:query')")
     @GetMapping("/{assignmentId}/submissions")
-    public AjaxResult getSubmissions(@PathVariable Long assignmentId) {
+    public AjaxResult getSubmissions(@PathVariable Long assignmentId) 
+    {
+        List<SysCourseAssignmentSubmission> submitted = submissionService.selectSubmittedUsers(assignmentId);
+        List<SysCourseAssignmentSubmission> unsubmitted = submissionService.selectUnsubmittedUsers(assignmentId);
 
-        SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();
-        query.setAssignmentId(assignmentId);
-        return AjaxResult.success(submissionService.selectAssignmentSubmissionList(query));
+        Map<String, Object> result = new HashMap<>();
+        result.put("submitted", submitted);
+        result.put("unsubmitted", unsubmitted);
+        
+        return AjaxResult.success(result);
     }
 }

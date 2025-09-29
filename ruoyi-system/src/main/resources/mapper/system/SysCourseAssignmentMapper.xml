@@ -22,7 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectAssignmentVo">
-        select a.assignment_id, a.course_id, a.assignment_title, a.assignment_describe, a.deadline, a.start_time, a.end_time, a.del_flag, a.create_by, a.create_time, a.update_by, a.update_time, a.remark, a.dept_id
+        select a.assignment_id, a.course_id, a.assignment_title, a.assignment_describe, a.deadline, a.start_time, a.end_time, a.create_by, a.create_time, a.update_by, a.update_time, a.remark, a.dept_id, 
             (select course_name from sys_dept_course where course_id = a.course_id) course_name
         from sys_course_assignment a
     </sql>
