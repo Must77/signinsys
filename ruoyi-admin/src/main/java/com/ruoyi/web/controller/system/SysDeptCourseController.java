@@ -35,21 +35,20 @@ public class SysDeptCourseController extends BaseController
 
     /**
      * 查询课程列表
-     * - 废弃
-     * - 普通用户：只能看到自己部门
      * - admin：可传 deptId 指定部门；未传则查询全部
      */
     @PreAuthorize("@ss.hasPermi('system:deptCourse:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysDeptCourse query)
     {
-        String username = SecurityUtils.getUsername();
+        /* 通过数据库来权限控制， 因此controller中删除判断逻辑 */
+        // String username = SecurityUtils.getUsername();
 
-        // 如果不是 admin，则强制限定在自己部门
-        if (!"admin".equals(username)) {
-            Long myDeptId = SecurityUtils.getLoginUser().getUser().getDeptId();
-            query.setDeptId(myDeptId);
-        }
+        // // 如果不是 admin，则强制限定在自己部门
+        // if (!"admin".equals(username)) {
+        //     Long myDeptId = SecurityUtils.getLoginUser().getUser().getDeptId();
+        //     query.setDeptId(myDeptId);
+        // }
 
         startPage();
         List<SysDeptCourse> list = deptCourseService.selectDeptCourseList(query);

@@ -60,7 +60,7 @@ public class SysCourseSigninRecordController extends BaseController {
     */
     @GetMapping("/list")
     @PreAuthorize("@ss.hasPermi('system:signinRecord:list')")
-    public AjaxResult list(SysCourseSigninRecord query)
+    public TableDataInfo list(SysCourseSigninRecord query)
     {
         // 添加用户ID条件，确保只能查询自己的记录
         query.setUserId(getUserId());
