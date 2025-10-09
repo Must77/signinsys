@@ -77,6 +77,12 @@
             type="text"
             @click="handleResult(scope.row)"
           >查看结果</el-button>
+          <el-button
+            v-hasPermi="['system:signin:export']"
+            size="mini"
+            type="text"
+            @click="handleExport(scope.row)"
+          >导出签到表</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -186,13 +192,14 @@
 </template>
 
 <script>
-import {
-  listSignin,
-  getSignin,
-  addSignin,
-  updateSignin,
-  delSignin,
-  getResult
+import { 
+  listSignin, 
+  getSignin, 
+  delSignin, 
+  addSignin, 
+  updateSignin, 
+  getResult,
+  exportSigninRecord
 } from "@/api/system/signin";
 import { listDeptCourse } from "@/api/system/deptCourse";
 
@@ -361,6 +368,21 @@ export default {
         this.resultPage = { signed: 1, unsigned: 1 };
         this.resultDialog = true;
       });
+    },
+    // 导出签到表
+    handleExport(row) {
+      const signinId = row.signinId;
+      this.$modal.confirm('确认导出"' + row.title + '"的签到表吗？').then(() => {
+        return exportSigninRecord(signinId);
+      }).then(response => {
+        const fileName = "签到表_" + row.title + "_" + this.parseTime(new Date(), '{y}{m}{d}') + ".xlsx";
+        const blob = new Blob([response]);
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+      }).catch(() => {});
     }
   }
 };

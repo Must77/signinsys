@@ -98,6 +98,12 @@
             v-if="scope.row.parentId != 0"
             size="mini"
             type="text"
+            @click="handleExport(scope.row)"
+          >导出报名表</el-button>
+          <el-button
+            v-if="scope.row.parentId != 0"
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:dept:remove']"
@@ -232,7 +238,9 @@
 </template>
 
 <script>
-import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept"
+import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild, exportDeptApply } from "@/api/system/dept"
+import { exportClassUsers } from "@/api/system/user"
+import { listApprovedUsers } from "@/api/system/deptApply"
 import Treeselect from "@riophae/vue-treeselect"
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"
 
@@ -412,6 +420,21 @@ export default {
         this.getList()
         this.$modal.msgSuccess("删除成功")
       }).catch(() => {})
+    },
+    /** 导出报名表操作 */
+    handleExport(row) {
+      const deptId = row.deptId;
+      this.$modal.confirm('确认导出"' + row.deptName + '"的报名表吗？').then(() => {
+        return exportDeptApply(deptId);
+      }).then(response => {
+        const fileName = "报名表_" + row.deptName + ".xlsx";
+        const blob = new Blob([response]);
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+      }).catch(() => {});
     }
   }
 }

@@ -50,3 +50,13 @@ export function delDept(deptId) {
     method: 'delete'
   })
 }
+
+// 导出报名表
+export function exportDeptApply(deptId) {
+  return request({
+    url: '/system/deptApply/export',
+    method: 'post',
+    data: { deptId: deptId },
+    responseType: 'blob'
+  })
+}
