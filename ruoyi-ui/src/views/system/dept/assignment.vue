@@ -141,6 +141,7 @@
 
 <script>
 import { listCourseAssignment, getCourseAssignment, addCourseAssignment, updateCourseAssignment, delCourseAssignment, getCourseAssignmentSubmissions } from "@/api/system/courseAssignment";
+import { getDeptCourse } from "@/api/system/deptCourse"; // 导入获取课程详情的接口
 import { parseTime } from "@/utils";
 
 export default {
@@ -154,6 +155,7 @@ export default {
       type: String,
       default: ''
     }
+    // 移除了 deptId prop
   },
   data() {
     return {
@@ -163,12 +165,14 @@ export default {
       ids: [],
       single: true,
       multiple: true,
+      courseDeptId: null, // 存储从课程信息中获取的部门ID
       assignmentForm: {
         title: "",
         open: false,
         form: {
           assignmentId: undefined,
           courseId: undefined,
+          deptId: undefined,
           assignmentTitle: "",
           assignmentDescribe: "",
           startTime: "",
@@ -212,12 +216,57 @@ export default {
   created() {
     // 设置查询参数中的课程ID
     this.queryParams.courseId = this.courseId;
+    // 获取课程信息以获取部门ID
+    this.getCourseInfo();
     // 根据课程ID查询作业列表
     this.getList();
   },
   
   methods: {
     parseTime,
+    
+    /** 获取课程信息 */
+    getCourseInfo() {
+      // 如果有获取课程详情的接口
+      if (typeof getCourse === 'function') {
+        getCourse(this.courseId).then(res => {
+          if (res.data && res.data.deptId) {
+            this.courseDeptId = res.data.deptId;
+          } else {
+            console.warn('课程信息中未找到部门ID，将尝试其他方法');
+            this.tryAlternativeDeptId();
+          }
+        }).catch(() => {
+          console.warn('获取课程信息失败，将尝试其他方法获取部门ID');
+          this.tryAlternativeDeptId();
+        });
+      } else {
+        console.warn('没有获取课程信息的接口，将尝试其他方法获取部门ID');
+        this.tryAlternativeDeptId();
+      }
+    },
+    
+    /** 尝试其他方法获取部门ID */
+    tryAlternativeDeptId() {
+      // 方法1: 从用户信息中获取（如果适用）
+      if (this.$store.getters && this.$store.getters.deptId) {
+        this.courseDeptId = this.$store.getters.deptId;
+        console.log('从用户信息中获取部门ID:', this.courseDeptId);
+        return;
+      }
+      
+      // 方法2: 如果已有作业列表，从第一个作业中获取部门ID
+      if (this.assignmentList.length > 0 && this.assignmentList[0].deptId) {
+        this.courseDeptId = this.assignmentList[0].deptId;
+        console.log('从作业列表中获取部门ID:', this.courseDeptId);
+        return;
+      }
+      
+      // 方法3: 使用默认值
+      // 注意：这个值需要根据你的数据库实际情况来定，确保这个部门ID在数据库中存在
+      this.courseDeptId = 100; // 设置为一个合理的默认部门ID
+      console.warn('使用默认部门ID:', this.courseDeptId);
+    },
     
     goBack() {
       this.$emit('close');
@@ -235,6 +284,17 @@ export default {
         this.assignmentList = res.rows || [];
         this.total = res.total || 0;
         this.loading = false;
+        
+        // 如果还没有获取到部门ID，尝试从作业列表中获取
+        if (!this.courseDeptId && this.assignmentList.length > 0 && this.assignmentList[0].deptId) {
+          this.courseDeptId = this.assignmentList[0].deptId;
+          console.log('从作业列表中获取部门ID:', this.courseDeptId);
+        }
+        
+        // 如果仍然没有部门ID，尝试其他方法
+        if (!this.courseDeptId) {
+          this.tryAlternativeDeptId();
+        }
       }).catch(() => { 
         this.loading = false; 
         this.$message.error('获取作业列表失败');
@@ -243,11 +303,18 @@ export default {
     
     /** 发布作业 */
     handleAdd() {
+      // 检查是否已获取到部门ID
+      if (!this.courseDeptId) {
+        this.$message.error('无法确定所属部门，请稍后重试或联系管理员');
+        return;
+      }
+      
       this.assignmentForm.open = true;
       this.assignmentForm.title = "发布作业";
       this.assignmentForm.form = {
         assignmentId: undefined,
         courseId: this.courseId,
+        deptId: this.courseDeptId,
         assignmentTitle: "",
         assignmentDescribe: "",
         startTime: "",
@@ -258,11 +325,18 @@ export default {
 
     /** 修改作业 */
     handleUpdate(row) {
+      // 检查是否已获取到部门ID
+      if (!this.courseDeptId) {
+        this.$message.error('无法确定所属部门，请稍后重试或联系管理员');
+        return;
+      }
+      
       this.assignmentForm.open = true;
       this.assignmentForm.title = "修改作业";
       this.assignmentForm.form = {
         assignmentId: row.assignmentId,
         courseId: this.courseId,
+        deptId: this.courseDeptId,
         assignmentTitle: row.assignmentTitle,
         assignmentDescribe: row.assignmentDescribe,
         startTime: row.startTime,
@@ -273,32 +347,40 @@ export default {
     
     /** 提交发布/修改表单 */
     submitAssignmentForm() {
-      this.$refs["assignmentForm"].validate(valid => {
+      this.$refs.assignmentForm.validate(valid => {
         if (valid) {
+          // 检查部门ID
+          if (!this.assignmentForm.form.deptId) {
+            this.$message.error('缺少部门ID，无法提交作业');
+            return;
+          }
+          
           // 如果是新增作业
           if (!this.assignmentForm.form.assignmentId) {
             // 检查课程ID是否存在
             if (!this.courseId) {
-              this.$modal.msgError("缺少课程ID");
+              this.$message.error("缺少课程ID");
               return;
             }
             
             // 调用新增接口
             addCourseAssignment(this.assignmentForm.form).then(response => {
-              this.$modal.msgSuccess("发布成功");
+              this.$message.success("发布成功");
               this.assignmentForm.open = false;
               this.getList();
             }).catch(err => {
-              this.$modal.msgError("发布失败: " + err.message);
+              this.$message.error("发布失败: " + (err.message || '未知错误'));
+              console.error('发布作业失败:', err);
             });
           } else {
             // 修改作业信息
             updateCourseAssignment(this.assignmentForm.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
+              this.$message.success("修改成功");
               this.assignmentForm.open = false;
               this.getList();
             }).catch(err => {
-              this.$modal.msgError("修改失败: " + err.message);
+              this.$message.error("修改失败: " + (err.message || '未知错误'));
+              console.error('修改作业失败:', err);
             });
           }
         }
@@ -316,23 +398,28 @@ export default {
       this.assignmentForm.form = {
         assignmentId: undefined,
         courseId: this.courseId,
+        deptId: this.courseDeptId,
         assignmentTitle: "",
         assignmentDescribe: "",
         startTime: "",
         endTime: "",
         deadline: ""
       };
-      this.resetForm("assignmentForm");
+      if (this.$refs.assignmentForm) {
+        this.$refs.assignmentForm.resetFields();
+      }
     },
     
     /** 删除作业 */
     handleDelete(row) {
       const assignmentIds = row.assignmentId || this.ids;
-      this.$modal.confirm('是否确认删除作业编号为"' + assignmentIds + '"的数据项？').then(function() {
+      this.$confirm('是否确认删除作业编号为"' + assignmentIds + '"的数据项？', '提示', {
+        type: 'warning'
+      }).then(() => {
         return delCourseAssignment(assignmentIds);
       }).then(() => {
         this.getList();
-        this.$modal.msgSuccess("删除成功");
+        this.$message.success("删除成功");
       }).catch(() => {});
     },
     

@@ -22,10 +22,7 @@ export function submitAssignment(data) {
   return request({
     url: '/system/deptCourse/assignment/submit',
     method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    data: data
   })
 }
 
@@ -34,9 +31,6 @@ export function uploadAssignmentFile(data) {
   return request({
     url: '/common/upload',
     method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    data: data
   })
 }
