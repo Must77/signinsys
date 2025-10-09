@@ -110,13 +110,22 @@ export default {
       <el-table-column label="课程名称" prop="courseName" />
       <el-table-column label="课程描述" prop="brief" />
       <el-table-column label="所属部门" prop="deptName" />
-      <el-table-column label="操作" width="200">
+      <el-table-column label="操作" width="300">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" icon="el-icon-view" @click="toggleResource(scope.row)">
             查看资源
           </el-button>
+          <el-button
+            size="mini"
+            type="success"
+            icon="el-icon-edit-outline"
+            @click="handleViewAssignments(scope.row)"
+          >
+            提交作业
+          </el-button>
         </template>
       </el-table-column>
+
       <!-- 展开行：当前课程的资源 -->
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -155,14 +164,19 @@ export default {
 import { listMyDeptCourse } from '@/api/system/deptCourse'
 import { getCourseResource } from '@/api/system/courseResource'
 import { parseTime } from '@/utils'
+import AssignmentUser from './assignment.vue' // 新增：作业提交组件
 
 export default {
   name: 'MyCourse',
+  components: { AssignmentUser }, // 注册组件
   data() {
     return {
       loading: false,
       errorMsg: '',
-      courseList: []
+      courseList: [],
+      assignmentVisible: false,     // 控制作业对话框显示
+      currentCourseId: null,        // 当前选中的课程ID
+      currentCourseName: ''         // 当前课程名称
     }
   },
   created() {
@@ -247,10 +261,60 @@ export default {
     /** 预览文件 */
     handlePreview(row) {
       window.open(row.filePath, '_blank')
+    },
+
+    // 查看并提交作业
+    handleViewAssignments(row) {
+      this.currentCourseId = row.courseId
+      this.currentCourseName = row.courseName
+      this.assignmentVisible = true
     }
   }
 }
 </script>
+```
+
+```vue
+<<<<<<< SEARCH
+<style scoped>
+.resource-panel {
+  padding: 10px;
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.no-resource {
+  text-align: center;
+  padding: 20px;
+  color: #909399;
+}
+</style>
+<style scoped>
+.resource-panel {
+  padding: 10px;
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.no-resource {
+  text-align: center;
+  padding: 20px;
+  color: #909399;
+}
+</style>
+
+<!-- 新增：避免 dialog 被遮挡 -->
+<style lang="scss" scoped>
+::v-deep .el-dialog__wrapper {
+  ::v-deep .el-dialog {
+    min-width: 600px;
+  }
+}
+</style>
 
 <style scoped>
 .resource-panel {

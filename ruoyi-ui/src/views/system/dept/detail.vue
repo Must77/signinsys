@@ -39,9 +39,10 @@
               {{ parseTime(scope.row.createTime) }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="120" align="center">
+          <el-table-column label="操作" width="200" align="center">
             <template slot-scope="scope">
               <el-button size="mini" type="text" @click="handleViewResources(scope.row)">查看资源</el-button>
+              <el-button size="mini" type="text" @click="handleHomeworkManage(scope.row)">作业管理</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -64,15 +65,27 @@
         </el-table-column>
       </el-table>
     </el-dialog>
+    
+    <!-- 作业管理对话框 -->
+    <el-dialog title="作业管理" :visible.sync="homeworkVisible" width="80%" append-to-body>
+      <assignment-manage 
+        v-if="homeworkVisible" 
+        :course-id="currentCourseId" 
+        :course-name="currentCourseName"
+        @close="homeworkVisible = false"
+      />
+    </el-dialog>
   </el-dialog>
 </template>
 
 <script>
 import { listDeptCourseByDeptId } from "@/api/system/deptCourse";
 import { listCourseResource } from "@/api/system/courseResource";
+import AssignmentManage from "./assignment.vue";
 
 export default {
   name: "DeptDetail",
+  components: { AssignmentManage },
   props: {
     visible: {
       type: Boolean,
@@ -88,7 +101,10 @@ export default {
       activeTab: "info",
       courses: [],
       resources: [],
-      resourceVisible: false
+      resourceVisible: false,
+      homeworkVisible: false,
+      currentCourseId: null,
+      currentCourseName: ''
     };
   },
   watch: {
@@ -112,6 +128,11 @@ export default {
     },
     handleDownload(row) {
       window.open(row.resourceUrl, "_blank");
+    },
+    handleHomeworkManage(row) {
+      this.currentCourseId = row.courseId;
+      this.currentCourseName = row.courseName;
+      this.homeworkVisible = true;
     },
     close() {
       this.$emit("update:visible", false);

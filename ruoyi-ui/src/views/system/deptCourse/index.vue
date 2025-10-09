@@ -71,7 +71,7 @@
         <el-table-column prop="deptName" label="班级名称" width="120" />
         <el-table-column prop="courseName" label="课程名称" />
         <el-table-column prop="brief" label="课程描述" />
-        <el-table-column label="操作" width="200" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
+        <el-table-column label="操作" width="280" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
           <template slot-scope="scope">
             <el-button 
               size="mini" 
@@ -95,6 +95,13 @@
               icon="el-icon-folder"
               @click="handleResourceManage(scope.row)"
             >资源管理</el-button>
+            
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-s-management"
+              @click="handleAssignmentManage(scope.row)"
+            >作业管理</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -123,6 +130,16 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    
+    <!-- 作业管理对话框 -->
+    <el-dialog title="作业管理" :visible.sync="assignmentVisible" width="80%" append-to-body>
+      <assignment-manage 
+        v-if="assignmentVisible" 
+        :course-id="currentCourseId" 
+        :course-name="currentCourseName"
+        @close="assignmentVisible = false"
+      />
+    </el-dialog>
   </div>
 </template>
 
@@ -131,10 +148,11 @@ import { listDeptCourse, listDeptCourseByDeptId, addDeptCourse, updateDeptCourse
 import { listDept } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+import AssignmentManage from "/Users/niubo/Documents/代码/signinsys/ruoyi-ui/src/views/system/dept/assignment.vue";
 
 export default {
   name: "DeptCourse",
-  components: { Treeselect },
+  components: { Treeselect, AssignmentManage },
   data() {
     return {
       loading: false,
@@ -151,7 +169,10 @@ export default {
       deptOptions: [],
       deptTreeOptions: [], // 用于treeselect的部门选项
       dialogVisible: false,
+      assignmentVisible: false,
       queryDeptId: undefined, // 用于筛选的部门ID
+      currentCourseId: null,
+      currentCourseName: '',
       form: {
         courseId: undefined,
         deptId: undefined,
@@ -328,6 +349,12 @@ export default {
           courseName: row.courseName
         }
       });
+    },
+    /** 课程作业管理 */
+    handleAssignmentManage(row) {
+      this.currentCourseId = row.courseId;
+      this.currentCourseName = row.courseName;
+      this.assignmentVisible = true;
     }
   }
 }
