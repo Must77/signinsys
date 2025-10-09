@@ -3,7 +3,24 @@
     <!-- 顶部查询 -->
     <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="80px">
       <el-form-item label="签到标题">
-        <el-input v-model="queryParams.title" placeholder="请输入签到标题" clearable />
+                <el-input v-model="queryParams.title" placeholder="请输入签到标题" clearable style="width: 200px;" />
+              </el-form-item>
+              <el-form-item label="课程名称">
+                <el-select 
+                  v-model="queryParams.courseId" 
+                  placeholder="请选择课程" 
+                  clearable 
+                  filterable
+                  style="width: 200px;"
+                  @change="handleQuery"
+                >
+                  <el-option
+                    v-for="course in courseOptions"
+                    :key="course.courseId"
+                    :label="course.courseName"
+                    :value="course.courseId"
+                  />
+                </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
@@ -44,48 +61,175 @@
       </el-col>
     </el-row>
 
-    <!-- 表格 -->
-    <el-table v-loading="loading" :data="signinList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" />
-      <el-table-column prop="signinId" label="ID" width="80" />
-      <el-table-column prop="title" label="签到标题" />
-      <el-table-column prop="courseName" label="课程名称" />
-      <el-table-column prop="deptName" label="班级名称" />
-      <el-table-column prop="startTime" label="开始时间" width="160">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="endTime" label="结束时间" width="160">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="100">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
-          <el-tag type="success" v-else-if="scope.row.status === '1'">进行中</el-tag>
-          <el-tag type="danger" v-else-if="scope.row.status === '2'">已结束</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="220">
-        <template slot-scope="scope">
-          <!-- 签到按钮已删除 -->
-          <el-button
-            v-hasPermi="['system:signin:result']"
-            size="mini"
-            type="text"
-            @click="handleResult(scope.row)"
-          >查看结果</el-button>
-          <el-button
-            v-hasPermi="['system:signin:export']"
-            size="mini"
-            type="text"
-            @click="handleExport(scope.row)"
-          >导出签到表</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <!-- 按状态分类展示 -->
+    <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+      <el-tab-pane label="全部" name="all">
+        <el-table v-loading="loading" :data="signinList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="signinId" label="ID" width="80" />
+          <el-table-column prop="title" label="签到标题" />
+          <el-table-column prop="courseName" label="课程名称" />
+          <el-table-column prop="deptName" label="班级名称" />
+          <el-table-column prop="startTime" label="开始时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
+              <el-tag type="success" v-else-if="scope.row.status === '1'">进行中</el-tag>
+              <el-tag type="danger" v-else-if="scope.row.status === '2'">已结束</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" width="220">
+            <template slot-scope="scope">
+              <!-- 签到按钮已删除 -->
+              <el-button
+                v-hasPermi="['system:signin:result']"
+                size="mini"
+                type="text"
+                @click="handleResult(scope.row)"
+              >查看结果</el-button>
+              <el-button
+                v-hasPermi="['system:signin:export']"
+                size="mini"
+                type="text"
+                @click="handleExport(scope.row)"
+              >导出签到表</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+      
+      <el-tab-pane label="未开始" name="0">
+        <el-table v-loading="loading" :data="getStatusFilteredData('0')" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="signinId" label="ID" width="80" />
+          <el-table-column prop="title" label="签到标题" />
+          <el-table-column prop="courseName" label="课程名称" />
+          <el-table-column prop="deptName" label="班级名称" />
+          <el-table-column prop="startTime" label="开始时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" width="220">
+            <template slot-scope="scope">
+              <el-button
+                v-hasPermi="['system:signin:result']"
+                size="mini"
+                type="text"
+                @click="handleResult(scope.row)"
+              >查看结果</el-button>
+              <el-button
+                v-hasPermi="['system:signin:export']"
+                size="mini"
+                type="text"
+                @click="handleExport(scope.row)"
+              >导出签到表</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+      
+      <el-tab-pane label="进行中" name="1">
+        <el-table v-loading="loading" :data="getStatusFilteredData('1')" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="signinId" label="ID" width="80" />
+          <el-table-column prop="title" label="签到标题" />
+          <el-table-column prop="courseName" label="课程名称" />
+          <el-table-column prop="deptName" label="班级名称" />
+          <el-table-column prop="startTime" label="开始时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100">
+            <template slot-scope="scope">
+              <el-tag type="success" v-if="scope.row.status === '1'">进行中</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" width="220">
+            <template slot-scope="scope">
+              <el-button
+                v-hasPermi="['system:signin:result']"
+                size="mini"
+                type="text"
+                @click="handleResult(scope.row)"
+              >查看结果</el-button>
+              <el-button
+                v-hasPermi="['system:signin:export']"
+                size="mini"
+                type="text"
+                @click="handleExport(scope.row)"
+              >导出签到表</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+      
+      <el-tab-pane label="已结束" name="2">
+        <el-table v-loading="loading" :data="getStatusFilteredData('2')" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="signinId" label="ID" width="80" />
+          <el-table-column prop="title" label="签到标题" />
+          <el-table-column prop="courseName" label="课程名称" />
+          <el-table-column prop="deptName" label="班级名称" />
+          <el-table-column prop="startTime" label="开始时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="结束时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100">
+            <template slot-scope="scope">
+              <el-tag type="danger" v-if="scope.row.status === '2'">已结束</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" width="220">
+            <template slot-scope="scope">
+              <el-button
+                v-hasPermi="['system:signin:result']"
+                size="mini"
+                type="text"
+                @click="handleResult(scope.row)"
+              >查看结果</el-button>
+              <el-button
+                v-hasPermi="['system:signin:export']"
+                size="mini"
+                type="text"
+                @click="handleExport(scope.row)"
+              >导出签到表</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+    </el-tabs>
 
     <pagination
       v-show="total > 0"
@@ -94,7 +238,7 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
+    
     <!-- 新增/修改弹窗 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
@@ -207,15 +351,33 @@ export default {
   name: "Signin",
   data() {
     return {
+      // 遮罩层
       loading: false,
-      signinList: [],
-      total: 0,
-      title: "",
-      open: false,
-      single: true,
-      multiple: true,
+      // 选中数组
       ids: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
+      // 总条数
+      total: 0,
+      // 签到表格数据
+      signinList: [],
+      // 课程选项
       courseOptions: [],
+      // 当前激活的tab
+      activeTab: 'all',
+      // 查询参数
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        title: undefined
+      },
+      // 弹出层标题
+      title: "",
+      // 是否显示弹出层
+      open: false,
+      // 表单参数
       form: {
         signinId: undefined,
         title: "",
@@ -224,15 +386,11 @@ export default {
         startTime: "",
         endTime: ""
       },
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        title: ""
-      },
+      // 表单校验
       rules: {
         title: [{ required: true, message: "签到标题不能为空", trigger: "blur" }],
-        courseId: [{ required: true, message: "课程不能为空", trigger: "blur" }],
-        deptId: [{ required: true, message: "部门不能为空", trigger: "blur" }],
+        courseId: [{ required: true, message: "课程ID不能为空", trigger: "blur" }],
+        deptId: [{ required: true, message: "班级ID不能为空", trigger: "blur" }],
         startTime: [{ required: true, message: "开始时间不能为空", trigger: "blur" }],
         endTime: [{ required: true, message: "结束时间不能为空", trigger: "blur" }]
       },
@@ -247,11 +405,31 @@ export default {
       resultPageSize: 10
     };
   },
+  computed: {
+    // 根据状态过滤的签到列表
+    filteredSigninList() {
+      if (this.activeTab === 'all') {
+        return this.signinList;
+      }
+      return this.signinList.filter(item => item.status === this.activeTab);
+    }
+  },
+  watch: {
+  },
   created() {
     this.getList();
     this.getCourseList();
   },
   methods: {
+    // 根据状态获取过滤后的数据
+    getStatusFilteredData(status) {
+      return this.signinList.filter(item => item.status === status);
+    },
+    // tab切换处理
+    handleTabClick(tab) {
+      // 刷新当前tab的数据
+      this.getList();
+    },
     // 表格分页计算
     pagedTable(list, page) {
       const start = (page - 1) * this.resultPageSize;
