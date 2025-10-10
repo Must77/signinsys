@@ -28,7 +28,7 @@
               </template>
             </el-table-column>
           </el-table>
-          
+
           <!-- 添加空状态提示 -->
           <div v-if="pendingAssignments.length === 0 && !loading.pending" class="empty-state">
             <el-empty description="暂无待提交的作业"></el-empty>
@@ -64,7 +64,7 @@
               </template>
             </el-table-column>
           </el-table>
-          
+
           <!-- 添加空状态提示 -->
           <div v-if="submittedAssignments.length === 0 && !loading.submitted" class="empty-state">
             <el-empty description="暂无已提交的作业"></el-empty>
@@ -83,15 +83,8 @@
           <span>{{ courseName }}</span>
         </el-form-item>
         <el-form-item label="作业文件" prop="file">
-          <el-upload
-            ref="upload"
-            :limit="1"
-            accept=".doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :on-remove="handleFileRemove"
-            :file-list="fileList"
-          >
+          <el-upload ref="upload" :limit="1" accept=".doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+            :auto-upload="false" :on-change="handleFileChange" :on-remove="handleFileRemove" :file-list="fileList">
             <el-button slot="trigger" size="mini" type="primary">选取文件</el-button>
             <div slot="tip" class="el-upload__tip">只能上传doc/docx/pdf/xls/xlsx/ppt/pptx/zip/rar文件，且不超过100MB</div>
           </el-upload>
@@ -157,14 +150,15 @@ export default {
   created() {
     this.getPendingAssignments();
   },
-  
+
   methods: {
     parseTime,
-    
+
     /** 获取待提交作业 */
     getPendingAssignments() {
       this.loading.pending = true;
       listPendingAssignments(this.courseId).then(response => {
+        console.log('【待提交作业原始响应】', JSON.stringify(response, null, 2));
         this.pendingAssignments = response.rows || [];
         this.loading.pending = false;
       }).catch(() => {
@@ -172,32 +166,67 @@ export default {
         this.$message.error('获取待提交作业失败');
       });
     },
-    
+
     /** 获取已提交作业 */
     getSubmittedAssignments() {
       this.loading.submitted = true;
-      listMySubmissions(this.courseId).then(response => {
-        // 确保返回的数据格式正确
-        if (response && response.rows) {
-          this.submittedAssignments = response.rows;
-        } else {
+      
+      // 收集所有作业ID
+      const assignmentIds = this.pendingAssignments.map(item => item.assignmentId);
+      
+      // 如果没有作业，直接返回空数组
+      if (assignmentIds.length === 0) {
+        this.submittedAssignments = [];
+        this.loading.submitted = false;
+        return;
+      }
+      
+      // 并行请求所有作业的提交情况
+      const promises = assignmentIds.map(id => listMySubmissions(id));
+      
+      Promise.all(promises)
+        .then(responses => {
+          // 合并所有已提交的作业
+          let allSubmissions = [];
+          responses.forEach((response, index) => {
+            // 后端接口返回的是一个对象数组，不是分页数据，也不是单个对象
+            if (response.data) {
+              // response.data 应该是一个数组
+              if (Array.isArray(response.data)) {
+                response.data.forEach(item => {
+                  // 添加作业标题等信息
+                  const assignment = this.pendingAssignments.find(a => a.assignmentId === assignmentIds[index]);
+                  if (assignment) {
+                    item.assignmentTitle = assignment.assignmentTitle;
+                    item.courseName = assignment.courseName;
+                  }
+                  // 只添加已提交的作业（有文件名的）
+                  if (item.fileName && item.fileName !== '') {
+                    allSubmissions.push(item);
+                  }
+                });
+              }
+            }
+          });
+          
+          this.submittedAssignments = allSubmissions;
+          this.loading.submitted = false;
+        })
+        .catch(error => {
+          console.error('获取已提交作业失败:', error);
           this.submittedAssignments = [];
-        }
-        this.loading.submitted = false;
-      }).catch(error => {
-        console.error('获取已提交作业失败:', error);
-        this.loading.submitted = false;
-        this.$message.error('获取已提交作业失败');
-      });
+          this.loading.submitted = false;
+          this.$message.error('获取已提交作业失败');
+        });
     },
-    
+
     /** 标签页切换 */
     handleTabClick(tab) {
       if (tab.name === "submitted") {
         this.getSubmittedAssignments();
       }
     },
-    
+
     /** 提交作业 */
     handleSubmit(row) {
       console.log('准备提交作业:', row);
@@ -208,11 +237,14 @@ export default {
         fileName: "",
         filePath: ""
       };
-      this.currentAssignment = row;
+      this.currentAssignment = {
+        ...row,              // ✅ 把整行数据都存下来
+        submissionId: row.submissionId // ✅ 关键字段
+      };
       this.selectedFile = null;
       this.fileList = [];
     },
-    
+
     /** 文件选择 */
     handleFileChange(file, fileList) {
       console.log('文件选择:', file, fileList);
@@ -227,20 +259,20 @@ export default {
         this.submitForm.form.fileName = file.name;
       }
     },
-    
+
     /** 文件移除 */
     handleFileRemove(file, fileList) {
       console.log('文件移除:', file, fileList);
       this.selectedFile = null;
       this.fileList = [];
     },
-    
+
     /** 取消提交 */
     cancelSubmit() {
       this.submitForm.open = false;
       this.resetSubmitForm();
     },
-    
+
     /** 重置提交表单 */
     resetSubmitForm() {
       this.submitForm.form = {
@@ -259,7 +291,8 @@ export default {
         this.$refs.upload.clearFiles();
       }
     },
-    
+
+    /** 提交作业 */
     /** 提交作业 */
     async submitAssignment() {
       try {
@@ -268,79 +301,78 @@ export default {
           this.$message.error("请先选择要上传的文件");
           return;
         }
-        
+
         // 验证文件大小（最大100MB）
         if (this.selectedFile.size > 100 * 1024 * 1024) {
           this.$message.error("文件大小超过限制，请上传小于100MB的文件");
           return;
         }
-        
+
         this.submitForm.loading = true;
-        
+
         // 第一步：上传文件
         const fileFormData = new FormData();
         fileFormData.append("file", this.selectedFile);
-        
+
         console.log('开始上传文件...');
         const uploadResponse = await uploadAssignmentFile(fileFormData);
         console.log('文件上传响应:', uploadResponse);
-        
+
         if (uploadResponse.code !== 200) {
           throw new Error(uploadResponse.msg || '文件上传失败');
         }
-        
+
         // 获取文件路径 - 根据实际API响应调整
-        const filePath = uploadResponse.fileName || uploadResponse.url || uploadResponse.data.url;
+        const filePath = uploadResponse.fileName || uploadResponse.url || uploadResponse.data?.url;
         const fileName = this.submitForm.form.fileName || this.selectedFile.name;
-        
+
         // 第二步：提交作业信息
         const submitData = {
-          assignmentId: this.submitForm.form.assignmentId,
-          courseId: this.courseId,
+          submissionId: this.currentAssignment.submissionId, // ✅ 动态获取
+
+          //assignmentId: this.submitForm.form.assignmentId,
+          //courseId: this.courseId,
           fileName: fileName,
           filePath: filePath,
           fileType: this.selectedFile.type,
           fileSize: this.selectedFile.size
         };
-        
+
         console.log('提交作业数据:', submitData);
-        
+
+        // 添加更详细的调试信息
+        console.log('准备调用 submitAssignment API，参数:', JSON.stringify(submitData, null, 2));
+
         const submitResponse = await submitAssignment(submitData);
-        console.log('作业提交响应:', submitResponse);
-        
+        console.log('【后端实际返回】', submitResponse);
+
         if (submitResponse.code !== 200) {
           throw new Error(submitResponse.msg || '作业提交失败');
         }
-        
+
         this.$message.success("提交成功");
         this.submitForm.open = false;
         this.resetSubmitForm();
         this.getPendingAssignments();
-        
-        // 如果当前在已提交作业标签页，刷新已提交作业列表
-        if (this.activeTab === "submitted") {
-          this.getSubmittedAssignments();
-        }
+
+        // ✅ 无论当前在哪个标签页，都刷新已提交列表
+        this.getSubmittedAssignments();
       } catch (err) {
-        console.error('提交作业失败:', err);
-        
-        // 根据错误类型显示不同的提示信息
-        if (err.message && err.message.includes('403')) {
-          this.$message.error("没有权限，请联系管理员授权");
-        } else {
-          this.$message.error("提交失败: " + (err.message || '未知错误'));
-        }
-      } finally {
+        console.error('提交异常', err);          // ✅ 只打印原始错误
+        const msg = err?.message || '未知错误';
+        this.$message.error('提交失败: ' + msg);
+      }
+      finally {
         this.submitForm.loading = false;
       }
     },
-    
+
     /** 下载作业提交文件 */
     handleDownload(row) {
       if (row.filePath) {
         // 如果filePath是相对路径，可能需要拼接完整的URL
-        const fullUrl = row.filePath.startsWith('http') ? row.filePath : 
-                       `http://117.72.126.104:8080${row.filePath}`;
+        const fullUrl = row.filePath.startsWith('http') ? row.filePath :
+          `http://117.72.126.104:8080${row.filePath}`;
         window.open(fullUrl, '_blank');
       } else {
         this.$message.warning('该作业没有上传文件');
