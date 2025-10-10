@@ -63,7 +63,7 @@
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="handleSignin(scope.row)" v-hasPermi="['system:signin:do']"
+          <el-button size="mini" type="primary" @click="handleSignin(scope.row)"
             :disabled="scope.row.status !== '1' || scope.row.mySigninStatus === '1'">
             签到
           </el-button>
