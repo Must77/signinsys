@@ -23,7 +23,7 @@
           </el-select>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">查询</el-button>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:deptCourse:list']">查询</el-button>
         </el-col>
       </el-row>
       
@@ -94,6 +94,7 @@
               type="text"
               icon="el-icon-folder"
               @click="handleResourceManage(scope.row)"
+              v-hasPermi="['system:deptCourse:resource']"
             >资源管理</el-button>
             
             <el-button
@@ -101,6 +102,7 @@
               type="text"
               icon="el-icon-s-management"
               @click="handleAssignmentManage(scope.row)"
+              v-hasPermi="['system:deptCourse:assignment']"
             >作业管理</el-button>
           </template>
         </el-table-column>

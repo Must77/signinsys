@@ -24,7 +24,7 @@
             </el-table-column>
             <el-table-column label="操作" width="120">
               <template slot-scope="scope">
-                <el-button size="mini" type="primary" @click="handleSubmit(scope.row)">提交</el-button>
+                <el-button size="mini" type="primary" @click="handleSubmit(scope.row)" v-hasPermi="['system:myCourse:assignment:submit']">提交</el-button>
               </template>
             </el-table-column>
           </el-table>

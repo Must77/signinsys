@@ -13,7 +13,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery" v-hasPermi="['system:leave:list']">搜索</el-button>
         <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -60,7 +60,7 @@
       <el-table-column label="操作" align="center" width="220">
         <template slot-scope="scope">
           <!-- <el-button size="mini" type="text" @click="handleUpdate(scope.row)">修改</el-button> -->
-          <el-button size="mini" type="text" @click="handleDetail(scope.row)">详情</el-button>
+          <el-button size="mini" type="text" @click="handleDetail(scope.row)" v-hasPermi="['system:leave:query']">详情</el-button>
           <el-button
             v-if="scope.row.status==='0'"
             v-hasPermi="['system:leave:approve']"

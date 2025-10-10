@@ -5,7 +5,7 @@
         <el-input v-model="queryParams.title" placeholder="请输入问卷标题" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:questionnaire:list']">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -47,7 +47,7 @@
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['system:questionnaire:remove']">删除</el-button>
           <el-button size="mini" type="text" icon="el-icon-document" @click="handleSubmissions(scope.row)"
-            v-hasPermi="['system:questionnaire:query']">提交记录</el-button>
+            v-hasPermi="['']">提交记录</el-button>
         </template>
       </el-table-column>
     </el-table>

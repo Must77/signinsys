@@ -26,7 +26,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:mySignin:list']">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -64,7 +64,7 @@
       <el-table-column label="操作" width="120" align="center">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleSignin(scope.row)"
-            :disabled="scope.row.status !== '1' || scope.row.mySigninStatus === '1'">
+            :disabled="scope.row.status !== '1' || scope.row.mySigninStatus === '1'" v-hasPermi="['system:mySignin:signin']">
             签到
           </el-button>
         </template>

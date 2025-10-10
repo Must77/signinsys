@@ -8,14 +8,14 @@
       <el-table-column label="所属部门" prop="deptName" />
       <el-table-column label="操作" width="300">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" icon="el-icon-view" @click="toggleResource(scope.row)">
+          <el-button size="mini" type="primary" icon="el-icon-view" @click="toggleResource(scope.row)" v-hasPermi="['system:myCourse:resource:view']">
             查看资源
           </el-button>
           <el-button
             size="mini"
             type="success"
             icon="el-icon-edit-outline"
-            @click="handleViewAssignments(scope.row)"
+            @click="handleViewAssignments(scope.row)" v-hasPermi="['system:myCourse:assignment:userSubmit']"
           >
             提交作业
           </el-button>

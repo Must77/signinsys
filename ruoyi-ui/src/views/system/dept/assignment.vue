@@ -8,11 +8,12 @@
       <!-- 作业操作 -->
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
-          <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd">发布作业</el-button>
+          <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd" 
+                  v-hasPermi="['system:deptCourse:assignment:publish']">发布作业</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="danger" icon="el-icon-delete" size="mini" :disabled="multiple"
-            @click="handleDelete">删除</el-button>
+            @click="handleDelete" v-hasPermi="['system:deptCourse:assignment:remove']">删除</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="info" icon="el-icon-back" size="mini" @click="goBack">返回</el-button>
@@ -47,9 +48,9 @@
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">
-            <el-button size="mini" type="text" icon="el-icon-view" @click="handleViewSubmissions(scope.row)">查看提交</el-button>
-            <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
-            <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button size="mini" type="text" icon="el-icon-view" @click="handleViewSubmissions(scope.row)" v-hasPermi="['system:deptCourse:assignment:check']">查看提交</el-button>
+            <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:deptCourse:assignment:edit']">修改</el-button>
+            <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['system:deptCourse:assignment:remove']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -3,7 +3,7 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>我的请假</span>
-        <el-button style="float: right;" type="primary" size="mini" @click="handleAdd">新增请假</el-button>
+        <el-button style="float: right;" type="primary" size="mini" @click="handleAdd" v-hasPermi="['system:myLeave:add']">新增请假</el-button>
       </div>
 
       <!-- 请假列表 -->

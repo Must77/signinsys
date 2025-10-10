@@ -19,8 +19,8 @@
         </el-table-column>
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" @click="handleDownload(scope.row)">下载</el-button>
-            <el-button size="mini" type="success" @click="handlePreview(scope.row)">预览</el-button>
+            <el-button size="mini" type="primary" @click="handleDownload(scope.row)" v-hasPermi="['system:myCourse:resource:download']">下载</el-button>
+            <el-button size="mini" type="success" @click="handlePreview(scope.row)" v-hasPermi="['system:myCourse:resource:preview']">预览</el-button>
           </template>
         </el-table-column>
       </el-table>

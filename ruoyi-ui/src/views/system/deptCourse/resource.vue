@@ -8,11 +8,11 @@
       <!-- 上传资源 -->
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
-          <el-button type="primary" icon="el-icon-upload" size="mini" @click="handleUpload">上传资源</el-button>
+          <el-button type="primary" icon="el-icon-upload" size="mini" @click="handleUpload" v-hasPermi="['system:deptCourse:resource:upload']">上传资源</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="danger" icon="el-icon-delete" size="mini" :disabled="multiple"
-            @click="handleDelete">删除</el-button>
+            @click="handleDelete" v-hasPermi="['system:deptCourse:resource:remove']">删除</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="info" icon="el-icon-back" size="mini" @click="goBack">返回</el-button>
