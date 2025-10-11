@@ -39,9 +39,9 @@ public class SysLeaveRequestController extends BaseController
     {
         String username = SecurityUtils.getUsername();
         // 非管理员强制查看自己申请
-        if (!"admin".equals(username)) {
-            query.setUserId(SecurityUtils.getUserId());
-        }
+        // if (!"admin".equals(username)) {
+        //     query.setUserId(SecurityUtils.getUserId());
+        // }
         startPage();
         List<SysLeaveRequest> list = leaveService.selectLeaveRequestList(query);
         return getDataTable(list);
@@ -93,7 +93,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 审批拒绝 — 仅有权限的人（admin）
      */
-    @PreAuthorize("@ss.hasPermi('system:leave:approve')")
+    @PreAuthorize("@ss.hasPermi('system:leave:reject')")
     @Log(title = "请假审批", businessType = BusinessType.UPDATE)
     @PutMapping("/reject/{leaveId}")
     public AjaxResult reject(@PathVariable Long leaveId)
