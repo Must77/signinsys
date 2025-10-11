@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysCourseSignin;
 import com.ruoyi.system.domain.SysCourseSigninRecord;
@@ -38,6 +38,7 @@ public class SysCourseSigninController extends BaseController
      * 查询课程签到列表（admin）
      */
     @GetMapping("/list")
+    @PreAuthorize("@ss.hasPermi('system:signin:list')")
     public TableDataInfo list(SysCourseSignin query)
     {
         startPage();
@@ -49,6 +50,7 @@ public class SysCourseSigninController extends BaseController
      * 获取课程签到详细信息（admin）
      */
     @GetMapping("/{signinId}")
+    @PreAuthorize("@ss.hasPermi('system:signin:query')")
     public AjaxResult getInfo(@PathVariable Long signinId)
     {
         return AjaxResult.success(signinService.selectCourseSigninById(signinId));
@@ -61,6 +63,7 @@ public class SysCourseSigninController extends BaseController
      */
     @Log(title = "课程签到", businessType = BusinessType.INSERT)
     @PostMapping
+    @PreAuthorize("@ss.hasPermi('system:signin:add')")
     public AjaxResult add(@RequestBody SysCourseSignin signin)
     {
         // TODO 确认字段status的必要性和更新逻辑
@@ -92,6 +95,7 @@ public class SysCourseSigninController extends BaseController
      */
     @Log(title = "课程签到", businessType = BusinessType.UPDATE)
     @PutMapping
+    @PreAuthorize("@ss.hasPermi('system:signin:edit')")
     public AjaxResult edit(@RequestBody SysCourseSignin signin)
     {
         return toAjax(signinService.updateCourseSignin(signin));
@@ -102,6 +106,7 @@ public class SysCourseSigninController extends BaseController
      */
     @Log(title = "课程签到", businessType = BusinessType.DELETE)
     @DeleteMapping("/{signinIds}")
+    @PreAuthorize("@ss.hasPermi('system:signin:remove')")
     public AjaxResult remove(@PathVariable Long[] signinIds)
     {
         return toAjax(signinService.deleteCourseSigninByIds(signinIds));
@@ -113,6 +118,7 @@ public class SysCourseSigninController extends BaseController
      * 已签到人员 / 未签到人员
      */
     @GetMapping("/result/{signinId}")
+    @PreAuthorize("@ss.hasPermi('system:signin:result')")
     public AjaxResult result(@PathVariable Long signinId)
     {
         List<SysCourseSigninRecord> signed = recordService.selectSignedUsers(signinId);
