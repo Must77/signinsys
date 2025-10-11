@@ -80,9 +80,9 @@ public class SysDeptCourseController extends BaseController
     public AjaxResult listByDept(@PathVariable Long deptId)
     {
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("仅管理员可以按部门查看课程");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("仅管理员可以按部门查看课程");
+        // }
         SysDeptCourse query = new SysDeptCourse();
         query.setDeptId(deptId);
         List<SysDeptCourse> list = deptCourseService.selectDeptCourseList(query);
@@ -98,9 +98,9 @@ public class SysDeptCourseController extends BaseController
     public AjaxResult add(@RequestBody SysDeptCourse course)
     {
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("只有管理员可以添加课程");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("只有管理员可以添加课程");
+        // }
         if (course.getDeptId() == null) {
             return error("新增课程必须指定部门");
         }
@@ -116,9 +116,9 @@ public class SysDeptCourseController extends BaseController
     public AjaxResult edit(@RequestBody SysDeptCourse course)
     {
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("只有管理员可以修改课程");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("只有管理员可以修改课程");
+        // }
         return toAjax(deptCourseService.updateDeptCourse(course));
     }
 
@@ -131,9 +131,9 @@ public class SysDeptCourseController extends BaseController
     public AjaxResult remove(@PathVariable Long[] courseIds)
     {
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("只有管理员可以删除课程");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("只有管理员可以删除课程");
+        // }
         return toAjax(deptCourseService.deleteDeptCourseByIds(courseIds));
     }
 }

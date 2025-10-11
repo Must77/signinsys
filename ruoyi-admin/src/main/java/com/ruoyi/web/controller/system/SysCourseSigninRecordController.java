@@ -62,13 +62,6 @@ public class SysCourseSigninRecordController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:signinRecord:list')")
     public TableDataInfo list(SysCourseSigninRecord query)
     {
-        if(getUsername().equals("admin")) {
-            // 管理员查看全部
-        } else {
-            // 普通用户只能查看自己的
-            query.setUserId(getUserId());
-        }
-        
         startPage();
         List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
         return getDataTable(list);
