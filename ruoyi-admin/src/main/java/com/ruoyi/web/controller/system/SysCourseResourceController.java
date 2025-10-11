@@ -92,9 +92,9 @@ public class SysCourseResourceController extends BaseController {
     public AjaxResult add(@RequestBody SysCourseResource resource) {
         // 只有 admin 能写资源（也可通过权限表控制）
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("只有管理员可以新增课程资源");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("只有管理员可以新增课程资源");
+        // }
         resource.setCreateBy(getUsername());
         return toAjax(resourceService.insertCourseResource(resource));
     }
@@ -107,9 +107,9 @@ public class SysCourseResourceController extends BaseController {
     @DeleteMapping("/{resourceIds}")
     public AjaxResult remove(@PathVariable Long[] resourceIds) {
         String username = SecurityUtils.getUsername();
-        if (!"admin".equals(username)) {
-            return error("只有管理员可以删除课程资源");
-        }
+        // if (!"admin".equals(username)) {
+        //     return error("只有管理员可以删除课程资源");
+        // }
         return toAjax(resourceService.deleteCourseResourceByIds(resourceIds));
     }
 }
