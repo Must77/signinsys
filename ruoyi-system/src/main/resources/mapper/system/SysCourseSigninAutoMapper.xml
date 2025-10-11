@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.system.mapper.SysCourseSigninAutoMapper">
+
+    <resultMap type="SysCourseSigninAuto" id="SysCourseSigninAutoResult">
+        <id     property="autoId"        column="auto_id"        />
+        <result property="courseId"      column="course_id"      />
+        <result property="cronExpression" column="cron_expression"/>
+        <result property="status"        column="status"         />
+        <result property="delFlag"       column="del_flag"       />
+        <result property="remark"        column="remark"         />
+    </resultMap>
+
+    <sql id="selectCourseSigninAutoVo">
+        select auto_id, course_id, cron_expression, status, del_flag, remark
+        from sys_course_signin_auto
+    </sql>
+
+    <select id="selectCourseSigninAutoByCourseId" parameterType="long" resultMap="SysCourseSigninAutoResult">
+        <include refid="selectCourseSigninAutoVo"/>
+        where course_id = #{courseId}
+    </select>
+
+    <insert id="insertCourseSigninAuto" parameterType="SysCourseSigninAuto" useGeneratedKeys="true" keyProperty="autoId" resultMap="SysCourseSigninAutoResult">
+        INSERT INTO sys_course_signin_auto (
+            <if test="courseId != null">course_id, </if>
+            <if test="cronExpression != null and cronExpression != ''">cron_expression, </if>
+            <if test="status != null">status, </if>
+            <if test="delFlag != null">del_flag, </if>
+            <if test="remark != null">remark </if>
+        ) VALUES (
+            <if test="courseId != null">#{courseId}, </if>
+            <if test="cronExpression != null and cronExpression != ''">#{cronExpression}, </if>
+            <if test="status != null">#{status}, </if>
+            <if test="delFlag != null">#{delFlag}, </if>
+            <if test="remark != null">#{remark} </if>
+        )
+    </insert>
+
+    <update id="updateCourseSigninAuto" parameterType="SysCourseSigninAuto">
+        UPDATE sys_course_signin_auto
+        <set>
+            <if test="courseId != null">course_id = #{courseId}, </if>
+            <if test="cronExpression != null and cronExpression != ''">cron_expression = #{cronExpression}, </if>
+            <if test="status != null">status = #{status}, </if>
+            <if test="delFlag != null">del_flag = #{delFlag}, </if>
+            <if test="remark != null">remark = #{remark} </if>
+        </set>
+        WHERE auto_id = #{autoId}
+    </update>
+
+    <update id="deleteCourseSigninAutoByCourseId" parameterType="long">
+        UPDATE sys_course_signin_auto
+        SET del_flag = '2'
+        WHERE course_id = #{courseId}
+    </update>
+
+</mapper>
