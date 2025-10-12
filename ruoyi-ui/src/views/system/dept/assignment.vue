@@ -28,22 +28,22 @@
         <el-table-column prop="assignmentDescribe" label="作业描述" />
         <el-table-column prop="startTime" label="开始时间" width="160">
           <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.startTime) }}</span>
+            <span>{{ scope.row.startTime }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="endTime" label="结束时间" width="160">
           <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.endTime) }}</span>
+            <span>{{ scope.row.endTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="deadline" label="截止时间" width="160">
+        <!-- <el-table-column prop="deadline" label="截止时间" width="160">
           <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.deadline) }}</span>
+          <span>{{ scope.row.deadline }}</span>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column prop="createTime" label="创建时间" width="160">
           <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.createTime) }}</span>
+            <span>{{ scope.row.createTime }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200">
@@ -85,14 +85,14 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="截止时间" prop="deadline">
+        <!-- <el-form-item label="截止时间" prop="deadline">
           <el-date-picker
             v-model="assignmentForm.form.deadline"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择截止时间">
           </el-date-picker>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitAssignmentForm">确 定</el-button>
@@ -106,18 +106,18 @@
         <el-tab-pane label="已提交" name="submitted">
           <el-table :data="submission.submittedList" v-loading="submission.loading" style="width: 100%">
             <el-table-column prop="userName" label="学生姓名" width="120" />
-            <el-table-column prop="submitTime" label="提交时间" width="160">
+            <!-- <el-table-column prop="submitTime" label="提交时间" width="160">
               <template slot-scope="scope">
                 <span>{{ parseTime(scope.row.submitTime) }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             <el-table-column prop="fileName" label="提交文件名" />
-            <el-table-column prop="fileType" label="文件类型" width="100" />
+            <!-- <el-table-column prop="fileType" label="文件类型" width="100" />
             <el-table-column prop="fileSize" label="文件大小" width="120">
               <template slot-scope="scope">
                 <span>{{ scope.row.fileSize }} 字节</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             <el-table-column label="操作" width="100">
               <template slot-scope="scope">
                 <el-button size="mini" type="text" @click="handleDownloadSubmission(scope.row)">下载</el-button>
@@ -127,12 +127,14 @@
         </el-tab-pane>
         <el-tab-pane label="未提交" name="unsubmitted">
           <el-table :data="submission.unsubmittedList" v-loading="submission.loading" style="width: 100%">
+            
+            <el-table-column prop="userId" label="学生ID" width="120" />
             <el-table-column prop="userName" label="学生姓名" width="120" />
-            <el-table-column prop="createTime" label="加入时间" width="160">
+            <!-- <el-table-column prop="createTime" label="加入时间" width="160">
               <template slot-scope="scope">
                 <span>{{ parseTime(scope.row.createTime) }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
         </el-tab-pane>
       </el-tabs>
@@ -192,10 +194,10 @@ export default {
           ],
           endTime: [
             { required: true, message: "结束时间不能为空", trigger: "blur" }
-          ],
-          deadline: [
-            { required: true, message: "截止时间不能为空", trigger: "blur" }
           ]
+          // deadline: [
+          //   { required: true, message: "截止时间不能为空", trigger: "blur" }
+          // ]
         }
       },
       submission: {
@@ -286,6 +288,16 @@ export default {
         this.total = res.total || 0;
         this.loading = false;
         
+        // 调试：检查作业数据中的时间字段
+    if (this.assignmentList.length > 0) {
+      console.log('作业列表数据:', this.assignmentList);
+      console.log('第一条作业的时间字段:', {
+        startTime: this.assignmentList[0].startTime,
+        endTime: this.assignmentList[0].endTime,
+        deadline: this.assignmentList[0].deadline,
+        createTime: this.assignmentList[0].createTime
+      });
+    }
         // 如果还没有获取到部门ID，尝试从作业列表中获取
         if (!this.courseDeptId && this.assignmentList.length > 0 && this.assignmentList[0].deptId) {
           this.courseDeptId = this.assignmentList[0].deptId;
@@ -453,7 +465,14 @@ export default {
     
     /** 下载作业提交文件 */
     handleDownloadSubmission(row) {
-      window.open(row.filePath, '_blank');
+      // 直接创建一个a标签来下载文件，避免使用POST方法
+      const link = document.createElement('a');
+      link.href = row.filePath;
+      link.download = row.fileName || 'download';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   }
 };

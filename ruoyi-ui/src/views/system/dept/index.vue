@@ -2,34 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20">
       <splitpanes :horizontal="this.$store.getters.device === 'mobile'" class="default-theme">
-        <!-- 部门树
-        <pane size="16">
-          <el-col>
-            <div class="head-container">
-              <el-input
-                v-model="deptName"
-                placeholder="请输入班级名称"
-                clearable
-                size="small"
-                prefix-icon="el-icon-search"
-                style="margin-bottom: 20px"
-              />
-            </div>
-            <div class="head-container">
-              <el-tree
-                :data="deptOptions"
-                :props="defaultProps"
-                :expand-on-click-node="false"
-                :filter-node-method="filterNode"
-                ref="tree"
-                node-key="id"
-                default-expand-all
-                highlight-current
-                @node-click="handleNodeClick"
-              />
-            </div>
-          </el-col>
-        </pane> -->
+        
         
         <!-- 部门列表 -->
         <pane size="84">
@@ -91,7 +64,7 @@
               :default-expand-all="isExpandAll"
               :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
             >
-              <el-table-column prop="deptName" label="班级名称" width="200">
+              <el-table-column prop="deptName" label="班级名称" width="300">
                 <template slot-scope="scope">
                   <el-link v-if="scope.row.parentId != 0" @click="handleViewDetails(scope.row)" :underline="false">
                     {{ scope.row.deptName }}
@@ -194,11 +167,11 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="12">
+                  <!-- <el-col :span="12">
                     <el-form-item label="邮箱" prop="email">
                       <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
                     </el-form-item>
-                  </el-col>
+                  </el-col> -->
                 </el-row>
                 <el-row>
                   <el-col :span="12">
@@ -220,14 +193,9 @@
                       <el-input v-model="form.brief" placeholder="请输入简介" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="12">
-                    <el-form-item label="封面URL" prop="coverURL">
-                      <el-input v-model="form.coverURL" placeholder="请输入封面URL" />
-                    </el-form-item>
-                  </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="12">
+                  <el-col :span="10">
                     <el-form-item label="开始时间" prop="startTime">
                       <el-date-picker
                         v-model="form.startTime"
@@ -237,7 +205,7 @@
                       </el-date-picker>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="12">
+                  <el-col :span="10">
                     <el-form-item label="结束时间" prop="endTime">
                       <el-date-picker
                         v-model="form.endTime"
@@ -260,7 +228,7 @@
                     </el-form-item>
                   </el-col>
                 </el-row>
-                <el-row>
+                <!-- <el-row>
                   <el-col :span="12">
                     <el-form-item label="自动加入">
                       <el-switch
@@ -270,7 +238,7 @@
                       </el-switch>
                     </el-form-item>
                   </el-col>
-                </el-row>
+                </el-row> -->
               </el-form>
               <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -288,7 +256,7 @@
 </template>
 
 <script>
-import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild, exportDeptApply } from "@/api/system/dept"
+import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild, exportDeptApply, listDeptApply } from "@/api/system/dept"
 import { exportClassUsers } from "@/api/system/user"
 import { listApprovedUsers } from "@/api/system/deptApply"
 import Treeselect from "@riophae/vue-treeselect"
@@ -343,9 +311,6 @@ export default {
         size: [
           { required: true, message: "当前人数不能为空", trigger: "blur" }
         ],
-        autoJoin: [
-          { required: true, message: "自动加入不能为空", trigger: "blur" }
-        ],
         startTime: [
           { required: true, message: "开始时间不能为空", trigger: "blur" }
         ],
@@ -358,7 +323,9 @@ export default {
         label: "label"
       },
       detailVisible: false,
-      currentDept: {}
+      currentDept: {
+        isApplied: false
+      }
     };
   },
   created() {
@@ -510,8 +477,14 @@ export default {
       }).catch(() => {});
     },
     /** 查看详情操作 */
-    handleViewDetails(row) {
+    async handleViewDetails(row) {
       this.currentDept = row;
+      try {
+        const res = await listDeptApply({ deptId: row.deptId });
+        this.currentDept.isApplied = res.data && res.data.length > 0;
+      } catch (error) {
+        this.currentDept.isApplied = false;
+      }
       this.detailVisible = true;
     }
   }

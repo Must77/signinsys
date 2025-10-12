@@ -20,15 +20,6 @@
 
     <!-- 工具栏 -->
     <el-row :gutter="10" class="mb8">
-      <!-- <el-col :span="1.5">
-        <el-button
-          v-hasPermi="['system:leave:add']"
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          @click="handleAdd"
-        >新增</el-button>
-      </el-col> -->
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['system:leave:remove']"
@@ -46,7 +37,6 @@
       <el-table-column type="selection" width="55" />
       <el-table-column prop="leaveId" label="编号" width="80" />
       <el-table-column prop="userName" label="请假人" />
-      <!-- <el-table-column prop="leaveType" label="类型" :formatter="typeFmt" /> -->
       <el-table-column prop="startTime" label="开始时间" width="160" />
       <el-table-column prop="endTime" label="结束时间" width="160" />
       <el-table-column prop="reason" label="事由" show-overflow-tooltip />
@@ -59,7 +49,6 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="220">
         <template slot-scope="scope">
-          <!-- <el-button size="mini" type="text" @click="handleUpdate(scope.row)">修改</el-button> -->
           <el-button size="mini" type="text" @click="handleDetail(scope.row)" v-hasPermi="['system:leave:query']">详情</el-button>
           <el-button
             v-if="scope.row.status==='0'"
@@ -75,7 +64,6 @@
             type="text"
             @click="handleReject(scope.row)"
           >拒绝</el-button>
-          <!-- <el-button size="mini" type="text" @click="handleDelete(scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -119,7 +107,6 @@
       <el-descriptions :column="2" border>
         <el-descriptions-item label="编号">{{ detail.leaveId }}</el-descriptions-item>
         <el-descriptions-item label="请假人">{{ detail.userName }}</el-descriptions-item>
-        <!-- <el-descriptions-item label="类型">{{ typeFmt(null,null,detail.leaveType) }}</el-descriptions-item> -->
         <el-descriptions-item label="开始时间">{{ detail.startTime }}</el-descriptions-item>
         <el-descriptions-item label="结束时间">{{ detail.endTime }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ statusFmt(null,null,detail.status) }}</el-descriptions-item>
@@ -167,7 +154,6 @@ export default {
         reason: ''
       },
       rules: {
-        // leaveType: [{ required: true, message: '请选择类型', trigger: 'change' }],
         startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
         endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
         reason: [{ required: true, message: '请填写事由', trigger: 'blur' }]
@@ -183,7 +169,9 @@ export default {
       this.loading = true
       listLeave(this.queryParams).then(response => {
         if (response.code === 200) {
-          this.leaveList = response.rows || []
+          // 修复manager用户无法查看请假列表的问题
+          // 后端接口返回的数据结构可能是rows或data，需要兼容处理
+          this.leaveList = response.rows || response.data || []
           this.total = response.total || 0
         } else {
           this.leaveList = []

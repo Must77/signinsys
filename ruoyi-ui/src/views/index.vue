@@ -32,9 +32,9 @@
                 </template>
               </el-table-column>
             </el-table>
-            <div class="notice-more" v-if="noticeList.length > 0">
+            <!-- <div class="notice-more" v-if="noticeList.length > 0">
               <el-link type="primary" @click="handleMoreNotice">查看更多</el-link>
-            </div>
+            </div> -->
           </div>
         </el-card>
       </el-col>

@@ -20,8 +20,8 @@
 
     <el-table v-loading="loading" :data="questionnaireList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="问卷ID" align="center" prop="metaId" />
-      <el-table-column label="问卷标题" align="center" prop="title" :show-overflow-tooltip="true" />
+      <el-table-column label="问卷ID" align="center" prop="metaId" width="100"/>
+      <el-table-column label="问卷标题" align="center" prop="title" width="300" :show-overflow-tooltip="true" />
       <el-table-column label="描述" align="center" prop="description" :show-overflow-tooltip="true" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
@@ -47,7 +47,7 @@
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['system:questionnaire:remove']">删除</el-button>
           <el-button size="mini" type="text" icon="el-icon-document" @click="handleSubmissions(scope.row)"
-            v-hasPermi="['']">提交记录</el-button>
+            v-hasPermi="['system:questionnaire:result']">提交记录</el-button>
         </template>
       </el-table-column>
     </el-table>

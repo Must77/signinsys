@@ -33,11 +33,6 @@
               <el-tag type="danger" v-else>已拒绝</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="申请时间" prop="createTime" width="160" align="center">
-            <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.createTime) }}</span>
-            </template>
-          </el-table-column>
           <el-table-column label="操作" width="220" align="center" fixed="right">
             <template slot-scope="scope">
               <el-button size="mini" type="success" @click="handleApprove(scope.row)" v-hasPermi="['system:deptApply:approve']" :disabled="scope.row.status!=='0'">通过</el-button>

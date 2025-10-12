@@ -22,11 +22,47 @@
               <el-form-item label="修改时间:">{{ parseTime(dept.updateTime) }}</el-form-item>
             </el-col> -->
           </el-row>
-          <!-- <el-row>
+          <el-row>
             <el-col :span="24">
-              <el-form-item label="备注:">{{ dept.remark }}</el-form-item>
+              <el-form-item label="简介:">{{ dept.brief }}</el-form-item>
             </el-col>
-          </el-row> -->
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="开始时间:">{{ parseTime(dept.startTime) }}</el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="结束时间:">{{ parseTime(dept.endTime) }}</el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="班级容量:">{{ dept.cap }}</el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="当前人数:">{{ dept.size }}</el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="自动加入:">
+                <el-tag v-if="dept.autoJoin === 1" type="success">是</el-tag>
+                <el-tag v-else type="info">否</el-tag>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24" style="text-align: center;">
+              <el-button 
+                type="primary" 
+                @click="handleApply" 
+                :disabled="isApplied"
+                v-hasPermi="['system:deptApply:add']"
+              >
+                {{ isApplied ? '已报名' : '报名参加' }}
+              </el-button>
+            </el-col>
+          </el-row>
         </el-form>
       </el-tab-pane>
       
@@ -79,8 +115,9 @@
 </template>
 
 <script>
-import { listDeptCourseByDeptId } from "@/api/system/deptCourse";
+import { listDeptCourseByDeptId, getApplyStatus } from "@/api/system/dept";
 import { listCourseResource } from "@/api/system/courseResource";
+import { addDeptApply } from "@/api/system/deptApply";
 import AssignmentManage from "./assignment.vue";
 
 export default {
@@ -104,20 +141,29 @@ export default {
       resourceVisible: false,
       homeworkVisible: false,
       currentCourseId: null,
-      currentCourseName: ''
+      currentCourseName: '',
+      isApplied: false
     };
   },
   watch: {
     visible(newVal) {
       if (newVal) {
         this.loadCourses();
+        this.loadApplyStatus();
       }
     }
   },
   methods: {
     loadCourses() {
-      listDeptCourseByDeptId(this.dept.deptId).then(response => {
-        this.courses = response.rows || response.data || [];
+      if (this.dept.deptId) {
+        listDeptCourseByDeptId(this.dept.deptId).then(response => {
+          this.courses = response.data || [];
+        });
+      }
+    },
+    loadApplyStatus() {
+      getApplyStatus(this.dept.deptId).then(response => {
+        this.isApplied = response.data;
       });
     },
     handleViewResources(row) {
@@ -136,6 +182,18 @@ export default {
     },
     close() {
       this.$emit("update:visible", false);
+    },
+    handleApply() {
+      this.$modal.confirm('确认要报名参加"' + this.dept.deptName + '"吗？').then(() => {
+        return addDeptApply({
+          deptId: this.dept.deptId
+        });
+      }).then(() => {
+        this.$modal.msgSuccess("报名申请已提交，请等待管理员审批");
+        this.isApplied = true;
+        this.close();
+        this.$emit("applied");
+      }).catch(() => {});
     }
   }
 };

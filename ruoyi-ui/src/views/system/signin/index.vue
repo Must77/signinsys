@@ -300,8 +300,10 @@
       <el-tabs v-model="resultActiveName">
         <el-tab-pane label="已签到" name="signed">
           <el-table :data="pagedTable(signedList, resultPage.signed)" border>
+            
+            <el-table-column prop="userId" label="用户ID" />
             <el-table-column prop="userName" label="姓名" />
-            <el-table-column prop="nickName" label="昵称" />
+            
             <el-table-column prop="signinTime" label="签到时间" />
           </el-table>
           <pagination
@@ -315,8 +317,9 @@
         </el-tab-pane>
         <el-tab-pane label="未签到" name="unsigned">
           <el-table :data="pagedTable(unsignedList, resultPage.unsigned)" border>
+            <el-table-column prop="userId" label="用户ID" />
             <el-table-column prop="userName" label="姓名" />
-            <el-table-column prop="nickName" label="昵称" />
+            
           </el-table>
           <pagination
             small
