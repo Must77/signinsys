@@ -36,7 +36,7 @@
         </el-tab-pane>
 
         <!-- 已提交作业 -->
-        <el-tab-pane label="已提交作业" name="submitted">
+        <!-- <el-tab-pane label="已提交作业" name="submitted">
           <el-table :data="submittedAssignments" v-loading="loading.submitted" style="width: 100%">
             <el-table-column prop="assignmentId" label="作业ID" width="80" />
             <el-table-column prop="assignmentTitle" label="作业标题" />
@@ -65,11 +65,11 @@
             </el-table-column>
           </el-table>
 
-          <!-- 添加空状态提示 -->
+         
           <div v-if="submittedAssignments.length === 0 && !loading.submitted" class="empty-state">
             <el-empty description="暂无已提交的作业"></el-empty>
           </div>
-        </el-tab-pane>
+        </el-tab-pane> -->
       </el-tabs>
     </el-card>
 
