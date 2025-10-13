@@ -8,11 +8,11 @@
       <!-- 上传资源 -->
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
-          <el-button type="primary" icon="el-icon-upload" size="mini" @click="handleUpload">上传资源</el-button>
+          <el-button type="primary" icon="el-icon-upload" size="mini" @click="handleUpload" v-hasPermi="['system:deptCourse:resource:upload']">上传资源</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="danger" icon="el-icon-delete" size="mini" :disabled="multiple"
-            @click="handleDelete">删除</el-button>
+            @click="handleDelete" v-hasPermi="['system:deptCourse:resource:remove']">删除</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button type="info" icon="el-icon-back" size="mini" @click="goBack">返回</el-button>
@@ -22,16 +22,16 @@
       <!-- 资源列表 -->
       <el-table :data="resourceList" v-loading="loading" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="resourceId" label="资源主键ID" width="80" />
+        <!-- <el-table-column prop="resourceId" label="资源主键ID" width="80" /> -->
         <el-table-column prop="courseId" label="课程ID" width="80" />
-        <el-table-column prop="fileName" label="原始文件名" />
+        <el-table-column prop="fileName" label="文件名" />
         <el-table-column prop="filePath" label="文件路径">
           <template slot-scope="scope">
             <el-link :href="scope.row.filePath" target="_blank">{{ scope.row.fileName }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column prop="fileType" label="文件类型" width="100" />
-        <el-table-column prop="fileSize" label="文件大小(字节)" width="120" />
+        <!-- <el-table-column prop="fileType" label="文件类型" width="100" />
+        <el-table-column prop="fileSize" label="文件大小(字节)" width="120" /> -->
         <el-table-column prop="createTime" label="创建时间" width="160">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.createTime) }}</span>
@@ -61,8 +61,8 @@
             <div class="el-upload__tip" slot="tip">只能上传jpg/png/pdf/doc/docx/xls/xlsx/ppt/pptx/mp4等文件，且不超过100MB</div>
           </el-upload>
         </el-form-item>
-        <el-form-item label="原始文件名" prop="fileName">
-          <el-input v-model="upload.form.fileName" placeholder="请输入原始文件名" />
+        <el-form-item label="文件名" prop="fileName">
+          <el-input v-model="upload.form.fileName" placeholder="请输入文件名" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">

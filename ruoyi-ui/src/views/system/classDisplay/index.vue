@@ -16,12 +16,12 @@
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" @click="handleView(scope.row)">查看详情</el-button>
+          <el-button size="mini" type="text" @click="handleView(scope.row)" v-hasPermi="['system:classDisplay:query']">查看详情</el-button>
           <el-button 
             size="mini" 
             :class="['apply-button', { 'apply-disabled': scope.row.status !== '0' || scope.row.size >= scope.row.cap }]"
             :disabled="scope.row.status !== '0' || scope.row.size >= scope.row.cap"
-            @click="handleApply(scope.row)"
+            @click="handleApply(scope.row)" v-hasPermi="['system:classDisplay:signin']"
           >
             报名
           </el-button>

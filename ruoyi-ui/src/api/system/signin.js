@@ -83,3 +83,13 @@ export function getResult(id) {
     method: 'get'
   })
 }
+
+// 导出签到表
+export function exportSigninRecord(signinId) {
+  return request({
+    url: '/system/signinRecord/export',
+    method: 'post',
+    data: { signinId },
+    responseType: 'blob'
+  })
+}

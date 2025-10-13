@@ -10,7 +10,7 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:questionna:userList:list']">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -47,7 +47,7 @@
             type="primary"
             icon="el-icon-edit-outline"
             @click="handleFill(scope.row)"
-            :disabled="isExpired(scope.row) || isNotStarted(scope.row)"
+            :disabled="isExpired(scope.row) || isNotStarted(scope.row)" v-hasPermi="['system:questionna:userList:fill']"
           >填写问卷</el-button>
         </template>
       </el-table-column>

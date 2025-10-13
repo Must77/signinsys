@@ -134,3 +134,13 @@ export function deptTreeSelect() {
     method: 'get'
   })
 }
+
+// 导出班级用户表
+export function exportClassUsers(deptId) {
+  return request({
+    url: '/system/user/export',
+    method: 'post',
+    data: { deptId },
+    responseType: 'blob'
+  })
+}

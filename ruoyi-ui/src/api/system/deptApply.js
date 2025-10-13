@@ -9,6 +9,7 @@ export function listDeptApply(query) {
   })
 }
 
+
 // 用户提交申请
 export function addDeptApply(data) {
   return request({

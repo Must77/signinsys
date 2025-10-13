@@ -50,3 +50,37 @@ export function delDept(deptId) {
     method: 'delete'
   })
 }
+
+// 根据部门ID查询课程列表
+export function listDeptCourseByDeptId(deptId) {
+  return request({
+    url: '/system/deptCourse/list/' + deptId,
+    method: 'get'
+  })
+}
+
+// 用户申请时获取所有部门（忽略数据权限）
+export function treeselectAll() {
+  return request({
+    url: '/system/dept/treeselectAll',
+    method: 'get'
+  })
+}
+
+// 导出部门申请表
+export function exportDeptApply(deptId) {
+  return request({
+    url: '/system/deptApply/export',
+    method: 'post',
+    data: { deptId },
+    responseType: 'blob'
+  })
+}
+
+// 获取用户申请状态
+export function getApplyStatus(deptId) {
+  return request({
+    url: '/system/dept/applied/' + deptId,
+    method: 'get'
+  })
+}

@@ -1,245 +1,272 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
-      <el-form-item label="班级名称" prop="deptName">
-        <el-input
-          v-model="queryParams.deptName"
-          placeholder="请输入班级名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="班级状态" clearable>
-          <el-option
-            v-for="dict in dict.type.sys_normal_disable"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-row :gutter="20">
+      <splitpanes :horizontal="this.$store.getters.device === 'mobile'" class="default-theme">
+        
+        
+        <!-- 部门列表 -->
+        <pane size="84">
+          <el-col>
+            <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+              <el-form-item label="班级名称" prop="deptName">
+                <el-input
+                  v-model="queryParams.deptName"
+                  placeholder="请输入班级名称"
+                  clearable
+                  style="width: 240px"
+                  @keyup.enter.native="handleQuery"
+                />
+              </el-form-item>
+              <el-form-item label="状态" prop="status">
+                <el-select v-model="queryParams.status" placeholder="班级状态" clearable style="width: 240px">
+                  <el-option
+                    v-for="dict in dict.type.sys_normal_disable"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:dept:list']" >搜索</el-button>
+                <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+              </el-form-item>
+            </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['system:dept:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="info"
-          plain
-          icon="el-icon-sort"
-          size="mini"
-          @click="toggleExpandAll"
-        >展开/折叠</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+            <el-row :gutter="10" class="mb8">
+              <el-col :span="1.5">
+                <el-button
+                  type="primary"
+                  plain
+                  icon="el-icon-plus"
+                  size="mini"
+                  @click="handleAdd"
+                  v-hasPermi="['system:dept:add']"
+                >新增</el-button>
+              </el-col>
+              <el-col :span="1.5">
+                <el-button
+                  type="info"
+                  plain
+                  icon="el-icon-sort"
+                  size="mini"
+                  @click="toggleExpandAll"
+                >展开/折叠</el-button>
+              </el-col>
+              <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+            </el-row>
+
+            <el-table
+              v-if="refreshTable"
+              v-loading="loading"
+              :data="deptList"
+              row-key="deptId"
+              :default-expand-all="isExpandAll"
+              :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+            >
+              <el-table-column prop="deptName" label="班级名称" width="300">
+                <template slot-scope="scope">
+                  <el-link v-if="scope.row.parentId != 0" @click="handleViewDetails(scope.row)" :underline="false">
+                    {{ scope.row.deptName }}
+                  </el-link>
+                  <span v-else>{{ scope.row.deptName }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="orderNum" label="排序" width="80"></el-table-column>
+              <el-table-column prop="startTime" label="开始时间" width="160">
+                <template slot-scope="scope">
+                  <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="endTime" label="结束时间" width="160">
+                <template slot-scope="scope">
+                  <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="status" label="状态" width="100">
+                <template slot-scope="scope">
+                  <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.status"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建时间" align="center" prop="createTime" width="160">
+                <template slot-scope="scope">
+                  <span>{{ parseTime(scope.row.createTime) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+                <template slot-scope="scope">
+                  <el-button
+                    size="mini"
+                    type="text"
+                    icon="el-icon-edit"
+                    @click="handleUpdate(scope.row)"
+                    v-hasPermi="['system:dept:edit']"
+                  >修改</el-button>
+                  <el-button
+                    size="mini"
+                    type="text"
+                    icon="el-icon-plus"
+                    @click="handleAdd(scope.row)"
+                    v-hasPermi="['system:dept:add']"
+                  >新增</el-button>
+                  <el-button
+                    v-if="scope.row.parentId != 0"
+                    size="mini"
+                    type="text"
+                    @click="handleExport(scope.row)"
+                    v-hasPermi="['system:dept:export']"
+                  >导出报名表</el-button>
+                  <el-button
+                    v-if="scope.row.parentId != 0"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-delete"
+                    @click="handleDelete(scope.row)"
+                    v-hasPermi="['system:dept:remove']"
+                  >删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            
+            <!-- 添加或修改部门对话框 -->
+            <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
+              <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="班级名称" prop="deptName">
+                      <el-input v-model="form.deptName" placeholder="请输入班级名称" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="显示排序" prop="orderNum">
+                      <el-input-number v-model="form.orderNum" controls-position="right" :min="0" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="负责人" prop="leader">
+                      <el-input v-model="form.leader" placeholder="请输入负责人" maxlength="20" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="联系电话" prop="phone">
+                      <el-input v-model="form.phone" placeholder="请输入联系电话" maxlength="11" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="父级部门" prop="parentId">
+                      <treeselect 
+                        v-model="form.parentId" 
+                        :options="deptOptions" 
+                        :normalizer="normalizer" 
+                        :show-count="true" 
+                        placeholder="请选择父级部门" 
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <!-- <el-col :span="12">
+                    <el-form-item label="邮箱" prop="email">
+                      <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+                    </el-form-item>
+                  </el-col> -->
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="班级状态">
+                      <el-radio-group v-model="form.status">
+                        <el-radio
+                          v-for="dict in dict.type.sys_normal_disable"
+                          :key="dict.value"
+                          :label="dict.value"
+                        >{{dict.label}}</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <!-- 新增字段 -->
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="简介" prop="brief">
+                      <el-input v-model="form.brief" placeholder="请输入简介" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="10">
+                    <el-form-item label="开始时间" prop="startTime">
+                      <el-date-picker
+                        v-model="form.startTime"
+                        type="datetime"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        placeholder="请选择开始时间">
+                      </el-date-picker>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="10">
+                    <el-form-item label="结束时间" prop="endTime">
+                      <el-date-picker
+                        v-model="form.endTime"
+                        type="datetime"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        placeholder="请选择结束时间">
+                      </el-date-picker>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="班级容量" prop="cap">
+                      <el-input-number v-model="form.cap" controls-position="right" :min="0" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="当前人数" prop="size">
+                      <el-input-number v-model="form.size" controls-position="right" :min="0" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <!-- <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="自动加入">
+                      <el-switch
+                        v-model="form.autoJoin"
+                        :active-value="1"
+                        :inactive-value="0">
+                      </el-switch>
+                    </el-form-item>
+                  </el-col>
+                </el-row> -->
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitForm">确 定</el-button>
+                <el-button @click="cancel">取 消</el-button>
+              </div>
+            </el-dialog>
+            
+            <!-- 班级详情对话框 -->
+            <dept-detail :visible.sync="detailVisible" :dept="currentDept" />
+          </el-col>
+        </pane>
+      </splitpanes>
     </el-row>
-
-    <el-table
-      v-if="refreshTable"
-      v-loading="loading"
-      :data="deptList"
-      row-key="deptId"
-      :default-expand-all="isExpandAll"
-      :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-    >
-      <el-table-column prop="deptName" label="班级名称" width="200"></el-table-column>
-      <el-table-column prop="orderNum" label="排序" width="80"></el-table-column>
-      <el-table-column prop="startTime" label="开始时间" width="160">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="endTime" label="结束时间" width="160">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="100">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.status"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="160">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:dept:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-plus"
-            @click="handleAdd(scope.row)"
-            v-hasPermi="['system:dept:add']"
-          >新增</el-button>
-          <el-button
-            v-if="scope.row.parentId != 0"
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:dept:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 添加或修改部门对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="班级名称" prop="deptName">
-              <el-input v-model="form.deptName" placeholder="请输入班级名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="显示排序" prop="orderNum">
-              <el-input-number v-model="form.orderNum" controls-position="right" :min="0" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="负责人" prop="leader">
-              <el-input v-model="form.leader" placeholder="请输入负责人" maxlength="20" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="联系电话" prop="phone">
-              <el-input v-model="form.phone" placeholder="请输入联系电话" maxlength="11" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="父级部门" prop="parentId">
-              <treeselect 
-                v-model="form.parentId" 
-                :options="deptOptions" 
-                :normalizer="normalizer" 
-                :show-count="true" 
-                placeholder="请选择父级部门" 
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="班级状态">
-              <el-radio-group v-model="form.status">
-                <el-radio
-                  v-for="dict in dict.type.sys_normal_disable"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <!-- 新增字段 -->
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="简介" prop="brief">
-              <el-input v-model="form.brief" placeholder="请输入简介" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="封面URL" prop="coverURL">
-              <el-input v-model="form.coverURL" placeholder="请输入封面URL" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="开始时间" prop="startTime">
-              <el-date-picker
-                v-model="form.startTime"
-                type="datetime"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择开始时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="结束时间" prop="endTime">
-              <el-date-picker
-                v-model="form.endTime"
-                type="datetime"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择结束时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="班级容量" prop="cap">
-              <el-input-number v-model="form.cap" controls-position="right" :min="0" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="当前人数" prop="size">
-              <el-input-number v-model="form.size" controls-position="right" :min="0" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="自动加入">
-              <el-switch
-                v-model="form.autoJoin"
-                :active-value="1"
-                :inactive-value="0">
-              </el-switch>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept"
+import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild, exportDeptApply, listDeptApply } from "@/api/system/dept"
+import { exportClassUsers } from "@/api/system/user"
+import { listApprovedUsers } from "@/api/system/deptApply"
 import Treeselect from "@riophae/vue-treeselect"
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"
+import DeptDetail from "./detail.vue"
 
 export default {
   name: "Dept",
   dicts: ['sys_normal_disable'],
-  components: { Treeselect },
+  components: { Treeselect, DeptDetail },
   data() {
     return {
       // 遮罩层
@@ -250,6 +277,8 @@ export default {
       deptList: [],
       // 部门树选项
       deptOptions: [],
+      // 部门名称
+      deptName: undefined,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -267,28 +296,37 @@ export default {
       form: {},
       // 表单校验
       rules: {
+        parentId: [
+          { required: true, message: "父级部门不能为空", trigger: "blur" }
+        ],
         deptName: [
           { required: true, message: "班级名称不能为空", trigger: "blur" }
         ],
         orderNum: [
           { required: true, message: "显示排序不能为空", trigger: "blur" }
         ],
-        email: [
-          {
-            type: "email",
-            message: "请输入正确的邮箱地址",
-            trigger: ["blur", "change"]
-          }
+        cap: [
+          { required: true, message: "班级容量不能为空", trigger: "blur" }
         ],
-        phone: [
-          {
-            pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
-            message: "请输入正确的手机号码",
-            trigger: "blur"
-          }
+        size: [
+          { required: true, message: "当前人数不能为空", trigger: "blur" }
+        ],
+        startTime: [
+          { required: true, message: "开始时间不能为空", trigger: "blur" }
+        ],
+        endTime: [
+          { required: true, message: "结束时间不能为空", trigger: "blur" }
         ]
+      },
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
+      detailVisible: false,
+      currentDept: {
+        isApplied: false
       }
-    }
+    };
   },
   created() {
     this.getList()
@@ -312,6 +350,16 @@ export default {
         label: node.deptName,
         children: node.children
       }
+    },
+    // 筛选节点
+    filterNode(value, data) {
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
+    },
+    // 节点单击事件
+    handleNodeClick(data) {
+      this.queryParams.deptId = data.id
+      this.getList()
     },
     // 取消按钮
     cancel() {
@@ -412,6 +460,32 @@ export default {
         this.getList()
         this.$modal.msgSuccess("删除成功")
       }).catch(() => {})
+    },
+    /** 导出报名表操作 */
+    handleExport(row) {
+      const deptId = row.deptId;
+      this.$modal.confirm('确认导出"' + row.deptName + '"的报名表吗？').then(() => {
+        return exportDeptApply(deptId);
+      }).then(response => {
+        const fileName = "报名表_" + row.deptName + ".xlsx";
+        const blob = new Blob([response]);
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+      }).catch(() => {});
+    },
+    /** 查看详情操作 */
+    async handleViewDetails(row) {
+      this.currentDept = row;
+      try {
+        const res = await listDeptApply({ deptId: row.deptId });
+        this.currentDept.isApplied = res.data && res.data.length > 0;
+      } catch (error) {
+        this.currentDept.isApplied = false;
+      }
+      this.detailVisible = true;
     }
   }
 }

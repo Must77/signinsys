@@ -7,94 +7,52 @@
       <!-- 添加班级筛选条件 -->
       <el-row :gutter="20" class="mb8">
         <el-col :span="6">
-          <el-select 
-            v-model="queryDeptId" 
-            placeholder="请选择班级" 
-            clearable 
-            filterable
-            @change="handleDeptChange"
-          >
-            <el-option
-              v-for="dept in deptOptions"
-              :key="dept.id"
-              :label="dept.label"
-              :value="dept.id">
+          <el-select v-model="queryDeptId" placeholder="请选择班级" clearable filterable @change="handleDeptChange">
+            <el-option v-for="dept in deptOptions" :key="dept.id" :label="dept.label" :value="dept.id">
             </el-option>
           </el-select>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">查询</el-button>
-        </el-col>
-      </el-row>
-      
-      <el-row :gutter="10" class="mb8">
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['system:deptCourse:add']"
-            type="primary"
-            icon="el-icon-plus"
-            size="mini"
-            @click="handleAdd"
-          >新增</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['system:deptCourse:edit']"
-            type="success"
-            icon="el-icon-edit"
-            size="mini"
-            :disabled="single"
-            @click="handleUpdate"
-          >修改</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['system:deptCourse:remove']"
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-            :disabled="multiple"
-            @click="handleDelete"
-          >删除</el-button>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery"
+            v-hasPermi="['system:deptCourse:list']">查询</el-button>
         </el-col>
       </el-row>
 
-      <el-table 
-        :data="courseList" 
-        v-loading="loading" 
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-row :gutter="10" class="mb8">
+        <el-col :span="1.5">
+          <el-button v-hasPermi="['system:deptCourse:add']" type="primary" icon="el-icon-plus" size="mini"
+            @click="handleAdd">新增</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button v-hasPermi="['system:deptCourse:edit']" type="success" icon="el-icon-edit" size="mini"
+            :disabled="single" @click="handleUpdate">修改</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button v-hasPermi="['system:deptCourse:remove']" type="danger" icon="el-icon-delete" size="mini"
+            :disabled="multiple" @click="handleDelete">删除</el-button>
+        </el-col>
+      </el-row>
+
+      <el-table :data="courseList" v-loading="loading" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="courseId" label="课程ID" width="80" />
         <el-table-column prop="deptId" label="班级ID" width="120" />
-        <el-table-column prop="deptName" label="班级名称" width="120" />
+        <el-table-column prop="deptName" label="班级名称" width="300" />
         <el-table-column prop="courseName" label="课程名称" />
         <el-table-column prop="brief" label="课程描述" />
-        <el-table-column label="操作" width="200" v-hasPermi="['system:deptCourse:edit','system:deptCourse:remove']">
+        <el-table-column label="操作" width="280" v-hasPermi="['system:deptCourse:edit', 'system:deptCourse:remove']">
           <template slot-scope="scope">
-            <el-button 
-              size="mini" 
-              type="text" 
-              icon="el-icon-edit" 
-              v-hasPermi="['system:deptCourse:edit']"
-              @click="handleEdit(scope.row)"
-            >编辑</el-button>
-            
-            <el-button 
-              size="mini" 
-              type="text" 
-              icon="el-icon-delete" 
-              v-hasPermi="['system:deptCourse:remove']"
-              @click="handleDelete(scope.row)"
-            >删除</el-button>
-            
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-folder"
-              @click="handleResourceManage(scope.row)"
-            >资源管理</el-button>
+            <el-button size="mini" type="text" icon="el-icon-edit" v-hasPermi="['system:deptCourse:edit']"
+              @click="handleEdit(scope.row)">编辑</el-button>
+
+            <el-button size="mini" type="text" icon="el-icon-delete" v-hasPermi="['system:deptCourse:remove']"
+              @click="handleDelete(scope.row)">删除</el-button>
+
+            <el-button size="mini" type="text" icon="el-icon-folder" @click="handleResourceManage(scope.row)"
+              v-hasPermi="['system:deptCourse:resource']">资源管理</el-button>
+
+            <el-button size="mini" type="text" icon="el-icon-s-management" @click="handleAssignmentManage(scope.row)"
+              v-hasPermi="['system:deptCourse:assignment']">作业管理</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -102,14 +60,9 @@
 
     <el-dialog :title="title" :visible.sync="dialogVisible" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="所属班级" prop="deptId" v-if="!form.courseId">
-          <treeselect
-            v-model="form.deptId"
-            :options="deptTreeOptions"
-            :normalizer="normalizer"
-            :show-count="true"
-            placeholder="请选择所属班级"
-          />
+        <el-form-item label="所属班级" prop="deptId">
+          <treeselect v-model="form.deptId" :options="deptTreeOptions" :normalizer="normalizer" :show-count="true"
+            placeholder="请选择所属班级" />
         </el-form-item>
         <el-form-item label="课程名称" prop="courseName">
           <el-input v-model="form.courseName" placeholder="请输入课程名称" />
@@ -123,6 +76,12 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 作业管理对话框 -->
+    <el-dialog title="作业管理" :visible.sync="assignmentVisible" width="80%" append-to-body>
+      <assignment-manage v-if="assignmentVisible" :course-id="currentCourseId" :course-name="currentCourseName"
+        @close="assignmentVisible = false" />
+    </el-dialog>
   </div>
 </template>
 
@@ -131,10 +90,11 @@ import { listDeptCourse, listDeptCourseByDeptId, addDeptCourse, updateDeptCourse
 import { listDept } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+import AssignmentManage from "/Users/niubo/Documents/代码/signinsys/ruoyi-ui/src/views/system/dept/assignment.vue";
 
 export default {
   name: "DeptCourse",
-  components: { Treeselect },
+  components: { Treeselect, AssignmentManage },
   data() {
     return {
       loading: false,
@@ -151,7 +111,10 @@ export default {
       deptOptions: [],
       deptTreeOptions: [], // 用于treeselect的部门选项
       dialogVisible: false,
+      assignmentVisible: false,
       queryDeptId: undefined, // 用于筛选的部门ID
+      currentCourseId: null,
+      currentCourseName: '',
       form: {
         courseId: undefined,
         deptId: undefined,
@@ -213,7 +176,7 @@ export default {
             label: item.deptName,
             children: item.children || []
           }));
-          
+
           // 为treeselect准备数据（使用原始数据结构）
           this.deptTreeOptions = response.data;
         } else {
@@ -291,18 +254,18 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const courseIds = row.courseId || this.ids;
-      this.$modal.confirm('是否确认删除课程编号为"' + courseIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除课程编号为"' + courseIds + '"的数据项？').then(function () {
         return delDeptCourse(courseIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if(this.form.courseId) {
+          if (this.form.courseId) {
             updateDeptCourse(this.form).then(() => {
               this.dialogVisible = false;
               this.getList();
@@ -323,11 +286,21 @@ export default {
       // 跳转到课程资源管理页面，传入课程ID
       this.$router.push({
         name: 'CourseResource',
-        params: { 
+        params: {
           courseId: row.courseId,
           courseName: row.courseName
         }
       });
+    },
+    /** 课程作业管理 */
+    handleAssignmentManage(row) {
+      // 正确的调试信息：显示课程信息
+      console.log('打开作业管理，课程ID:', row.courseId);
+      console.log('课程名称:', row.courseName);
+      console.log('班级ID:', row.deptId);
+      this.currentCourseId = row.courseId;
+      this.currentCourseName = row.courseName;
+      this.assignmentVisible = true;
     }
   }
 }
