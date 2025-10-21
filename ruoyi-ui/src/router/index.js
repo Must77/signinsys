@@ -69,13 +69,6 @@ export const constantRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/system/questionnaire/userList',
-  //   component: () => import('@/views/system/questionnaire/userList.vue'),
-  //   name: 'QuestionnaireUserSubmit',
-  //   hidden: true,
-  //   meta: { title: '填写问卷', icon: 'form' }
-  // },
   {
     path: '/class-display/index',
     
@@ -133,6 +126,27 @@ export const constantRoutes = [
     hidden: true
   },
   {
+  path: '/mobile/user/profile',
+  component: () => import('@/views/system/user/profile/index'),
+  name: 'MobileProfile',
+  hidden: true,
+  meta: { title: '个人中心' }
+},
+{
+  path: '/mobile/questionnaire/userList',
+  component: () => import('@/views/system/questionnaire/userList.vue'),
+  name: 'MobileQuestionnaireList',
+  hidden: true,
+  meta: { title: '问卷列表' }
+},
+{
+  path: '/mobile/questionnaire/userSubmit/:questionnaireMetaId(\\d+)',
+  component: () => import('@/views/system/questionnaire/userSubmit.vue'),
+  name: 'MobileUserQuestionnaireSubmit',
+  hidden: true,
+  meta: { title: '填写问卷' }
+},
+  {
     path: '/404',
     component: () => import('@/views/error/404'),
     hidden: true
@@ -170,20 +184,11 @@ export const constantRoutes = [
     ]
   },
   
-  {
-    path: '/404',
-    component: () => import('@/views/error/404'),
-    hidden: true
-  },
-  {
-    path: '/401',
-    component: () => import('@/views/error/401'),
-    hidden: true
-  }
 ]
 
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
+  
   {
     path: '/system/user-auth',
     component: Layout,
@@ -293,13 +298,6 @@ export const dynamicRoutes = [
         name: 'QuestionnaireUserList',
         meta: { title: '问卷提交记录', icon: '' }
       },
-    
-{
-  path: '/system/myCourse/resource/:courseId',
-  component: () => import('@/views/system/myCourse/resource.vue'),
-  name: 'MyCourseResource',
-  meta: { title: '我的课程资源', icon: '' }
-}
     ]
   },
 {
@@ -328,6 +326,28 @@ Router.prototype.push = function push(location) {
 Router.prototype.replace = function push(location) {
   return routerReplace.call(this, location).catch(err => err)
 }
+
+const router = new Router({
+  mode: 'history',
+  scrollBehavior: () => ({ y: 0 }),
+  routes: constantRoutes
+})
+
+// 添加详细的路由调试
+router.beforeEach((to, from, next) => {
+  console.log('=== 路由跳转调试信息 ===')
+  console.log('目标路径:', to.path)
+  console.log('完整路径:', to.fullPath)
+  console.log('匹配的路由记录:', to.matched)
+  console.log('路由名称:', to.name)
+  console.log('=====================')
+  next()
+})
+
+router.afterEach((to, from) => {
+  console.log('路由跳转完成，当前路径:', to.path)
+  console.log('匹配的组件:', to.matched.map(m => m.components.default))
+})
 
 export default new Router({
   mode: 'history', // 去掉url中的#

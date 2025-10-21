@@ -4,14 +4,9 @@
       <h1>签到系统</h1>
       <p>欢迎使用移动端签到系统</p>
     </div>
-    
+
     <div class="menu-grid">
-      <div 
-        v-for="item in menuItems" 
-        :key="item.path" 
-        class="menu-item"
-        @click="goToPage(item)"
-      >
+      <div v-for="item in menuItems" :key="item.path" class="menu-item" @click="goToPage(item)">
         <i :class="item.icon" class="menu-icon"></i>
         <span class="menu-text">{{ item.title }}</span>
       </div>
@@ -25,16 +20,6 @@ export default {
   data() {
     return {
       menuItems: [
-        // {
-        //   path: '/index',
-        //   title: '首页',
-        //   icon: 'el-icon-house'
-        // },
-        // {
-        //   path: '/system/questionnaire/userList',
-        //   title: '问卷管理',
-        //   icon: 'el-icon-edit'
-        // },
         {
           path: '/mobile/notice',
           title: '通知管理',
@@ -61,12 +46,12 @@ export default {
           icon: 'el-icon-document'
         },
         {
-          path: '/system/questionnaire/userList',
+          path: '/mobile/questionnaire/userList', // 使用移动端专用路径
           title: '填写问卷',
           icon: 'el-icon-edit-outline'
         },
         {
-          path: '/user/profile',
+          path: '/mobile/user/profile', // 使用移动端专用路径
           title: '个人中心',
           icon: 'el-icon-user'
         }
@@ -98,13 +83,13 @@ export default {
   text-align: center;
   margin-bottom: 30px;
   padding: 20px 0;
-  
+
   h1 {
     font-size: 24px;
     color: #303133;
     margin-bottom: 10px;
   }
-  
+
   p {
     font-size: 16px;
     color: #606266;
@@ -128,18 +113,18 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
   }
-  
+
   .menu-icon {
     font-size: 28px;
     color: #8B0000;
     margin-bottom: 10px;
   }
-  
+
   .menu-text {
     font-size: 14px;
     color: #606266;
@@ -151,15 +136,15 @@ export default {
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
   }
-  
+
   .menu-item {
     padding: 15px 5px;
   }
-  
+
   .menu-icon {
     font-size: 24px !important;
   }
-  
+
   .menu-text {
     font-size: 12px !important;
   }

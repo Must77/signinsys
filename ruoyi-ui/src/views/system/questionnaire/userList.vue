@@ -1,135 +1,101 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="问卷标题" prop="title">
-        <el-input
-          v-model="queryParams.title"
-          placeholder="请输入问卷标题"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:questionna:userList:list']">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-row :gutter="10" class="mb8">
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="questionnaireList" @selection-change="handleSelectionChange">
-      <el-table-column label="问卷ID" align="center" prop="metaId" />
-      <el-table-column label="问卷标题" align="center" prop="title" :show-overflow-tooltip="true" />
-      <el-table-column label="描述" align="center" prop="description" :show-overflow-tooltip="true" />
-      <el-table-column label="开始时间" align="center" prop="startTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime) }}</span>
-          </template>
-      </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-tag v-if="isExpired(scope.row)" type="danger">已过期</el-tag>
-          <el-tag v-else-if="isNotStarted(scope.row)" type="warning">未开始</el-tag>
-          <el-tag v-else type="success">进行中</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="primary"
-            icon="el-icon-edit-outline"
-            @click="handleFill(scope.row)"
-            :disabled="isExpired(scope.row) || isNotStarted(scope.row)" v-hasPermi="['system:questionna:userList:fill']"
-          >填写问卷</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+  <div class="mobile-questionnaire">
+    <div class="header">
+      <button @click="$router.back()" class="back-btn">← 返回</button>
+      <h2>问卷列表</h2>
+    </div>
+    
+    <div class="content" v-loading="loading">
+      <!-- 问卷列表 -->
+      <div v-if="questionnaireList.length > 0" class="questionnaire-list">
+        <div 
+          v-for="questionnaire in questionnaireList" 
+          :key="questionnaire.metaId"
+          class="questionnaire-item"
+          @click="handleFill(questionnaire)"
+        >
+          <div class="questionnaire-header">
+            <h3 class="title">{{ questionnaire.title }}</h3>
+            <span 
+              class="status" 
+              :class="getStatusClass(questionnaire)"
+            >
+              {{ getStatusText(questionnaire) }}
+            </span>
+          </div>
+          <p class="description">{{ questionnaire.description }}</p>
+          <div class="questionnaire-footer">
+            <span class="time">截止时间: {{ parseTime(questionnaire.endTime) }}</span>
+            <i class="el-icon-arrow-right arrow"></i>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 空状态 -->
+      <div v-else class="empty-state">
+        <i class="el-icon-document"></i>
+        <p>暂无问卷</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { listQuestionnaire } from '@/api/system/questionnaire'
+import { parseTime } from '@/utils'
 
 export default {
-  name: 'UserQuestionnaireList',
+  name: 'MobileQuestionnaireList',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
-      total: 0,
-      // 问卷表格数据
-      questionnaireList: [],
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        title: undefined,
-        status: undefined
-      }
+      loading: false,
+      questionnaireList: []
     }
   },
-  created() {
+  mounted() {
     this.getList()
   },
   methods: {
+    parseTime,
+    
     /** 查询问卷列表 */
     getList() {
       this.loading = true
-      listQuestionnaire(this.queryParams).then(response => {
-        this.questionnaireList = response.data
-        this.total = response.total
+      listQuestionnaire({
+        pageNum: 1,
+        pageSize: 100 // 移动端显示更多数据
+      }).then(response => {
+        this.questionnaireList = response.rows || response.data || []
         this.loading = false
+      }).catch(error => {
+        console.error('获取问卷列表失败:', error)
+        this.loading = false
+        this.$message.error('获取问卷列表失败')
       })
     },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1
-      this.getList()
-    },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm('queryForm')
-      this.handleQuery()
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.metaId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
+    
     /** 填写问卷按钮操作 */
     handleFill(row) {
+      // 检查问卷状态
+      if (this.isExpired(row)) {
+        this.$message.warning('该问卷已过期，无法填写')
+        return
+      }
+      
+      if (this.isNotStarted(row)) {
+        this.$message.warning('该问卷未开始，无法填写')
+        return
+      }
+      
       const metaId = row.metaId
+      console.log('跳转到问卷填写页面，问卷ID:', metaId)
+      
+      // 使用移动端路由
       this.$router.push({
-        name: 'UserQuestionnaireSubmit',
-        params: { questionnaireMetaId: metaId }
+        path: `/mobile/questionnaire/userSubmit/${metaId}`
       })
     },
+    
     /** 判断问卷是否已过期 */
     isExpired(row) {
       if (!row.endTime) return false
@@ -137,13 +103,158 @@ export default {
       const end = new Date(row.endTime)
       return now > end
     },
+    
     /** 判断问卷是否未开始 */
     isNotStarted(row) {
       if (!row.startTime) return false
       const now = new Date()
       const start = new Date(row.startTime)
       return now < start
+    },
+    
+    /** 获取状态样式 */
+    getStatusClass(row) {
+      if (this.isExpired(row)) return 'status-expired'
+      if (this.isNotStarted(row)) return 'status-pending'
+      return 'status-active'
+    },
+    
+    /** 获取状态文本 */
+    getStatusText(row) {
+      if (this.isExpired(row)) return '已过期'
+      if (this.isNotStarted(row)) return '未开始'
+      return '进行中'
     }
   }
 }
 </script>
+
+<style scoped>
+.mobile-questionnaire {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.header {
+  background: white;
+  padding: 15px;
+  border-bottom: 1px solid #e4e7ed;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  margin-right: 10px;
+  cursor: pointer;
+  color: #606266;
+}
+
+.content {
+  padding: 15px;
+}
+
+/* 问卷列表样式 */
+.questionnaire-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questionnaire-item {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.questionnaire-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.questionnaire-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.status-pending {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.status-expired {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.description {
+  font-size: 14px;
+  color: #606266;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.questionnaire-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time {
+  font-size: 12px;
+  color: #909399;
+}
+
+.arrow {
+  color: #c0c4cc;
+}
+
+/* 空状态样式 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #909399;
+}
+
+.empty-state i {
+  font-size: 60px;
+  margin-bottom: 20px;
+  color: #dcdfe6;
+}
+
+.empty-state p {
+  font-size: 16px;
+  margin: 0;
+}
+</style>
