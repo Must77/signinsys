@@ -69,6 +69,49 @@ export const constantRoutes = [
       }
     ]
   },
+  // {
+  //   path: '/system/questionnaire/userList',
+  //   component: () => import('@/views/system/questionnaire/userList.vue'),
+  //   name: 'QuestionnaireUserSubmit',
+  //   hidden: true,
+  //   meta: { title: '填写问卷', icon: 'form' }
+  // },
+  {
+    path: '/class-display/index',
+    
+        component: () => import('@/views/system/classDisplay/index.vue'),
+        name: 'ClassDisplay',
+        hidden: true,
+        meta: { title: '班级广场', icon: 'peoples' }
+      
+  },
+  {
+    path: '/system/myCourse/index',
+    
+        component: () => import('@/views/system/myCourse/index.vue'),
+        name: 'MyCourse',
+        hidden: true,
+        meta: { title: '我的课程', icon: 'education' }
+      
+    
+  },
+  {
+    path: '/system/mySignin/index',
+    
+        component: () => import('@/views/system/mySignin/index.vue'),
+        name: 'MySignin',
+        hidden: true,
+        meta: { title: '我的签到', icon: 'education' }
+      },
+    {
+    path: '/system/leave/index',
+    
+        component: () => import('@/views/system/myLeave/index.vue'),
+        name: 'Leave',
+        hidden: true,
+        meta: { title: '我的请假', icon: 'documentation' }
+     
+  },
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -77,6 +120,16 @@ export const constantRoutes = [
   {
     path: '/register',
     component: () => import('@/views/register'),
+    hidden: true
+  },
+  {
+    path: '/mobile',
+    component: () => import('@/views/mobile/Home'),
+    hidden: true
+  },
+  {
+    path: '/mobile/notice',
+    component: () => import('@/views/mobile/Notice'),
     hidden: true
   },
   {
@@ -116,20 +169,7 @@ export const constantRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/class-display',
-  //   component: Layout,
-  //   redirect: '/class-display/index',
-  //   hidden: false,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/system/classDisplay/index.vue'),
-  //       name: 'ClassDisplay',
-  //       meta: { title: '班级广场', icon: 'peoples' }
-  //     }
-  //   ]
-  // },
+  
   {
     path: '/404',
     component: () => import('@/views/error/404'),
@@ -190,7 +230,6 @@ export const dynamicRoutes = [
     path: '/system/mySignin',
     component: Layout,
     hidden: false,
-    permissions: ['system:mysignin:list'],
     children: [
       {
         path: 'index',
@@ -254,7 +293,7 @@ export const dynamicRoutes = [
         name: 'QuestionnaireUserList',
         meta: { title: '问卷提交记录', icon: '' }
       },
-      
+    
 {
   path: '/system/myCourse/resource/:courseId',
   component: () => import('@/views/system/myCourse/resource.vue'),
@@ -262,7 +301,20 @@ export const dynamicRoutes = [
   meta: { title: '我的课程资源', icon: '' }
 }
     ]
-  }
+  },
+{
+  path: '/system/notice',
+  component: Layout,
+  hidden: true,
+  children: [
+    {
+      path: 'index',
+      component: () => import('@/views/system/notice/index'),
+      name: 'Notice',
+      meta: { title: '通知公告', icon: 'message' }
+    }
+  ]
+}
 ]
 
 // 防止连续点击多次路由报错

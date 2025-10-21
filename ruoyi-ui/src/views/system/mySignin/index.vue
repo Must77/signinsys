@@ -168,8 +168,19 @@ export default {
           pageSize: this.queryParams.pageSize
         }
         listMyPendingSignin(params).then(res => {
-          this.signinList = res.rows || []
-          this.total = res.total || this.signinList.length
+          if (res.rows && Array.isArray(res.rows)) {
+            // TableDataInfo格式
+            this.signinList = res.rows || []
+            this.total = res.total || this.signinList.length
+          } else if (res.data && Array.isArray(res.data)) {
+            // AjaxResult格式，数据在data中
+            this.signinList = res.data || []
+            this.total = this.signinList.length
+          } else {
+            // 其他格式
+            this.signinList = []
+            this.total = 0
+          }
           this.loading = false
         }).catch(() => {
           this.signinList = []

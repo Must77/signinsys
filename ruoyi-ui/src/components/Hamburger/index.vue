@@ -41,4 +41,16 @@ export default {
 .hamburger.is-active {
   transform: rotate(180deg);
 }
+
+/* 在移动端显示为圆形图标 */
+@media screen and (max-width: 992px) {
+  .hamburger {
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    border-radius: 50%;
+    background-color: #8B0000; /* 使用系统主色调 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
 </style>

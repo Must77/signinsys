@@ -206,4 +206,34 @@ export default {
     }
   }
 }
+
+/* 移动端适配样式 */
+@media screen and (max-width: 992px) {
+  .navbar {
+    background: #8B0000; /* 使用系统主色调 */
+    border-radius: 30px; /* 添加圆角 */
+    margin: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    height: 60px;
+    
+    .hamburger-container {
+      line-height: 60px;
+    }
+    
+    .right-menu {
+      line-height: 60px;
+      
+      .right-menu-item {
+        color: #fff; /* 更改图标颜色为白色 */
+      }
+    }
+    
+    .avatar-wrapper {
+      .user-nickname {
+        color: #fff; /* 更改用户名颜色为白色 */
+        bottom: 8px;
+      }
+    }
+  }
+}
 </style>

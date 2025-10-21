@@ -43,6 +43,16 @@ router.beforeEach((to, from, next) => {
             })
           })
       } else {
+        // 检查是否是移动端页面且用户不是common用户
+        if (to.path === '/mobile') {
+          const roles = store.getters.roles;
+          const isCommonUser = roles.includes('common') && !roles.includes('admin') && !roles.includes('manager');
+          if (!isCommonUser) {
+            // 如果不是common用户访问移动端页面，则重定向到首页
+            next({ path: '/index' })
+            return;
+          }
+        }
         next()
       }
     }
