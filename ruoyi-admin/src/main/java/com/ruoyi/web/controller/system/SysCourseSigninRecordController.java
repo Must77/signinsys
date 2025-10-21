@@ -62,7 +62,7 @@ public class SysCourseSigninRecordController extends BaseController {
         // 添加用户ID条件，确保只能查询自己的记录
         query.setUserId(getUserId());
         startPage();
-        List<SysCourseSigninRecord> list = recordService.selectSigninRecordList(query);
+        List<SysCourseSigninRecord> list = recordService.selectSigninRecordListByUserDept(query, getUserId());
         return getDataTable(list);
     }
 
@@ -73,7 +73,6 @@ public class SysCourseSigninRecordController extends BaseController {
      * @throws UnsupportedEncodingException 
      */
     @Log(title = "签到记录-导出", businessType = com.ruoyi.common.enums.BusinessType.EXPORT)
-    @PreAuthorize("@ss.hasPermi('system:signinRecord:export')")
     @PostMapping("/export")
     public void export(HttpServletResponse response, @RequestBody SysCourseSigninRecord query) throws UnsupportedEncodingException
     {

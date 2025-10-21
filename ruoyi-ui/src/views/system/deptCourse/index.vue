@@ -90,7 +90,7 @@ import { listDeptCourse, listDeptCourseByDeptId, addDeptCourse, updateDeptCourse
 import { listDept } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-import AssignmentManage from "/Users/niubo/Documents/代码/signinsys/ruoyi-ui/src/views/system/dept/assignment.vue";
+import AssignmentManage from "@/views/system/dept/assignment.vue";
 
 export default {
   name: "DeptCourse",
@@ -310,4 +310,5 @@ export default {
 .mb8 {
   margin-bottom: 8px;
 }
+
 </style>

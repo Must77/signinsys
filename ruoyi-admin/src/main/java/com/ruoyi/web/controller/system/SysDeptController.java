@@ -138,6 +138,14 @@ public class SysDeptController extends BaseController
         List<SysDept> depts = deptService.selectDeptListAll();
         return AjaxResult.success(deptService.buildDeptTreeSelect(depts));
     }
-
+    
+    /**
+     * 获取用户申请状态
+     */
+    @GetMapping("/applied/{deptId}")
+    public AjaxResult getApplyStatus(@PathVariable Long deptId) {
+        boolean applied = deptService.checkUserAppliedDept(getUserId(), deptId);
+        return AjaxResult.success(applied);
+    }
 
 }
