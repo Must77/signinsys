@@ -70,6 +70,42 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/class-display/index',
+    
+        component: () => import('@/views/system/classDisplay/index.vue'),
+        name: 'ClassDisplay',
+        hidden: true,
+        meta: { title: '班级广场', icon: 'peoples' }
+      
+  },
+  {
+    path: '/system/myCourse/index',
+    
+        component: () => import('@/views/system/myCourse/index.vue'),
+        name: 'MyCourse',
+        hidden: true,
+        meta: { title: '我的课程', icon: 'education' }
+      
+    
+  },
+  {
+    path: '/system/mySignin/index',
+    
+        component: () => import('@/views/system/mySignin/index.vue'),
+        name: 'MySignin',
+        hidden: true,
+        meta: { title: '我的签到', icon: 'education' }
+      },
+    {
+    path: '/system/leave/index',
+    
+        component: () => import('@/views/system/myLeave/index.vue'),
+        name: 'Leave',
+        hidden: true,
+        meta: { title: '我的请假', icon: 'documentation' }
+     
+  },
+  {
     path: '/login',
     component: () => import('@/views/login'),
     hidden: true
@@ -79,6 +115,37 @@ export const constantRoutes = [
     component: () => import('@/views/register'),
     hidden: true
   },
+  {
+    path: '/mobile',
+    component: () => import('@/views/mobile/Home'),
+    hidden: true
+  },
+  {
+    path: '/mobile/notice',
+    component: () => import('@/views/mobile/Notice'),
+    hidden: true
+  },
+  {
+  path: '/mobile/user/profile',
+  component: () => import('@/views/system/user/profile/index'),
+  name: 'MobileProfile',
+  hidden: true,
+  meta: { title: '个人中心' }
+},
+{
+  path: '/mobile/questionnaire/userList',
+  component: () => import('@/views/system/questionnaire/userList.vue'),
+  name: 'MobileQuestionnaireList',
+  hidden: true,
+  meta: { title: '问卷列表' }
+},
+{
+  path: '/mobile/questionnaire/userSubmit/:questionnaireMetaId(\\d+)',
+  component: () => import('@/views/system/questionnaire/userSubmit.vue'),
+  name: 'MobileUserQuestionnaireSubmit',
+  hidden: true,
+  meta: { title: '填写问卷' }
+},
   {
     path: '/404',
     component: () => import('@/views/error/404'),
@@ -116,34 +183,12 @@ export const constantRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/class-display',
-  //   component: Layout,
-  //   redirect: '/class-display/index',
-  //   hidden: false,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/system/classDisplay/index.vue'),
-  //       name: 'ClassDisplay',
-  //       meta: { title: '班级广场', icon: 'peoples' }
-  //     }
-  //   ]
-  // },
-  {
-    path: '/404',
-    component: () => import('@/views/error/404'),
-    hidden: true
-  },
-  {
-    path: '/401',
-    component: () => import('@/views/error/401'),
-    hidden: true
-  }
+  
 ]
 
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
+  
   {
     path: '/system/user-auth',
     component: Layout,
@@ -190,7 +235,6 @@ export const dynamicRoutes = [
     path: '/system/mySignin',
     component: Layout,
     hidden: false,
-    permissions: ['system:mysignin:list'],
     children: [
       {
         path: 'index',
@@ -254,15 +298,21 @@ export const dynamicRoutes = [
         name: 'QuestionnaireUserList',
         meta: { title: '问卷提交记录', icon: '' }
       },
-      
-{
-  path: '/system/myCourse/resource/:courseId',
-  component: () => import('@/views/system/myCourse/resource.vue'),
-  name: 'MyCourseResource',
-  meta: { title: '我的课程资源', icon: '' }
-}
     ]
-  }
+  },
+{
+  path: '/system/notice',
+  component: Layout,
+  hidden: true,
+  children: [
+    {
+      path: 'index',
+      component: () => import('@/views/system/notice/index'),
+      name: 'Notice',
+      meta: { title: '通知公告', icon: 'message' }
+    }
+  ]
+}
 ]
 
 // 防止连续点击多次路由报错
@@ -276,6 +326,28 @@ Router.prototype.push = function push(location) {
 Router.prototype.replace = function push(location) {
   return routerReplace.call(this, location).catch(err => err)
 }
+
+const router = new Router({
+  mode: 'history',
+  scrollBehavior: () => ({ y: 0 }),
+  routes: constantRoutes
+})
+
+// 添加详细的路由调试
+router.beforeEach((to, from, next) => {
+  console.log('=== 路由跳转调试信息 ===')
+  console.log('目标路径:', to.path)
+  console.log('完整路径:', to.fullPath)
+  console.log('匹配的路由记录:', to.matched)
+  console.log('路由名称:', to.name)
+  console.log('=====================')
+  next()
+})
+
+router.afterEach((to, from) => {
+  console.log('路由跳转完成，当前路径:', to.path)
+  console.log('匹配的组件:', to.matched.map(m => m.components.default))
+})
 
 export default new Router({
   mode: 'history', // 去掉url中的#

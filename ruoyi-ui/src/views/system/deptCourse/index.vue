@@ -310,5 +310,4 @@ export default {
 .mb8 {
   margin-bottom: 8px;
 }
-
 </style>

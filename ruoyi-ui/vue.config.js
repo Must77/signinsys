@@ -7,7 +7,7 @@ function resolve(dir) {
 
 const CompressionPlugin = require('compression-webpack-plugin')
 
-const name = process.env.VUE_APP_TITLE || '地质图书馆培训管理系统' // 网页标题
+const name = process.env.VUE_APP_TITLE || '中国地质调查局干部培训中心签到系统' // 网页标题
 
 const baseUrl = 'http://117.72.126.104:8080' // 后端接口
 

@@ -56,7 +56,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>欢迎使用地质图书馆培训管理系统</span>
+      <span>欢迎使用中国地质调查局干部培训中心签到系统</span>
     </div>
   </div>
 </template>

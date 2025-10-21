@@ -1,4 +1,5 @@
 import store from '@/store'
+import router from '@/router'
 
 const { body } = document
 const WIDTH = 992 // refer to Bootstrap's responsive design
@@ -22,6 +23,13 @@ export default {
     if (isMobile) {
       store.dispatch('app/toggleDevice', 'mobile')
       store.dispatch('app/closeSideBar', { withoutAnimation: true })
+      // 检查用户角色，只有common用户才跳转到移动端首页
+      const roles = store.getters.roles;
+      const isCommonUser = roles.includes('common') && !roles.includes('admin') && !roles.includes('manager');
+      // 如果当前不是移动端首页，且用户是common用户，则跳转到移动端首页
+      if (this.$route.path !== '/mobile' && isCommonUser) {
+        router.push('/mobile')
+      }
     }
   },
   methods: {
@@ -38,6 +46,18 @@ export default {
 
         if (isMobile) {
           store.dispatch('app/closeSideBar', { withoutAnimation: true })
+          // 检查用户角色，只有common用户才跳转到移动端首页
+          const roles = store.getters.roles;
+          const isCommonUser = roles.includes('common') && !roles.includes('admin') && !roles.includes('manager');
+          // 如果当前不是移动端首页，且用户是common用户，则跳转到移动端首页
+          if (this.$route.path !== '/mobile' && isCommonUser) {
+            router.push('/mobile')
+          }
+        } else {
+          // 如果是桌面端且当前在移动端首页，则跳转到常规首页
+          if (this.$route.path === '/mobile') {
+            router.push('/index')
+          }
         }
       }
     }
