@@ -35,6 +35,12 @@
             <artifactId>ruoyi-common</artifactId>
         </dependency>
 
+        <!-- 课程服务 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-system</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

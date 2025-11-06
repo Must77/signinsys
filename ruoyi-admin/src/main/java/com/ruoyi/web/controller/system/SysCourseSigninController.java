@@ -15,6 +15,8 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysCourseSignin;
 import com.ruoyi.system.domain.SysCourseSigninRecord;
+import com.ruoyi.system.domain.SysDeptCourse;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.service.ISysCourseSigninRecordService;
 import com.ruoyi.system.service.ISysCourseSigninService;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -33,6 +35,9 @@ public class SysCourseSigninController extends BaseController
 
     @Autowired
     private ISysCourseSigninRecordService recordService;
+
+    @Autowired
+    private com.ruoyi.system.service.ISysDeptCourseService courseService;
 
     /**
      * 查询课程签到列表（admin）
@@ -60,13 +65,13 @@ public class SysCourseSigninController extends BaseController
      * 新增课程签到（admin发布签到）
      * 
      * TODO: 插入签到元数据时还预生成签到记录, 因此之后需要新增加一个@Transactional的Service, 通过事务保证一次性都成功或者都失败
+     * TODO 确认字段status的必要性和更新逻辑
      */
     @Log(title = "课程签到", businessType = BusinessType.INSERT)
     @PostMapping
     @PreAuthorize("@ss.hasPermi('system:signin:add')")
     public AjaxResult add(@RequestBody SysCourseSignin signin)
     {
-        // TODO 确认字段status的必要性和更新逻辑
         // 判断签到状态：0未开始,1进行中,2已结束
         Date now = new Date();
         if (now.before(signin.getStartTime())) {
@@ -131,4 +136,15 @@ public class SysCourseSigninController extends BaseController
         return AjaxResult.success(result);
     }
 
+
+    /**
+     * 自动发布签到任务（定时任务调度）
+     * 
+     * 为课程设置一个永不过期的定时器，每天都自动调用add来生成一个签到任务
+     */
+    @GetMapping("/{courseId}/autoPublish")
+    public AjaxResult autoPublish(@PathVariable Long courseId)
+    {
+        return AjaxResult.error("待实现");
+    }
 }

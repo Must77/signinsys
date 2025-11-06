@@ -5,6 +5,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.*;
+import com.ruoyi.system.service.ISysDeptCourseService;
+import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysQuestionnaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +23,12 @@ public class SysQuestionnaireController extends BaseController {
 
     @Autowired
     private ISysQuestionnaireService questionnaireService;
+
+    @Autowired
+    private ISysDeptService deptService;
+
+    @Autowired
+    private ISysDeptCourseService courseService;
 
     /**
      * 条件筛选问卷
@@ -42,7 +50,24 @@ public class SysQuestionnaireController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:questionnaire:query')")
     @GetMapping("/{questionnaireMetaId}")
     public AjaxResult getInfo(@PathVariable Long questionnaireMetaId) {
-        return success(questionnaireService.selectMetaById(questionnaireMetaId));
+        SysQuestionnaireMeta questionnaireMeta = questionnaireService.selectMetaById(questionnaireMetaId);
+        long targetRefId = questionnaireMeta.getTargetRefId();
+        String targetName = "";
+
+        if(questionnaireMeta.getTargetType().equals("D")){ // 部门
+            targetName = deptService.selectDeptById(targetRefId).getDeptName();
+            //questionnaireMeta.setDeptName(targetName);
+            // mysql自动连表查询
+        }else if (questionnaireMeta.getTargetType().equals("C")){ // 课程
+            targetName = courseService.selectDeptCourseById(targetRefId).getCourseName();
+            questionnaireMeta.setCourseName(targetName);
+        }else if (questionnaireMeta.getTargetType().equals("T")){ // 教师
+            targetName = deptService.selectDeptById(targetRefId).getLeader();
+            questionnaireMeta.setTeacherName(targetName);
+        }
+        questionnaireMeta.setTargetName(targetName);
+
+        return success(questionnaireMeta);
     }
 
     /**
