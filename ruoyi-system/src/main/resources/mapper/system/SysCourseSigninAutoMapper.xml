@@ -24,7 +24,7 @@
         where course_id = #{courseId}
     </select>
 
-    <insert id="insertCourseSigninAuto" parameterType="SysCourseSigninAuto" useGeneratedKeys="true" keyProperty="autoId" resultMap="SysCourseSigninAutoResult">
+    <insert id="insertCourseSigninAuto" parameterType="SysCourseSigninAuto" useGeneratedKeys="true" keyProperty="autoId">
         INSERT INTO sys_course_signin_auto (
             <if test="courseId != null">course_id, </if>
             <if test="cronExpression != null and cronExpression != ''">cron_expression, </if>
