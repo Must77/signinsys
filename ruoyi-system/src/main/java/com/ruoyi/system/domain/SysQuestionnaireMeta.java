@@ -100,6 +100,12 @@ public class SysQuestionnaireMeta extends BaseEntity {
     @Transient
     private List<SysQuestionnaireItem> items;
 
+    /** 用于前端显示的字段 **/
+    private String deptName;
+    private String courseName;
+    private String teacherName;
+    private String targetName;
+
     // getters/setters
     public Long getMetaId() { return metaId; }
     public void setMetaId(Long metaId) { this.metaId = metaId; }
@@ -159,5 +165,29 @@ public class SysQuestionnaireMeta extends BaseEntity {
     public void setAllowRepeat(String allowRepeat) { this.allowRepeat = allowRepeat; }
     public List<SysQuestionnaireItem> getItems() { return items; }
     public void setItems(List<SysQuestionnaireItem> items) { this.items = items; }
-
+    public String getDeptName() {
+        return deptName;
+    }
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+    }
+    public String getCourseName() {
+        return courseName;
+    }
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+    public String getTeacherName() {
+        return teacherName;
+    }
+    public void setTeacherName(String teacherName) {
+        this.teacherName = teacherName;
+    }
+    public String getTargetName() {
+        return targetName;
+    }
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+    
 }

@@ -22,6 +22,12 @@
         <result property="updateTime" column="update_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="delFlag" column="del_flag"/>
+        <!--前端显示-->
+        <result property="deptName" column="dept_name"/>
+        <result property="courseName" column="course_name"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="targetName" column="target_name"/>
+
     </resultMap>
 
     <sql id="selectMetaVo">
