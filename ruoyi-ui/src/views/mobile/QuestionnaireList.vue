@@ -73,6 +73,9 @@ export default {
       if (courseId) {
         queryParams.targetType = 'C'
         queryParams.targetRefId = courseId
+      } else {
+        // 如果没有课程ID参数，则只显示班级评价
+        queryParams.targetType = 'D'
       }
       
       listQuestionnaire(queryParams).then(response => {

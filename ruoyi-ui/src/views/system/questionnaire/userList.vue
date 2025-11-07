@@ -66,13 +66,16 @@ export default {
       
       const queryParams = {
         pageNum: 1,
-        pageSize: 100 // 移动端显示更多数据
+        pageSize: 100 // 显示更多数据
       }
       
       // 如果有课程ID参数，则添加筛选条件
       if (courseId) {
         queryParams.targetType = 'C'
         queryParams.targetRefId = courseId
+      } else {
+        // 如果没有课程ID参数，则只显示班级评价
+        queryParams.targetType = 'D'
       }
       
       listQuestionnaire(queryParams).then(response => {
