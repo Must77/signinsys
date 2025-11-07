@@ -95,17 +95,21 @@
                   <div class="assignment-title">{{ scope.row.assignmentTitle }}</div>
                   <div class="assignment-meta">
                     <span class="assignment-id">ID: {{ scope.row.assignmentId }}</span>
-                    <span class="update-time">{{ parseTime(scope.row.updateTime) }}</span>
+                    <span class="update-time">{{ scope.row.updateTime }}</span>
                   </div>
                 </div>
               </template>
             </el-table-column>
-            
-            <el-table-column label="创建时间" width="160">
+            <!-- <el-table-column label="作业描述" min-width="200">
+              <template slot-scope="scope">
+                <div class="assignment-description">{{ scope.row.assignmentDescribe }}</div>
+              </template> -->
+            <!-- </el-table-column> -->
+            <el-table-column label="创建时间" width="200">
               <template slot-scope="scope">
                 <div class="time-cell">
                   <i class="el-icon-time"></i>
-                  <span>{{ parseTime(scope.row.createTime) }}</span>
+                  <span>{{ scope.row.createTime}}</span>
                 </div>
               </template>
             </el-table-column>

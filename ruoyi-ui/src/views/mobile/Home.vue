@@ -13,13 +13,8 @@
       </div>
       
       <div class="user-info">
-        <div class="avatar">
-          <i class="el-icon-user-solid"></i>
-        </div>
-        <div class="welcome-text">
-          <h2>同志，欢迎回来</h2>
-          <p>不忘初心，牢记使命</p>
-        </div>
+        
+        
       </div>
       <div class="red-background-wave"></div>
     </div>

@@ -231,7 +231,7 @@
               {{ detailInfo.autoJoin === '1' ? '是' : '否' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item :span="isMobile ? 1 : 2" label="封面图片">
+          <!-- <el-descriptions-item :span="isMobile ? 1 : 2" label="封面图片">
             <el-image 
               v-if="detailInfo.coverURL" 
               :src="detailInfo.coverURL" 
@@ -240,7 +240,7 @@
               :preview-src-list="[detailInfo.coverURL]"
             ></el-image>
             <span v-else class="no-image">暂无图片</span>
-          </el-descriptions-item>
+          </el-descriptions-item> -->
         </el-descriptions>
       </el-card>
       <div slot="footer" class="dialog-footer">
