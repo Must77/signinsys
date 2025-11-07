@@ -1,11 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="问卷标题" prop="title">
-        <el-input v-model="queryParams.title" placeholder="请输入问卷标题" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="评价标题" prop="title">
+        <el-input v-model="queryParams.title" placeholder="请输入评价标题" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
+      <el-form-item label="评价类型" prop="targetType">
+        <el-select v-model="queryParams.targetType" placeholder="请选择评价类型" clearable @change="handleQuery">
+          <el-option label="班级评价" value="D" />
+          <el-option label="课程评价" value="C" />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" v-hasPermi="['system:questionnaire:list']">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery"
+          v-hasPermi="['system:questionnaire:list']">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -20,8 +27,15 @@
 
     <el-table v-loading="loading" :data="questionnaireList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="问卷ID" align="center" prop="metaId" width="100"/>
-      <el-table-column label="问卷标题" align="center" prop="title" width="300" :show-overflow-tooltip="true" />
+      <el-table-column label="评价标题" align="center" prop="title" width="300" :show-overflow-tooltip="true" />
+      <el-table-column label="评价类型" align="center" prop="targetType" width="100">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.targetType === 'C'" type="success">课程评价</el-tag>
+          <el-tag v-else-if="scope.row.targetType === 'D'" type="primary">班级评价</el-tag>
+          <span v-else>{{ scope.row.targetType }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="所属班级/课程名称" align="center" prop="targetName" />
       <el-table-column label="描述" align="center" prop="description" :show-overflow-tooltip="true" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
@@ -55,13 +69,41 @@
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
       @pagination="getList" />
 
-    <!-- 添加或修改问卷对话框 -->
+    <!-- 添加或修改评价对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="900px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
-            <el-form-item label="问卷标题" prop="title">
-              <el-input v-model="form.title" placeholder="请输入问卷标题" />
+            <el-form-item label="评价类型" prop="targetType">
+              <el-radio-group v-model="form.targetType" @change="handleTargetTypeChange">
+                <el-radio label="D">班级评价</el-radio>
+                <el-radio label="C">课程评价</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="评价标题" prop="title">
+              <el-input v-model="form.title" placeholder="请输入评价标题" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item :label="form.targetType === 'D' ? '所属班级' : '所属课程'" prop="targetRefId">
+              <el-select 
+                v-model="form.targetRefId" 
+                filterable 
+                :placeholder="'请选择' + (form.targetType === 'D' ? '班级' : '课程')"
+                style="width: 100%">
+                <el-option 
+                  v-for="item in (form.targetType === 'D' ? deptOptions : courseOptions)" 
+                  :key="item[form.targetType === 'D' ? 'deptId' : 'courseId']" 
+                  :label="item[form.targetType === 'D' ? 'deptName' : 'courseName']"
+                  :value="item[form.targetType === 'D' ? 'deptId' : 'courseId']">
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -145,7 +187,7 @@
       </div>
     </el-dialog>
 
-    <!-- 问卷提交记录对话框 -->
+    <!-- 评价提交记录对话框 -->
     <el-dialog title="提交记录" :visible.sync="submissionsOpen" width="1000px" append-to-body>
 
       <el-table :data="submissions" border>
@@ -192,6 +234,8 @@
 
 <script>
 import { addQuestionnaire, getQuestionnaire, listQuestionnaire, updateQuestionnaire, delQuestionnaire, listSubmissions, getSubmissionAnswers, listSubmission, getQuestionnaireItems } from "@/api/system/questionnaire";
+import { listDeptCourse } from "@/api/system/deptCourse";
+import { listDept } from "@/api/system/dept";
 
 export default {
   name: "Questionnaire",
@@ -212,8 +256,12 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 问卷表格数据
+      // 评价表格数据
       questionnaireList: [],
+      // 课程选项
+      courseOptions: [],
+      // 班级选项
+      deptOptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -229,11 +277,14 @@ export default {
         pageNum: 1,
         pageSize: 10,
         title: undefined,
+        targetType: undefined,
         status: undefined
       },
       // 表单参数
       form: {
         metaId: undefined,
+        targetRefId: undefined,
+        targetName: undefined,
         title: undefined,
         description: undefined,
         startTime: undefined,
@@ -241,8 +292,6 @@ export default {
         status: "0",
         allowRepeat: "0",
         targetType: "C",
-        targetRefId: 120,
-        deptId: 16,
         items: []
       },
       // 固定选项
@@ -250,7 +299,10 @@ export default {
       // 表单校验
       rules: {
         title: [
-          { required: true, message: "问卷标题不能为空", trigger: "blur" }
+          { required: true, message: "评价标题不能为空", trigger: "blur" }
+        ],
+        targetRefId: [
+          { required: true, message: "请选择所属对象", trigger: "change" }
         ],
         startTime: [
           { required: true, message: "开始时间不能为空", trigger: "change" }
@@ -277,15 +329,61 @@ export default {
   },
   created() {
     this.getList();
+    this.getCourseList();
+    this.getDeptList();
   },
   methods: {
-    /** 查询问卷列表 */
+    /** 查询评价列表 */
     getList() {
       this.loading = true;
       listQuestionnaire(this.queryParams).then(response => {
-        this.questionnaireList = response.data;
-        this.total = response.total;
+        this.questionnaireList = response.rows || response.data || [];
+        
+        // 匹配关联名称
+        this.questionnaireList.forEach(questionnaire => {
+          if (questionnaire.targetType === 'C') {
+            // 课程评价
+            const course = this.courseOptions.find(course => course.courseId == questionnaire.targetRefId);
+            if (course) {
+              questionnaire.targetName = course.courseName;
+            } else {
+              questionnaire.targetName = '未知课程';
+            }
+          } else if (questionnaire.targetType === 'D') {
+            // 班级评价
+            const dept = this.deptOptions.find(dept => dept.deptId == questionnaire.targetRefId);
+            if (dept) {
+              questionnaire.targetName = dept.deptName;
+            } else {
+              questionnaire.targetName = '未知班级';
+            }
+          } else {
+            questionnaire.targetName = '-';
+          }
+        });
+        
+        this.total = response.total || this.questionnaireList.length;
         this.loading = false;
+      });
+    },
+    /** 查询课程列表 */
+    getCourseList() {
+      listDeptCourse().then(response => {
+        this.courseOptions = response.rows || response.data || [];
+        // 获取列表数据后重新匹配课程名称
+        if (this.questionnaireList.length > 0) {
+          this.getList();
+        }
+      });
+    },
+    /** 查询班级列表 */
+    getDeptList() {
+      listDept().then(response => {
+        this.deptOptions = response.data || [];
+        // 获取列表数据后重新匹配班级名称
+        if (this.questionnaireList.length > 0) {
+          this.getList();
+        }
       });
     },
     /** 查询提交记录 */
@@ -345,8 +443,9 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.form.targetType = "C"; // 设置默认targetType为课程类型
       this.open = true;
-      this.title = "添加问卷";
+      this.title = "添加评价";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -354,6 +453,11 @@ export default {
       const metaId = row.metaId || this.ids
       getQuestionnaire(metaId).then(response => {
         this.form = response.data;
+        
+        // 设置关联ID，用于下拉框显示
+        if (this.form.targetType === 'C' || this.form.targetType === 'D') {
+          this.form.targetRefId = this.form.targetRefId;
+        }
 
         // 转换题目列表结构以适配前端表单
         if (this.form.items && Array.isArray(this.form.items)) {
@@ -384,7 +488,7 @@ export default {
         }
 
         this.open = true;
-        this.title = "修改问卷";
+        this.title = "修改评价";
       });
     },
     /** 提交记录按钮操作 */
@@ -406,6 +510,8 @@ export default {
     reset() {
       this.form = {
         metaId: undefined,
+        targetRefId: undefined,
+        targetName: undefined,
         title: undefined,
         description: undefined,
         startTime: undefined,
@@ -413,8 +519,6 @@ export default {
         status: "0",
         allowRepeat: "0",
         targetType: "C",
-        targetRefId: 120,
-        deptId: 16,
         items: []
       };
       this.resetForm("form");
@@ -424,41 +528,44 @@ export default {
       this.open = false;
       this.reset();
     },
+    /** 处理评价类型变更 */
+    handleTargetTypeChange() {
+      // 清空之前选择的关联对象
+      this.form.targetRefId = undefined;
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs.form.validate(valid => {
         if (!valid) return;
 
-        // 1. 深拷贝
-        const postData = JSON.parse(JSON.stringify(this.form));
+        // 构造提交数据
+        const postData = {
+          metaId: this.form.metaId,
+          title: this.form.title,
+          description: this.form.description,
+          startTime: this.form.startTime,
+          endTime: this.form.endTime,
+          status: this.form.status,
+          allowRepeat: this.form.allowRepeat,
+          targetType: this.form.targetType,
+          targetRefId: this.form.targetRefId,
+          items: this.form.items.map((q, idx) => {
+            // 处理选项
+            let options = [];
+            if (q.options && Array.isArray(q.options)) {
+              options = q.options.filter(opt => opt && opt.trim() !== "");
+            }
 
-        // 2. 转换数据格式以匹配后端API要求
-        // 添加缺失的字段
-        postData.targetType = "C";
-        postData.targetRefId = 120;
-        postData.deptId = 16;
+            return {
+              itemType: "R",  // 固定为单选题
+              questionText: q.questionText,
+              orderNum: idx + 1,
+              required: true,  // 所有题目都必填
+              options: options
+            };
+          })
+        };
 
-        // 转换 items 字段格式
-        postData.items = (postData.items || []).map((q, idx) => {
-          // 处理选项字段
-          let options = [];
-          if (q.options && Array.isArray(q.options)) {
-            // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-            options = q.options.map(opt =>
-              typeof opt === 'object' && opt !== null ? opt.optionText : opt
-            );
-          }
-
-          return {
-            itemType: "R",  // 固定为单选题
-            questionText: q.questionText,
-            orderNum: idx + 1,
-            required: true,  // 所有题目都必填
-            options: options
-          };
-        });
-
-        // 3. 发请求
         const api = postData.metaId
           ? updateQuestionnaire(postData)
           : addQuestionnaire(postData);
@@ -473,7 +580,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const metaIds = row.metaId || this.ids;
-      this.$modal.confirm('是否确认删除问卷编号为"' + metaIds + '"的数据项？').then(function () {
+      this.$modal.confirm('是否确认删除评价编号为"' + metaIds + '"的数据项？').then(function () {
         return delQuestionnaire(metaIds);
       }).then(() => {
         this.getList();
@@ -549,30 +656,24 @@ export default {
 .fixed-option-item {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
   padding: 4px 0;
 }
 
 .option-label {
-  font-weight: bold;
+  font-weight: 500;
   margin-right: 8px;
   min-width: 20px;
 }
 
 .option-text {
-  color: #666;
+  flex: 1;
 }
 
 .fixed-options-tip {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed #ddd;
   font-size: 12px;
   color: #999;
-  text-align: center;
-}
-
-.no-options-hint {
-  margin-top: 10px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed #e6e6e6;
 }
 </style>

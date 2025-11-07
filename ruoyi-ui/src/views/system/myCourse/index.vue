@@ -46,6 +46,15 @@
             >
               提交作业
             </el-button>
+            <el-button
+              size="small"
+              type="warning"
+              icon="el-icon-document"
+              @click="handleQuestionnaire(course)"
+              class="questionnaire-btn"
+            >
+              课程评价
+            </el-button>
           </div>
           
           <!-- 资源展开区域 -->
@@ -108,10 +117,10 @@
     <div class="desktop-view" v-else>
       <el-table ref="courseTable" v-loading="loading" :data="courseList" row-key="courseId">
         <el-table-column label="课程ID" prop="courseId" width="80" />
-        <el-table-column label="课程名称" prop="courseName" />
+        <el-table-column label="课程名称" prop="courseName" width="150"/>
         <el-table-column label="课程描述" prop="brief" />
-        <el-table-column label="所属部门" prop="deptName" />
-        <el-table-column label="操作" width="300">
+        <el-table-column label="所属部门" prop="deptName" width="300"/>
+        <el-table-column label="操作" width="500">
           <template slot-scope="scope">
             <el-button size="mini" type="primary" icon="el-icon-view" @click="toggleResource(scope.row)" v-hasPermi="['system:myCourse:resource:view']">
               查看资源
@@ -123,6 +132,14 @@
               @click="handleViewAssignments(scope.row)" v-hasPermi="['system:myCourse:assignment:userSubmit']"
             >
               提交作业
+            </el-button>
+            <el-button
+              size="mini"
+              type="warning"
+              icon="el-icon-document"
+              @click="handleQuestionnaire(scope.row)"
+            >
+              填写评价
             </el-button>
           </template>
         </el-table-column>
@@ -303,6 +320,21 @@ export default {
       this.currentCourseId = row.courseId
       this.currentCourseName = row.courseName
       this.assignmentVisible = true
+    },
+    
+    // 填写评价
+    handleQuestionnaire(row) {
+      // 根据设备类型决定跳转路径
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const path = isMobile ? '/mobile/questionnaire/userList' : '/system/questionnaire/userList';
+      
+      // 跳转到评价列表页面，传递课程ID作为查询参数
+      this.$router.push({
+        path: path,
+        query: {
+          courseId: row.courseId
+        }
+      })
     }
   }
 }
@@ -406,7 +438,7 @@ export default {
     display: flex;
     gap: 8px;
     
-    .resource-btn, .assignment-btn {
+    .resource-btn, .assignment-btn, .questionnaire-btn {
       flex: 1;
       border-radius: 8px;
       font-weight: 500;
