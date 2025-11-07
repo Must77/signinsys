@@ -27,7 +27,13 @@
 
     <el-table v-loading="loading" :data="questionnaireList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="评价标题" align="center" prop="title" width="300" :show-overflow-tooltip="true" />
+      <el-table-column label="评价标题" align="center" prop="title" width="300">
+        <template slot-scope="scope">
+          <el-tooltip :content="scope.row.description || '暂无描述'" placement="top">
+            <span class="title-with-tooltip">{{ scope.row.title }}</span>
+          </el-tooltip>
+        </template>
+      </el-table-column>
       <el-table-column label="评价类型" align="center" prop="targetType" width="100">
         <template slot-scope="scope">
           <el-tag v-if="scope.row.targetType === 'C'" type="success">课程评价</el-tag>
@@ -36,7 +42,6 @@
         </template>
       </el-table-column>
       <el-table-column label="所属班级/课程名称" align="center" prop="targetName" />
-      <el-table-column label="描述" align="center" prop="description" :show-overflow-tooltip="true" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime) }}</span>
@@ -459,36 +464,45 @@ export default {
           this.form.targetRefId = this.form.targetRefId;
         }
 
-        // 转换题目列表结构以适配前端表单
-        if (this.form.items && Array.isArray(this.form.items)) {
-          this.form.items = this.form.items.map(item => {
-            // 所有题目都是单选题
-            let questionType = "R";
+        // 获取题目信息并填充到form.items中
+        getQuestionnaireItems(metaId).then(itemsResponse => {
+          if (itemsResponse.code === 200) {
+            // 转换题目列表结构以适配前端表单
+            this.form.items = itemsResponse.data.map(item => {
+              // 所有题目都是单选题
+              let questionType = "R";
 
-            // 处理选项结构
-            let options = [];
-            if (item.options && Array.isArray(item.options)) {
-              // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
-              options = item.options.map(opt =>
-                typeof opt === 'object' && opt !== null ? opt.optionText : opt
-              );
-            }
+              // 处理选项结构
+              let options = [];
+              if (item.options && Array.isArray(item.options)) {
+                // 如果选项是对象数组，提取optionText；如果是字符串数组，直接使用
+                options = item.options.map(opt =>
+                  typeof opt === 'object' && opt !== null ? opt.optionText : opt
+                );
+              }
 
-            // 如果没有选项，使用默认选项
-            if (options.length === 0) {
-              options = [...this.defaultOptions];
-            }
+              // 如果没有选项，使用默认选项
+              if (options.length === 0) {
+                options = [...this.defaultOptions];
+              }
 
-            return {
-              questionType: questionType,
-              questionText: item.questionText,
-              options: options
-            };
-          });
-        }
+              return {
+                questionType: questionType,
+                questionText: item.questionText,
+                options: options
+              };
+            });
+          } else {
+            this.form.items = [];
+          }
 
-        this.open = true;
-        this.title = "修改评价";
+          this.open = true;
+          this.title = "修改评价";
+        }).catch(() => {
+          this.form.items = [];
+          this.open = true;
+          this.title = "修改评价";
+        });
       });
     },
     /** 提交记录按钮操作 */
@@ -676,4 +690,5 @@ export default {
   padding-top: 4px;
   border-top: 1px dashed #e6e6e6;
 }
+
 </style>
