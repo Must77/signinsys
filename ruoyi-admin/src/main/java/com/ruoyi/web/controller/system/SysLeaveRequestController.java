@@ -39,9 +39,9 @@ public class SysLeaveRequestController extends BaseController
     {
         String username = SecurityUtils.getUsername();
         // 非管理员强制查看自己申请
-        if (!"admin".equals(username)) {
-            query.setUserId(SecurityUtils.getUserId());
-        }
+        // if (!"admin".equals(username)) {
+        //     query.setUserId(SecurityUtils.getUserId());
+        // }
         startPage();
         List<SysLeaveRequest> list = leaveService.selectLeaveRequestList(query);
         return getDataTable(list);
@@ -60,7 +60,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 提交请假（普通用户）
      */
-    //@PreAuthorize("@ss.hasPermi('system:leave:add')")
+    @PreAuthorize("@ss.hasPermi('system:leave:add')")
     @Log(title = "请假申请", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysLeaveRequest leave)
@@ -93,7 +93,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 审批拒绝 — 仅有权限的人（admin）
      */
-    @PreAuthorize("@ss.hasPermi('system:leave:approve')")
+    @PreAuthorize("@ss.hasPermi('system:leave:reject')")
     @Log(title = "请假审批", businessType = BusinessType.UPDATE)
     @PutMapping("/reject/{leaveId}")
     public AjaxResult reject(@PathVariable Long leaveId)
@@ -121,7 +121,7 @@ public class SysLeaveRequestController extends BaseController
     /**
      * 我的请假
      */
-    //@PreAuthorize("@ss.hasPermi('system:leave:myleave')")
+    @PreAuthorize("@ss.hasPermi('system:leave:myleave')")
     @GetMapping("/myleave")
     public AjaxResult myleave()
     {

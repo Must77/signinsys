@@ -37,7 +37,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     /**
      * 查看自己待提交的作业
      */
-    //@PreAuthorize("@ss.hasPermi('system:assignment:pending')")
+    @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
     @GetMapping("/pending")
     public TableDataInfo myPendingAssignments() {
         startPage();
@@ -48,7 +48,7 @@ public class SysCourseAssignmentSubmissionController extends BaseController {
     /**
      * 查看自己某个作业活动的提交过的作业
      */
-    //@PreAuthorize("@ss.hasPermi('system:assignment:pending')")
+    @PreAuthorize("@ss.hasPermi('system:assignment:pending')")
     @GetMapping("/{assignmentId}/mySubmission")
     public AjaxResult mySubmittedFileNames(@PathVariable Long assignmentId) {
         SysCourseAssignmentSubmission query = new SysCourseAssignmentSubmission();

@@ -37,7 +37,7 @@ public class SysDeptController extends BaseController
     /**
      * 获取部门列表
      */
-//    @PreAuthorize("@ss.hasPermi('system:dept:list')")
+    @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list")
     public AjaxResult list(SysDept dept)
     {
@@ -64,7 +64,7 @@ public class SysDeptController extends BaseController
     @GetMapping(value = "/{deptId}")
     public AjaxResult getInfo(@PathVariable Long deptId)
     {
-        deptService.checkDeptDataScope(deptId);
+        //deptService.checkDeptDataScope(deptId);
         return success(deptService.selectDeptById(deptId));
     }
 
@@ -93,7 +93,7 @@ public class SysDeptController extends BaseController
     public AjaxResult edit(@Validated @RequestBody SysDept dept)
     {
         Long deptId = dept.getDeptId();
-        deptService.checkDeptDataScope(deptId);
+        //deptService.checkDeptDataScope(deptId);
         if (!deptService.checkDeptNameUnique(dept))
         {
             return error("修改部门'" + dept.getDeptName() + "'失败，部门名称已存在");
