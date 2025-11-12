@@ -15,7 +15,7 @@
         <el-row>
           <el-col :span="24">
             <div class="questionnaire-time">
-              <span>问卷时间：{{ parseTime(form.startTime) }} 至 {{ parseTime(form.endTime) }}</span>
+              <span>问卷时间：{{form.startTime }} 至 {{ form.endTime }}</span>
             </div>
           </el-col>
         </el-row>
@@ -50,7 +50,7 @@
             </div>
 
             <div v-else class="no-questions">
-              <el-alert title="该问卷暂无题目" type="info" show-icon :closable="false" />
+              <el-alert title="该评价暂无题目" type="info" show-icon :closable="false" />
             </div>
           </el-col>
         </el-row>
@@ -58,7 +58,7 @@
         <el-row>
           <el-col :span="24" class="submit-button-container">
             <el-button type="primary" @click="submitForm" :loading="submitLoading" :disabled="!canSubmit">
-              提交问卷
+              提交评价
             </el-button>
             <el-button @click="cancel">取消</el-button>
           </el-col>
@@ -104,7 +104,7 @@ export default {
   created() {
     const id = this.$route.params.questionnaireMetaId || this.$route.query.questionnaireMetaId
     if (!id) {
-      this.$modal.msgError('缺少问卷ID')
+      this.$modal.msgError('缺少评价ID')
       this.$router.go(-1)
       return
     }
@@ -114,16 +114,16 @@ export default {
   methods: {
     parseTime,
 
-    /** 获取问卷详情和题目信息 */
+    /** 获取评价详情和题目信息 */
     async getQuestionnaireDetail(questionnaireMetaId) {
       try {
-        // 并行获取问卷基本信息和题目信息
+        // 并行获取评价基本信息和题目信息
         const [questionnaireRes, itemsRes] = await Promise.all([
           getQuestionnaire(questionnaireMetaId),
           getQuestionnaireItems(questionnaireMetaId)
         ])
 
-        console.log('问卷基本信息响应:', questionnaireRes)
+        console.log('评价基本信息响应:', questionnaireRes)
         console.log('题目信息响应:', itemsRes)
 
         if (questionnaireRes.code === 200) {
@@ -138,8 +138,8 @@ export default {
         }
 
       } catch (error) {
-        console.error('获取问卷详情失败:', error)
-        this.$modal.msgError('获取问卷信息失败')
+        console.error('获取评价详情失败:', error)
+        this.$modal.msgError('获取评价信息失败')
       }
     },
 
@@ -158,8 +158,8 @@ export default {
         // 确定问题文本
         let questionText = item.questionText || item.text || ''
 
-        // 处理选项数据 - 直接使用固定选项，忽略后端返回的选项
-        let options = [...this.fixedOptions] // 使用固定选项的副本
+        // 处理选项数据 - 始终使用固定选项
+        let options = [...this.fixedOptions]; // 使用固定选项的副本
 
         console.log(`题目${index + 1}处理结果:`, {
           问题文本: questionText,
@@ -188,7 +188,7 @@ export default {
       return [{ required: true, message: '请选择一个选项', trigger: 'change' }]
     },
 
-    /** 提交问卷 */
+    /** 提交评价 */
     async submitForm() {
       try {
         // 表单验证
@@ -199,12 +199,12 @@ export default {
         }
 
         if (!this.canSubmit) {
-          this.$modal.msgError('问卷不在有效期内，无法提交')
+          this.$modal.msgError('评价不在有效期内，无法提交')
           return
         }
 
         if (!this.form.items || this.form.items.length === 0) {
-          this.$modal.msgError('问卷没有题目，无法提交')
+          this.$modal.msgError('评价没有题目，无法提交')
           return
         }
 
@@ -276,7 +276,7 @@ export default {
         const response = await submitQuestionnaire(this.questionnaireMetaId, answers);
 
         if (response.code === 200) {
-          this.$modal.msgSuccess('问卷提交成功');
+          this.$modal.msgSuccess('评价提交成功');
           setTimeout(() => {
             this.$router.go(-1);
           }, 1500);
@@ -309,7 +309,7 @@ export default {
             this.$modal.msgError('请求数据格式错误: ' + (data.message || '请检查填写内容'));
           }
         } else if (status === 409) {
-          this.$modal.msgWarning("该用户已提交过该问卷");
+          this.$modal.msgWarning("该用户已提交过该评价");
         } else if (status === 500) {
           this.$modal.msgError('服务器错误，请稍后重试');
         } else {
@@ -331,7 +331,7 @@ export default {
         try {
           // 调用清除重复提交记录的API
           await this.clearSubmissionRecord()
-          this.$modal.msgSuccess('清除成功，请重新提交问卷')
+          this.$modal.msgSuccess('清除成功，请重新提交评价')
           // 重新加载页面以重置状态
           location.reload()
         } catch (error) {

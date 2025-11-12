@@ -134,14 +134,14 @@ export const constantRoutes = [
 },
 {
   path: '/mobile/questionnaire/userList',
-  component: () => import('@/views/system/questionnaire/userList.vue'),
+  component: () => import('@/views/mobile/QuestionnaireList.vue'),
   name: 'MobileQuestionnaireList',
   hidden: true,
   meta: { title: '问卷列表' }
 },
 {
   path: '/mobile/questionnaire/userSubmit/:questionnaireMetaId(\\d+)',
-  component: () => import('@/views/system/questionnaire/userSubmit.vue'),
+  component: () => import('@/views/mobile/QuestionnaireSubmit.vue'),
   name: 'MobileUserQuestionnaireSubmit',
   hidden: true,
   meta: { title: '填写问卷' }

@@ -6,7 +6,7 @@
     </div>
     
     <div class="content" v-loading="loading">
-      <!-- 评价列表 -->
+      <!-- 问卷列表 -->
       <div v-if="questionnaireList.length > 0" class="questionnaire-list">
         <div 
           v-for="questionnaire in questionnaireList" 
@@ -34,7 +34,7 @@
       <!-- 空状态 -->
       <div v-else class="empty-state">
         <i class="el-icon-document"></i>
-        <p>暂无评价</p>
+        <p>暂无问卷</p>
       </div>
     </div>
   </div>
@@ -58,7 +58,7 @@ export default {
   methods: {
     parseTime,
     
-    /** 查询评价列表 */
+    /** 查询问卷列表 */
     getList() {
       this.loading = true
       // 获取路由中的查询参数
@@ -66,7 +66,7 @@ export default {
       
       const queryParams = {
         pageNum: 1,
-        pageSize: 100 // 显示更多数据
+        pageSize: 100 // 移动端显示更多数据
       }
       
       // 如果有课程ID参数，则添加筛选条件
@@ -82,27 +82,27 @@ export default {
         this.questionnaireList = response.rows || response.data || []
         this.loading = false
       }).catch(error => {
-        console.error('获取评价列表失败:', error)
+        console.error('获取问卷列表失败:', error)
         this.loading = false
-        this.$message.error('获取评价列表失败')
+        this.$message.error('获取问卷列表失败')
       })
     },
     
-    /** 填写评价按钮操作 */
+    /** 填写问卷按钮操作 */
     handleFill(row) {
-      // 检查评价状态
+      // 检查问卷状态
       if (this.isExpired(row)) {
-        this.$message.warning('该评价已过期，无法填写')
+        this.$message.warning('该问卷已过期，无法填写')
         return
       }
       
       if (this.isNotStarted(row)) {
-        this.$message.warning('该评价未开始，无法填写')
+        this.$message.warning('该问卷未开始，无法填写')
         return
       }
       
       const metaId = row.metaId
-      console.log('跳转到评价填写页面，评价ID:', metaId)
+      console.log('跳转到问卷填写页面，问卷ID:', metaId)
       
       // 使用移动端路由
       this.$router.push({
@@ -110,7 +110,7 @@ export default {
       })
     },
     
-    /** 判断评价是否已过期 */
+    /** 判断问卷是否已过期 */
     isExpired(row) {
       if (!row.endTime) return false
       const now = new Date()
@@ -118,7 +118,7 @@ export default {
       return now > end
     },
     
-    /** 判断评价是否未开始 */
+    /** 判断问卷是否未开始 */
     isNotStarted(row) {
       if (!row.startTime) return false
       const now = new Date()
@@ -173,7 +173,7 @@ export default {
   padding: 15px;
 }
 
-/* 评价列表样式 */
+/* 问卷列表样式 */
 .questionnaire-list {
   display: flex;
   flex-direction: column;
@@ -213,44 +213,50 @@ export default {
 .status {
   font-size: 12px;
   padding: 4px 8px;
-  border-radius: 10px;
-  white-space: nowrap;
+  border-radius: 4px;
+  font-weight: 500;
 }
 
 .status-active {
-  background: #f6ffed;
-  color: #52c41a;
-}
-
-.status-pending {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: #e8f4e8;
+  color: #67c23a;
 }
 
 .status-expired {
-  background: #fff2f0;
-  color: #ff4d4f;
+  background: #fdecea;
+  color: #f56c6c;
+}
+
+.status-pending {
+  background: #f0f5ff;
+  color: #409eff;
 }
 
 .description {
   font-size: 14px;
   color: #606266;
-  margin: 0 0 10px 0;
-  line-height: 1.4;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .questionnaire-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.time {
   font-size: 12px;
   color: #909399;
 }
 
+.time {
+  flex: 1;
+}
+
 .arrow {
+  font-size: 16px;
   color: #c0c4cc;
 }
 
@@ -262,8 +268,8 @@ export default {
 }
 
 .empty-state i {
-  font-size: 60px;
-  margin-bottom: 20px;
+  font-size: 48px;
+  margin-bottom: 16px;
   color: #dcdfe6;
 }
 
