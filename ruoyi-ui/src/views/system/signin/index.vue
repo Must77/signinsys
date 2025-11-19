@@ -82,9 +82,9 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
-              <el-tag type="success" v-else-if="scope.row.status === '1'">进行中</el-tag>
-              <el-tag type="danger" v-else-if="scope.row.status === '2'">已结束</el-tag>
+              <el-tag v-if="calculateStatus(scope.row) === '0'">未开始</el-tag>
+              <el-tag type="success" v-else-if="calculateStatus(scope.row) === '1'">进行中</el-tag>
+              <el-tag type="danger" v-else-if="calculateStatus(scope.row) === '2'">已结束</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" width="220">
@@ -126,7 +126,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.status === '0'">未开始</el-tag>
+              <el-tag v-if="calculateStatus(scope.row) === '0'">未开始</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" width="220">
@@ -167,7 +167,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template slot-scope="scope">
-              <el-tag type="success" v-if="scope.row.status === '1'">进行中</el-tag>
+              <el-tag type="success" v-if="calculateStatus(scope.row) === '1'">进行中</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" width="220">
@@ -208,7 +208,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template slot-scope="scope">
-              <el-tag type="danger" v-if="scope.row.status === '2'">已结束</el-tag>
+              <el-tag type="danger" v-if="calculateStatus(scope.row) === '2'">已结束</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" width="220">
@@ -426,7 +426,21 @@ export default {
   methods: {
     // 根据状态获取过滤后的数据
     getStatusFilteredData(status) {
-      return this.signinList.filter(item => item.status === status);
+      return this.signinList.filter(item => this.calculateStatus(item) === status);
+    },
+    // 实时计算签到状态
+    calculateStatus(row) {
+      const now = new Date();
+      const startTime = new Date(row.startTime);
+      const endTime = new Date(row.endTime);
+      
+      if (now < startTime) {
+        return '0'; // 未开始
+      } else if (now > endTime) {
+        return '2'; // 已结束
+      } else {
+        return '1'; // 进行中
+      }
     },
     // tab切换处理
     handleTabClick(tab) {
