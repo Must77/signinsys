@@ -89,8 +89,19 @@
 
     <update id="updateQuestionnaireMeta" parameterType="com.ruoyi.system.domain.SysQuestionnaireMeta">
         UPDATE sys_questionnaire_meta
-        SET title=#{title}, target_type=#{targetType}, target_ref_id=#{targetRefId}, description=#{description}, update_by=#{updateBy}, update_time=sysdate()
-        WHERE meta_id=#{metaId}
+        <set>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="targetType != null and targetType != ''">target_type = #{targetType},</if>
+            <if test="targetRefId != null">target_ref_id = #{targetRefId},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="allowRepeat != null and allowRepeat != ''">allow_repeat = #{allowRepeat},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+        </set>
+        WHERE meta_id = #{metaId}
     </update>
 
     <delete id="deleteQuestionnaireMetaById">
