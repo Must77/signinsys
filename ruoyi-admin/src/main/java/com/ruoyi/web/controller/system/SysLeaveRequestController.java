@@ -109,6 +109,7 @@ public class SysLeaveRequestController extends BaseController
 
     /**
      * 删除（仅 admin 或拥有权限）
+     * NOTICE: 这里是物理删除
      */
     @PreAuthorize("@ss.hasPermi('system:leave:remove')")
     @Log(title = "请假申请-删除", businessType = BusinessType.DELETE)
