@@ -27,7 +27,12 @@
 
     <el-table v-loading="loading" :data="questionnaireList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="评价标题" align="center" prop="title" width="300">
+      <el-table-column label="创建时间" align="center" prop="createTime" width="100">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="评价标题" align="center" prop="title" width="180">
         <template slot-scope="scope">
           <el-tooltip :content="scope.row.description || '暂无描述'" placement="top">
             <span class="title-with-tooltip">{{ scope.row.title }}</span>
@@ -42,21 +47,17 @@
         </template>
       </el-table-column>
       <el-table-column label="所属班级/课程名称" align="center" prop="targetName" />
-      <el-table-column label="开始时间" align="center" prop="startTime" width="180">
+      <el-table-column label="开始时间" align="center" prop="startTime" width="160">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
+      <el-table-column label="结束时间" align="center" prop="endTime" width="160">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.endTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-tickets" @click="handleViewItems(scope.row)"

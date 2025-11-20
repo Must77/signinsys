@@ -44,7 +44,13 @@
     <!-- 表格 -->
     <el-table v-loading="loading" :data="leaveList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="leaveId" label="编号" width="80" />
+      <!-- <el-table-column prop="leaveId" label="编号" width="80" /> -->
+       <!-- 创建时间 -->
+        <el-table-column prop="createTime" label="创建时间" width="160">
+        <template slot-scope="scope">
+          <span>{{parseTime(scope.row.createTime, '{y}-{m}-{d}')}}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="userName" label="请假人" />
       <el-table-column prop="startTime" label="开始时间" width="160" />
       <el-table-column prop="endTime" label="结束时间" width="160" />

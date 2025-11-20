@@ -39,7 +39,7 @@
           @click="handleAdd"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           v-hasPermi="['system:signin:edit']"
           type="success"
@@ -48,7 +48,7 @@
           :disabled="single"
           @click="handleUpdate"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['system:signin:remove']"
@@ -66,7 +66,13 @@
       <el-tab-pane label="全部" name="all">
         <el-table v-loading="loading" :data="signinList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="signinId" label="ID" width="80" />
+          <!-- <el-table-column prop="signinId" label="ID" width="80" /> -->
+          <!-- 创建时间 -->
+           <el-table-column prop="createTime" label="创建时间" width="160">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="title" label="签到标题" />
           <el-table-column prop="courseName" label="课程名称" />
           <el-table-column prop="deptName" label="班级名称" />

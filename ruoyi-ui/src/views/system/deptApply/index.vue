@@ -23,7 +23,7 @@
 
         <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center" />
-          <el-table-column label="申请ID" prop="applyId" width="90" align="center"/>
+          <el-table-column type="index" label="序号" width="60" align="center"/>
           <el-table-column label="申请人" prop="userName" align="center"/>
           <el-table-column label="部门" prop="deptName" align="center"/>
           <el-table-column label="状态" prop="status" width="100" align="center">
@@ -64,10 +64,11 @@ export default {
       showSearch: true,
       total: 0,
       list: [],
+      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        status: ''
+        status: null
       }
     }
   },
