@@ -125,6 +125,12 @@
     <div class="desktop-view" v-else>
       <el-table ref="courseTable" v-loading="loading" :data="courseList" row-key="courseId">
         <el-table-column label="课程ID" prop="courseId" width="80" />
+         <!-- 创建时间 -->
+          <!-- <el-table-column prop="createTime" label="创建时间" width="200">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column> -->
         <el-table-column label="课程名称" prop="courseName" width="150"/>
         <el-table-column label="课程描述" prop="brief" />
         <el-table-column label="所属部门" prop="deptName" width="300"/>

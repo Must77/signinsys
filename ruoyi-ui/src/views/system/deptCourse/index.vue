@@ -35,8 +35,14 @@
 
       <el-table :data="courseList" v-loading="loading" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="courseId" label="课程ID" width="80" />
-        <el-table-column prop="deptId" label="班级ID" width="120" />
+        <!-- <el-table-column prop="courseId" label="课程ID" width="80" />
+        <el-table-column prop="deptId" label="班级ID" width="120" /> -->
+        <!-- 创建时间 -->
+         <el-table-column label="创建时间" width="180">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}')  }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="deptName" label="班级名称" width="300" />
         <el-table-column prop="courseName" label="课程名称" />
         <el-table-column prop="brief" label="课程描述" />

@@ -57,7 +57,7 @@ export default {
       menuItems: [
         {
           path: '/mobile/notice',
-          title: '通知管理',
+          title: '通知公告',
           icon: 'el-icon-message'
         },
         {
