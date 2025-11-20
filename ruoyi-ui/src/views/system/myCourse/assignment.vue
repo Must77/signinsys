@@ -402,12 +402,22 @@ export default {
   },
 
   created() {
-    this.getPendingAssignments();
     window.addEventListener('resize', this.handleResize);
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize);
+  },
+
+  watch: {
+    courseId: {
+      handler(newVal) {
+        if (newVal) {
+          this.getPendingAssignments();
+        }
+      },
+      immediate: true
+    }
   },
 
   methods: {
@@ -420,11 +430,18 @@ export default {
     /** 获取待提交作业 */
     getPendingAssignments() {
       this.loading.pending = true;
+      console.log('正在获取课程ID为', this.courseId, '的待提交作业');
       listPendingAssignments(this.courseId).then(response => {
         console.log('【待提交作业原始响应】', JSON.stringify(response, null, 2));
-        this.pendingAssignments = response.rows || [];
+        // 添加额外的过滤，确保只显示当前课程的作业
+        const allAssignments = response.rows || [];
+        this.pendingAssignments = allAssignments.filter(assignment => 
+          assignment.courseId === this.courseId
+        );
+        console.log('过滤后的作业数量:', this.pendingAssignments.length);
         this.loading.pending = false;
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('获取待提交作业失败:', error);
         this.loading.pending = false;
         this.$message.error('获取待提交作业失败');
       });
