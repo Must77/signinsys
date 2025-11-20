@@ -1,8 +1,12 @@
 <template>
   <div class="mobile-questionnaire">
-    <div class="header">
-      <button @click="$router.back()" class="back-btn">← 返回</button>
-      <h2>评价列表</h2>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">填写问卷</h1>
+        <p class="page-subtitle">请填写以下问卷</p>
+      </div>
+      
     </div>
     
     <div class="content" v-loading="loading">
@@ -145,9 +149,61 @@ export default {
 
 <style scoped>
 .mobile-questionnaire {
-  min-height: 100vh;
+  padding: 20px;
   background: #f5f7fa;
+  min-height: calc(100vh - 84px);
 }
+
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding: 0 8px;
+  
+  .header-content {
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #303133;
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 16px;
+      color: #909399;
+      margin: 0;
+    }
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #409eff;
+        line-height: 1;
+      }
+      
+      .stat-label {
+        font-size: 14px;
+        color: #909399;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
 
 .header {
   background: white;

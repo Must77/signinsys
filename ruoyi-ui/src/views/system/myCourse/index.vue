@@ -1,5 +1,13 @@
 <template>
   <div class="my-course-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">我的课程</h1>
+        <p class="page-subtitle">我所在班级下的课程</p>
+      </div>
+      
+    </div>
     <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon class="error-alert" />
     
     <!-- 移动端卡片布局 -->
@@ -341,6 +349,56 @@ export default {
 </script>
 
 <style scoped>
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding: 0 8px;
+  
+  .header-content {
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #303133;
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 16px;
+      color: #909399;
+      margin: 0;
+    }
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #409eff;
+        line-height: 1;
+      }
+      
+      .stat-label {
+        font-size: 14px;
+        color: #909399;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
 .my-course-container {
   padding: 16px;
   min-height: calc(100vh - 84px);
