@@ -55,8 +55,8 @@
         <!-- 网页版表格 -->
         <div class="desktop-view" v-if="!isMobile">
           <el-table v-loading="loading" :data="leaveList" style="width: 100%" class="leave-table">
-            <el-table-column prop="leaveId" label="编号" width="80" align="center" />
-            <el-table-column prop="startTime" label="开始时间" width="160">
+            <el-table-column prop="leaveId" label="编号" width="180" align="center" />
+            <el-table-column prop="startTime" label="开始时间" width="200">
               <template slot-scope="scope">
                 <div class="time-cell">
                   <i class="el-icon-time"></i>
@@ -64,7 +64,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="endTime" label="结束时间" width="160">
+            <el-table-column prop="endTime" label="结束时间" width="200">
               <template slot-scope="scope">
                 <div class="time-cell">
                   <i class="el-icon-time"></i>

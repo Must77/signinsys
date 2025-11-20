@@ -58,32 +58,30 @@
                   </template>
                 </el-table-column>
                 
-                <el-table-column label="活动状态" width="100" align="center">
+                <el-table-column label="活动状态" align="center" prop="status" width="100">
                   <template slot-scope="scope">
-                    <el-tag :type="getActivityStatusType(scope.row)" effect="light">
+                    <el-tag :type="getActivityStatusType(scope.row)">
                       {{ getActivityStatus(scope.row.startTime, scope.row.endTime) }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                
-                <el-table-column label="签到状态" width="100" align="center">
+                <el-table-column label="签到状态" align="center" prop="mySigninStatus" width="100">
                   <template slot-scope="scope">
-                    <el-tag type="warning" effect="light">未签到</el-tag>
+                    <el-tag :type="getSignStatusType(scope.row)">
+                      {{ getSignStatusText(scope.row) }}
+                    </el-tag>
                   </template>
                 </el-table-column>
                 
-                <el-table-column label="操作" width="120" align="center">
+                <el-table-column label="操作" width="180" align="center">
                   <template slot-scope="scope">
-                    <el-button 
-                      size="mini" 
-                      type="primary" 
-                      @click="handleSignin(scope.row)" 
-                      :disabled="getActivityStatus(scope.row.startTime, scope.row.endTime) !== '进行中'"
-                      class="signin-btn"
-                    >
-                      <i class="el-icon-check"></i>
-                      签到
-                    </el-button>
+                    <el-button
+                      size="mini"
+                      type="text"
+                      icon="el-icon-check"
+                      @click="handleSignin(scope.row)"
+                      :disabled="getActivityStatus(scope.row.startTime, scope.row.endTime) !== '进行中' || scope.row.mySigninStatus === '1'"
+                    >{{ scope.row.mySigninStatus === '1' ? '已签到' : '签到' }}</el-button>
                   </template>
                 </el-table-column>
               </el-table>
@@ -261,13 +259,22 @@
               >
                 <div class="card-header">
                   <div class="activity-title-mobile">{{ activity.title }}</div>
-                  <el-tag 
-                    :type="getActivityStatusType(activity)" 
-                    size="small"
-                    class="status-tag"
-                  >
-                    {{ getActivityStatus(activity.startTime, activity.endTime) }}
-                  </el-tag>
+                  <div class="status-group">
+                    <el-tag 
+                      :type="getActivityStatusType(activity)" 
+                      size="small"
+                      class="status-tag"
+                    >
+                      {{ getActivityStatus(activity.startTime, activity.endTime) }}
+                    </el-tag>
+                    <el-tag 
+                      :type="getSignStatusType(activity)" 
+                      size="small"
+                      class="sign-status-tag"
+                    >
+                      {{ getSignStatusText(activity) }}
+                    </el-tag>
+                  </div>
                 </div>
                 
                 <div class="card-content">
@@ -300,12 +307,12 @@
                   <el-button 
                     size="small" 
                     type="primary" 
-                    @click="handleSignin(activity)" 
-                    :disabled="getActivityStatus(activity.startTime, activity.endTime) !== '进行中'"
+                    @click="handleSignin(activity)"
+                    :disabled="getActivityStatus(activity.startTime, activity.endTime) !== '进行中' || activity.mySigninStatus === '1'"
                     class="mobile-signin-btn"
                   >
                     <i class="el-icon-check"></i>
-                    立即签到
+                    {{ activity.mySigninStatus === '1' ? '已签到' : '立即签到' }}
                   </el-button>
                 </div>
               </div>
@@ -445,6 +452,7 @@
 
 <script>
 import { listMyPendingSignin, listSigninRecord, doSignin } from '@/api/system/userSignin'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'MySignin',
@@ -464,6 +472,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['id']),
     isMobile() {
       return window.innerWidth <= 768
     },
@@ -535,14 +544,14 @@ export default {
     // 获取签到状态类型
     getSignStatusType(row) {
       if (row.mySigninStatus === '1') return 'success'
-      if (row.status !== '1') return 'info'
+      if (this.getActivityStatus(row.startTime, row.endTime) !== '进行中') return 'info'
       return 'warning'
     },
     
     // 获取签到状态文本
     getSignStatusText(row) {
       if (row.mySigninStatus === '1') return '已签到'
-      if (row.status !== '1') return '不可签'
+      if (this.getActivityStatus(row.startTime, row.endTime) !== '进行中') return '不可签'
       return '未签到'
     },
     
@@ -602,10 +611,33 @@ export default {
         total = res.data.total || rows.length
       }
       
+      // 根据当前用户ID过滤数据
+      if (this.id) {
+        rows = rows.filter(item => {
+          // 检查userId是否匹配，支持不同字段名
+          return item.userId == this.id || item.user_id == this.id || item.userid == this.id;
+        });
+        total = rows.length;
+      }
+      
+      // 如果在"我的所有签到活动"标签页，根据查询条件过滤状态
+      if (isAllTab && this.queryParams.status) {
+        rows = rows.filter(item => {
+          const status = this.getActivityStatus(item.startTime, item.endTime);
+          const statusMap = {
+            '0': '未开始',
+            '1': '进行中',
+            '2': '已结束'
+          };
+          return status === statusMap[this.queryParams.status];
+        });
+        total = rows.length;
+      }
+      
       if (isAllTab) {
         rows = rows.map(r => ({
           ...r,
-          mySigninStatus: r.status === '1' ? '1' : '0'
+          mySigninStatus: this.getActivityStatus(r.startTime, r.endTime) === '进行中' ? '1' : '0'
         }))
       }
       

@@ -1,5 +1,13 @@
 <template>
   <div class="class-display-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">班级广场</h1>
+        <p class="page-subtitle">培训中心所有班级</p>
+      </div>
+      
+    </div>
     <!-- 顶部搜索和筛选区域 -->
     <div class="filter-section">
       <el-card shadow="never" class="filter-card">
@@ -435,6 +443,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding: 0 8px;
+  
+  .header-content {
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #303133;
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 16px;
+      color: #909399;
+      margin: 0;
+    }
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #409eff;
+        line-height: 1;
+      }
+      
+      .stat-label {
+        font-size: 14px;
+        color: #909399;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+
+
 .class-display-container {
   padding: 20px;
   background: #f5f7fa;
