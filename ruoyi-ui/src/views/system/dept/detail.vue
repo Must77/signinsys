@@ -35,7 +35,16 @@
               <el-form-item label="结束时间:">{{ parseTime(dept.endTime) }}</el-form-item>
             </el-col>
           </el-row>
+          <!-- 负责人 -->
           <el-row>
+            <el-col :span="12">
+              <el-form-item label="负责人:">{{ dept.leader }}</el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="联系电话:">{{ dept.phone }}</el-form-item>
+            </el-col>
+          </el-row>
+          <!-- <el-row>
             <el-col :span="12">
               <el-form-item label="班级容量:">{{ dept.cap }}</el-form-item>
             </el-col>
@@ -50,7 +59,7 @@
                 <el-tag v-else type="info">否</el-tag>
               </el-form-item>
             </el-col>
-          </el-row>
+          </el-row> -->
           <el-row>
             <el-col :span="24" style="text-align: center;">
               <el-button 
