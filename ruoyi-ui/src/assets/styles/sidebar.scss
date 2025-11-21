@@ -105,6 +105,64 @@
         background-color: $base-sub-menu-hover !important;
       }
     }
+    
+    // 添加深色主题菜单项被点击选中时的醒目设计
+    & .theme-dark .el-menu-item.is-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: #ffffff !important;
+      position: relative;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      border-radius: 8px;
+      margin: 2px 8px;
+      transition: all 0.3s ease;
+      
+      // 添加左侧指示条
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 5px;
+        background: linear-gradient(to bottom, #f093fb 0%, #f5576c 100%);
+        border-radius: 0 8px 8px 0;
+      }
+      
+      // 图标也变为白色
+      .svg-icon {
+        color: #ffffff !important;
+      }
+    }
+    
+    // 添加浅色主题菜单项被点击选中时的醒目设计
+    & .theme-light .el-menu-item.is-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: #ffffff !important;
+      position: relative;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      border-radius: 8px;
+      margin: 2px 8px;
+      transition: all 0.3s ease;
+      
+      // 添加左侧指示条
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 5px;
+        background: linear-gradient(to bottom, #f093fb 0%, #f5576c 100%);
+        border-radius: 0 8px 8px 0;
+      }
+      
+      // 图标也变为白色
+      .svg-icon {
+        color: #ffffff !important;
+      }
+    }
   }
 
   .hideSidebar {
