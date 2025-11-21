@@ -79,15 +79,6 @@
             <el-table-column prop="deptName" label="班级名称" min-width="120" />
             <el-table-column prop="leader" label="负责人" width="100" />
             <el-table-column prop="phone" label="联系电话" width="120" />
-            <el-table-column label="人数" width="100">
-              <template slot-scope="scope">
-                <div class="size-info">
-                  <span class="current-size">{{ scope.row.size }}</span>
-                  <span class="size-separator">/</span>
-                  <span class="total-size">{{ scope.row.cap }}</span>
-                </div>
-              </template>
-            </el-table-column>
             <el-table-column prop="status" label="状态" width="80">
               <template slot-scope="scope">
                 <el-tag 
@@ -158,10 +149,6 @@
                   <i class="el-icon-phone"></i>
                   <span>{{ classItem.phone || '暂无电话' }}</span>
                 </div>
-                <div class="info-row">
-                  <i class="el-icon-user-solid"></i>
-                  <span>人数：{{ classItem.size }}/{{ classItem.cap }}</span>
-                </div>
               </div>
 
               <div class="card-actions">
@@ -227,18 +214,11 @@
           </el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ detailInfo.startTime || '未设置' }}</el-descriptions-item>
           <el-descriptions-item label="结束时间">{{ detailInfo.endTime || '未设置' }}</el-descriptions-item>
-          <el-descriptions-item label="当前人数/容量">
-            <div class="size-display">
-              <span class="current">{{ detailInfo.size }}</span>
-              <span class="separator">/</span>
-              <span class="total">{{ detailInfo.cap }}</span>
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item label="自动加入">
+          <!-- <el-descriptions-item label="自动加入">
             <el-tag :type="detailInfo.autoJoin === '1' ? 'success' : 'info'">
               {{ detailInfo.autoJoin === '1' ? '是' : '否' }}
             </el-tag>
-          </el-descriptions-item>
+          </el-descriptions-item> -->
           <!-- <el-descriptions-item :span="isMobile ? 1 : 2" label="封面图片">
             <el-image 
               v-if="detailInfo.coverURL" 
@@ -320,7 +300,7 @@ export default {
       const total = this.classList.length
       const active = this.classList.filter(item => item.status === '0').length
       const available = this.classList.filter(item => this.canApply(item)).length
-      const full = this.classList.filter(item => item.size >= item.cap).length
+      // 移除满员统计，因为不再限制容量
       
       return [
         {
@@ -340,13 +320,8 @@ export default {
           number: available,
           icon: 'el-icon-check',
           type: 'available'
-        },
-        {
-          title: '已满员',
-          number: full,
-          icon: 'el-icon-warning',
-          type: 'full'
         }
+        // 移除满员统计项
       ]
     }
   },
@@ -429,13 +404,14 @@ export default {
     
     /** 判断是否可以报名 */
     canApply(row) {
-      return row.status === '0' && row.size < row.cap
+      // 移除容量限制，只检查状态
+      return row.status === '0'
     },
     
     /** 获取报名按钮文本 */
     getApplyButtonText(row) {
       if (row.status !== '0') return '已停用'
-      if (row.size >= row.cap) return '已满员'
+      // 移除容量满额检查
       return '报名'
     }
   }
