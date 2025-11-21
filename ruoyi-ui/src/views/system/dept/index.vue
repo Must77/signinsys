@@ -216,7 +216,7 @@
                     </el-form-item>
                   </el-col>
                 </el-row>
-                <el-row>
+                <!-- <el-row>
                   <el-col :span="12">
                     <el-form-item label="班级容量" prop="cap">
                       <el-input-number v-model="form.cap" controls-position="right" :min="0" />
@@ -227,7 +227,7 @@
                       <el-input-number v-model="form.size" controls-position="right" :min="0" />
                     </el-form-item>
                   </el-col>
-                </el-row>
+                </el-row> -->
                 <!-- <el-row>
                   <el-col :span="12">
                     <el-form-item label="自动加入">
@@ -305,12 +305,12 @@ export default {
         orderNum: [
           { required: true, message: "显示排序不能为空", trigger: "blur" }
         ],
-        cap: [
-          { required: true, message: "班级容量不能为空", trigger: "blur" }
-        ],
-        size: [
-          { required: true, message: "当前人数不能为空", trigger: "blur" }
-        ],
+        // cap: [
+        //   { required: true, message: "班级容量不能为空", trigger: "blur" }
+        // ],
+        // size: [
+        //   { required: true, message: "当前人数不能为空", trigger: "blur" }
+        // ],
         startTime: [
           { required: true, message: "开始时间不能为空", trigger: "blur" }
         ],
