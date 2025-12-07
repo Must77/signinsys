@@ -135,3 +135,11 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+
+aliyun:
+  sms:
+    accessKeyId: YOUR_ACCESS_KEY_ID       # 替换为你从阿里云获取的 Access Key ID
+    accessKeySecret: YOUR_ACCESS_KEY_SECRET  # 替换为你从阿里云获取的 Access Key Secret
+    signName: 速通互联验证码 
+    templateCode: 100001    
+

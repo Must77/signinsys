@@ -6,12 +6,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.UserConstants;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.common.enums.UserStatus;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.exception.user.BlackListException;
 import com.ruoyi.common.exception.user.CaptchaException;
@@ -50,6 +53,10 @@ public class SysLoginService
 
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private SysPermissionService permissionService; // 必须注入权限服务
+
 
     /**
      * 登录验证
@@ -96,6 +103,60 @@ public class SysLoginService
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser.getUserId());
         // 生成token
+        return tokenService.createToken(loginUser);
+    }
+
+
+    /**
+     * 短信验证码登录
+     *
+     * @param phoneNumber 手机号
+     * @param code        验证码
+     * @return token
+     */
+    public String loginBySms(String phoneNumber, String code) {
+        // 校验验证码
+        String cachedCode = redisCache.getCacheObject(phoneNumber);
+        if (cachedCode == null) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_FAIL, "验证码已失效"));
+            throw new UserPasswordNotMatchException(); 
+        }
+        if (!code.equals(cachedCode)) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_FAIL, "验证码错误"));
+            throw new UserPasswordNotMatchException();
+        }
+
+        // 查询用户信息
+        SysUser user = userService.selectUserByPhoneNumber(phoneNumber);
+        if (user == null) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_FAIL, "用户不存在"));
+            throw new ServiceException("用户不存在");
+        }
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag())) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_FAIL, "对不起，您的账号已被删除"));
+            throw new ServiceException("对不起，您的账号已被删除");
+        }
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_FAIL, "用户已停用，请联系管理员"));
+            throw new ServiceException("对不起，您的账号已停用");
+        }
+
+        // 组装 LoginUser，手动加载权限和部门信息
+        LoginUser loginUser = new LoginUser(user.getUserId(),
+                                             user.getDeptId(),
+                                             user,
+                                             permissionService.getMenuPermission(user));
+        
+        // 注入 Spring Security 上下文
+        // WARNING: 由于使用手机号登陆，越过了 AuthenticationProvider 的认证逻辑
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        // 记录登录成功日志
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(phoneNumber, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+
+        // 生成并返回 Token
+        redisCache.deleteObject(phoneNumber); // 删除验证码
         return tokenService.createToken(loginUser);
     }
 
