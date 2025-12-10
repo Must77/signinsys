@@ -58,3 +58,32 @@ export function getCodeImg() {
     timeout: 20000
   })
 }
+
+// 发送短信验证码
+export function sendSmsCode(phoneNumber) {
+  return request({
+    url: '/sms/send?phoneNumber=' + phoneNumber,
+    headers: {
+      isToken: false
+    },
+    method: 'post'
+  })
+}
+
+// 手机号验证码登录
+export function loginWithSms(phoneNumber, code) {
+  const data = new FormData();
+  data.append('phoneNumber', phoneNumber);
+  data.append('code', code);
+  
+  return request({
+    url: '/loginWithSms',
+    headers: {
+      isToken: false,
+      repeatSubmit: false,
+      'Content-Type': 'multipart/form-data'
+    },
+    method: 'post',
+    data: data
+  })
+}
