@@ -42,7 +42,7 @@
         </el-form-item>
       </div>
       
-      <!-- <el-form-item prop="code" v-if="captchaEnabled">
+      <el-form-item prop="code" v-if="captchaEnabled">
         <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%"
           @keyup.enter.native="handleLogin">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
@@ -50,7 +50,7 @@
         <div class="login-code">
           <img :src="codeUrl" @click="getCode" class="login-code-img" />
         </div>
-      </el-form-item> -->
+      </el-form-item>
       <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
         <el-button :loading="loading" size="medium" type="primary" style="width:100%;"
@@ -106,21 +106,24 @@ export default {
         code: "",
         uuid: ""
       },
-      loginRules: {
+      // 基础验证规则
+      baseLoginRules: {
         username: [
           { required: true, trigger: "blur", message: "请输入您的账号" }
         ],
         password: [
           { required: true, trigger: "blur", message: "请输入您的密码" }
-        ],
+        ]
+      },
+      // 手机验证码登录验证规则
+      smsLoginRules: {
         phoneNumber: [
           { required: true, trigger: "blur", message: "请输入手机号码" },
           { validator: validatePhone, trigger: "blur" }
         ],
         smsCode: [
           { required: true, trigger: "blur", message: "请输入短信验证码" }
-        ],
-        code: [{ required: true, trigger: "change", message: "请输入验证码" }]
+        ]
       },
       loading: false,
       // 验证码开关
@@ -128,6 +131,18 @@ export default {
       // 注册开关
       register: false,
       redirect: undefined
+    }
+  },
+  computed: {
+    // 根据当前登录方式动态计算验证规则
+    loginRules() {
+      if (this.activeLoginType === 'sms') {
+        // 手机验证码登录使用所有验证规则
+        return Object.assign({}, this.baseLoginRules, this.smsLoginRules);
+      } else {
+        // 账号密码登录只使用基础验证规则
+        return this.baseLoginRules;
+      }
     }
   },
   watch: {
