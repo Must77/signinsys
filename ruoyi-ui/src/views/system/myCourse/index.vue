@@ -132,7 +132,7 @@
             </template>
           </el-table-column> -->
         <el-table-column label="课程名称" prop="courseName" width="150"/>
-        <el-table-column label="课程描述" prop="brief" />
+        <el-table-column label="课程描述" prop="brief" width="300" />
         <el-table-column label="所属部门" prop="deptName" width="300"/>
         <el-table-column label="操作" width="500">
           <template slot-scope="scope">

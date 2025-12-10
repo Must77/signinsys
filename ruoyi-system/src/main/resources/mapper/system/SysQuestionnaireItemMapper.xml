@@ -41,8 +41,17 @@
 
     <update id="updateQuestionnaireItem" parameterType="com.ruoyi.system.domain.SysQuestionnaireItem">
         UPDATE sys_questionnaire_item
-        SET question_text=#{questionText}, item_type=#{itemType}, order_num=#{orderNum}, update_by=#{updateBy}, update_time=NOW()
-        WHERE item_id=#{itemId}
+        <set>
+            <if test="metaId != null">meta_id = #{metaId},</if>
+            <if test="questionText != null and questionText != ''">question_text = #{questionText},</if>
+            <if test="itemType != null and itemType != ''">item_type = #{itemType},</if>
+            <if test="required != null and required != ''">required = #{required},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE item_id = #{itemId}
     </update>
 
     <delete id="deleteQuestionnaireItemById">
